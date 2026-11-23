@@ -136,8 +136,8 @@ description: "Task list for feature 006 BuildingBlocks Messaging"
 
   Restore all four
 - [X] T020 Add a `Consumer check Messaging` step to `.github/workflows/building-blocks.yml` (FR-011)
-- [ ] T021 Run quickstart.md steps 1–4 on a clean clone in a temporary folder, then delete it. The cleanup check must be green
-- [ ] T022 Review for comments. Commit with no attribution, push, open the PR, and confirm CI passes
+- [X] T021 Run quickstart.md steps 1–4 on a clean clone in a temporary folder, then delete it. The cleanup check must be green
+- [X] T022 Review for comments. Commit with no attribution, push, open the PR, and confirm CI passes
 
 ---
 
