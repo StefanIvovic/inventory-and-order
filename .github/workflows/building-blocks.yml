@@ -41,6 +41,13 @@ jobs:
         with:
           global-json-file: global.json
 
+      - name: Pre-pull test images
+        run: |
+          set -a
+          . deploy/versions.env
+          set +a
+          for image in "$POSTGRES_IMAGE" "$RABBITMQ_IMAGE" "$RYUK_IMAGE"; do docker pull --quiet "$image"; done
+
       - name: Repository tool tests
         run: dotnet test --solution tools/RepoChecks.slnx
 
@@ -61,3 +68,8 @@ jobs:
       - name: Consumer check EntityFrameworkCore
         shell: pwsh
         run: ./scripts/check-consumer.ps1 -PackageId BuildingBlocks.EntityFrameworkCore
+
+      - name: Test cleanup check
+        if: always()
+        shell: pwsh
+        run: ./scripts/check-test-cleanup.ps1
