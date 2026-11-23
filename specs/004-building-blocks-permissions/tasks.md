@@ -119,6 +119,14 @@ description: "Task list for feature 004 BuildingBlocks Permissions"
 
 ---
 
+## Phase 8: Revision before merge (owner request, 2026-11-23)
+
+- [X] T019 [US3] Write `src/building-blocks/BuildingBlocks.AspNetCore.Tests/Permissions/PermissionCacheIsolationTests.cs`. With the application-wide `IMemoryCache` configured with `SizeLimit = 1` in `TestApp`, permission checks still work, and the shared cache stays empty after them (research.md R2 revision)
+- [X] T020 [US3] Change `src/building-blocks/BuildingBlocks.AspNetCore/Permissions/PermissionCache.cs` to own a private `MemoryCache` and implement `IDisposable`. Remove `AddMemoryCache()` from `PermissionsExtensions.cs`. Then make T019 and all earlier tests pass
+- [X] T021 Mutation check: point `PermissionCache` back at the shared `IMemoryCache` → T019 fails. Restore. Rerun the full suite and the clean-clone validation, then push to PR #4 and confirm CI passes
+
+---
+
 ## Dependencies & Execution Order
 
 - Setup → Foundational → US1 → US2 → US3, which share `PermissionManager`, `PermissionsExtensions` and the exception handler → US4 → Polish

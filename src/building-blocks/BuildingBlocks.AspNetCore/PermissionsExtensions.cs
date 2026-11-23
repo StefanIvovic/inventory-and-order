@@ -21,7 +21,6 @@ public static class PermissionsExtensions
             .Validate(options => options.CacheDuration > TimeSpan.Zero, "PermissionOptions.CacheDuration must be greater than zero.")
             .ValidateOnStart();
 
-        services.AddMemoryCache();
         services.TryAddSingleton(TimeProvider.System);
         services.TryAddSingleton<PermissionCache>();
         services.TryAddSingleton<IPermissionCache>(provider => provider.GetRequiredService<PermissionCache>());

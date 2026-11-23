@@ -4,8 +4,12 @@ using Microsoft.Extensions.Options;
 
 namespace BuildingBlocks.AspNetCore.Permissions;
 
-internal sealed class PermissionCache(IMemoryCache cache, TimeProvider clock, IOptions<PermissionOptions> options) : IPermissionCache
+internal sealed class PermissionCache(TimeProvider clock, IOptions<PermissionOptions> options) : IPermissionCache, IDisposable
 {
+    internal static readonly IReadOnlySet<string> EmptySet = new HashSet<string>(StringComparer.Ordinal);
+
+    private readonly MemoryCache cache = new(new MemoryCacheOptions());
+
     public static string KeyFor(string? tenantId, Guid userId) => $"perm:{tenantId ?? string.Empty}:{userId:N}";
 
     public bool TryGet(string? tenantId, Guid userId, out IReadOnlySet<string> granted)
@@ -30,7 +34,7 @@ internal sealed class PermissionCache(IMemoryCache cache, TimeProvider clock, IO
 
     public void Invalidate(string? tenantId, Guid userId) => cache.Remove(KeyFor(tenantId, userId));
 
-    internal static readonly IReadOnlySet<string> EmptySet = new HashSet<string>(StringComparer.Ordinal);
+    public void Dispose() => cache.Dispose();
 
     private sealed record Entry(IReadOnlySet<string> Granted, DateTimeOffset ExpiresAt);
 }

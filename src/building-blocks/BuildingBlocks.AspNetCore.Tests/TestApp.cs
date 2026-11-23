@@ -50,6 +50,8 @@ public sealed class TestApp : IAsyncDisposable
 
     public HttpClient Client { get; }
 
+    public IServiceProvider Services => app.Services;
+
     public CapturingLoggerProvider Logs { get; }
 
     public InvocationCounter Invocations { get; }
@@ -68,6 +70,7 @@ public sealed class TestApp : IAsyncDisposable
         builder.Services.AddSingleton<PermissionStore>();
         builder.Services.AddSingleton(new FakeTimeProvider(new DateTimeOffset(2026, 11, 23, 12, 0, 0, TimeSpan.Zero)));
         builder.Services.AddSingleton<TimeProvider>(provider => provider.GetRequiredService<FakeTimeProvider>());
+        builder.Services.AddMemoryCache(options => options.SizeLimit = 1);
         builder.Services.AddBuildingBlocksPermissions<FakePermissionProvider>();
         builder.Services.AddScoped<SampleDb>();
         builder.Services.AddScoped<SampleHandler>();

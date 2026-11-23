@@ -85,6 +85,7 @@ A command handler derives from one base type and immediately has the current use
 - The provider returns permissions with different letter case. Permission names are compared exactly (ordinal). Services define them as constants.
 - A platform user without a tenant. The cache key uses an empty tenant segment, and the service's provider decides what platform users may do.
 - An invalidation request for a user with no cached entry does nothing.
+- The service configures the application-wide memory cache with a size limit, or uses it for other data. The permission cache is unaffected, because it uses its own private store.
 - Demanding an empty list of permissions succeeds trivially.
 
 ## Requirements *(mandatory)*
@@ -98,7 +99,7 @@ A command handler derives from one base type and immediately has the current use
   - the permission-denied error, carrying the missing permissions
 - **FR-002**: Ensure operations MUST fail with the permission-denied error listing exactly the missing permissions, in the order requested.
 - **FR-003**: Unauthenticated callers MUST have an empty granted set, and the provider MUST NOT be called for them.
-- **FR-004**: Granted sets MUST be cached per (tenant, user) for a configurable duration (default 60 seconds), and resolved at most once per request. Invalidation MUST take effect for the next request. Provider failures MUST NOT be cached.
+- **FR-004**: Granted sets MUST be cached per (tenant, user) for a configurable duration (default 60 seconds), and resolved at most once per request. Invalidation MUST take effect for the next request. Provider failures MUST NOT be cached. The cache MUST use its own private store, isolated from any application-wide cache configuration.
 - **FR-005**: The error mapping from feature 002 MUST map the permission-denied error to 403 with code `permission-denied`, a `missingPermissions` array and a trace id. It is logged at warning level with the user id and the missing permissions.
 - **FR-006**: The core package MUST define a request context abstraction exposing current user, tenant context, permission manager and clock, and a command-handler base type that exposes the request context, the user, the permissions and a typed database context.
 - **FR-007**: Adoption MUST be one registration that names the service's provider type, on top of the existing `AddBuildingBlocks()`. The clock defaults to the system clock and can be replaced in tests.

@@ -12,22 +12,27 @@ Versions verified on 2026-11-23: Microsoft.Extensions.TimeProvider.Testing 10.11
   - The implementations (`PermissionManager`, `PermissionCache`, `RequestContext`) and the
     registration go in `BuildingBlocks.AspNetCore`.
 - **Rationale**: Core stays dependency-free. `CommandHandler<TDbContext>` constrains `TDbContext`
-  only to `class`, so Core needs no EF reference. The implementations need `IMemoryCache` and
+  only to `class`, so Core needs no EF reference. The implementations need `MemoryCache` and
   options, which come with the ASP.NET shared framework.
 
 ## R2. Cache design
 
-- **Decision**: `PermissionCache` (singleton) stores, in `IMemoryCache` under the key
+- **Decision (revised before merge, 2026-11-23)**: `PermissionCache` (singleton, disposable) owns a private
+  `MemoryCache` instance and does not use the application-wide `IMemoryCache` from DI. It stores, under the key
   `perm:{tenantId ?? ""}:{userId:N}`, an entry `(IReadOnlySet<string> Granted, DateTimeOffset ExpiresAt)`.
   - `ExpiresAt` comes from `TimeProvider`. On read, an entry whose `ExpiresAt <= now` counts as a
     miss.
-  - The `IMemoryCache` entry also gets an absolute expiration so memory is reclaimed.
+  - The private cache entry also gets an absolute expiration so memory is reclaimed.
   - `Invalidate` removes the key.
   - Only successful provider results are stored (FR-004).
 - **Rationale**: Expiry decisions follow `TimeProvider`, so tests use `FakeTimeProvider` and
-  never wait (FR-008). `IMemoryCache` still evicts real entries.
+  never wait (FR-008). The private cache still evicts real entries.
 - **Accepted trade-off**: Two concurrent cache misses for the same key may both call the
   provider. That is harmless, and simpler than per-key locking.
+
+- **Why it is private**: If a service sets `MemoryCacheOptions.SizeLimit` on the shared
+  `IMemoryCache`, every `Set` without a `Size` throws, which would break every permission check.
+  A private instance also keeps permission entries out of the service's own cache eviction.
 
 ## R3. Per-request resolution
 
@@ -52,7 +57,7 @@ Versions verified on 2026-11-23: Microsoft.Extensions.TimeProvider.Testing 10.11
     DbContext), `PermissionCache` as singleton (`IPermissionCache`), `PermissionManager` and
     `RequestContext` as scoped, and `TimeProvider.System` through `TryAddSingleton`.
   - `PermissionOptions.CacheDuration` defaults to 60 seconds and must be positive.
-  - It calls `AddMemoryCache()`.
+  - It does not call `AddMemoryCache()`. The cache store is private to `PermissionCache`.
 
 ## R6. Command handler base
 

@@ -20,7 +20,7 @@ Everything is tested in process with `FakeTimeProvider`. No Docker.
 
 **Language/Version**: C# on .NET 10 (SDK 10.0.401)
 
-**Primary Dependencies**: The ASP.NET shared framework (`IMemoryCache`, options). Tests also use Microsoft.Extensions.TimeProvider.Testing 10.11.1
+**Primary Dependencies**: The ASP.NET shared framework (a private `MemoryCache`, options). Tests also use Microsoft.Extensions.TimeProvider.Testing 10.11.1
 
 **Storage**: An in-memory cache per service instance
 
