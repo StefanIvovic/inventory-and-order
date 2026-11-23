@@ -93,8 +93,8 @@ description: "Task list for feature 007 Permission Invalidation"
   - remove `BufferedInMemory()` from the instance queue → T005 fails, which confirms the root cause in research.md R4a
 
   Restore all three
-- [ ] T011 Run quickstart.md steps 1–4 on a clean clone in a temporary folder and delete it. The cleanup check must be green
-- [ ] T012 Review for comments. Commit with no attribution, push, open the PR, and confirm CI passes
+- [X] T011 Run quickstart.md steps 1–4 on a clean clone in a temporary folder and delete it. The cleanup check must be green
+- [X] T012 Review for comments. Commit with no attribution, push, open the PR, and confirm CI passes
 
 ---
 
