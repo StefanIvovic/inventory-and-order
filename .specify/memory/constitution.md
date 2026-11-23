@@ -48,7 +48,7 @@ Rationale: pinned versions let each service upgrade its dependencies on its own 
   which has no dependency on HTTP, persistence or permissions. Domain violations raise
   `DomainException`, which is mapped centrally to 409/422 problem details.
 - HTTP-triggered commands use the `CommandHandler<TDbContext>` base class (user, permissions,
-  database). Message-triggered work uses `EventHandler<TDbContext>` (tenant, correlation and
+  database). Message-triggered work uses `MessageHandler<TDbContext>` with `IEventContext` (tenant, correlation and
   initiating user from message headers, with no permission access). Logic shared by both lives in
   the domain.
 - Code is organized in vertical slices: `Features/<UseCase>/` holds the command, handler and
@@ -94,6 +94,10 @@ Rationale: pinned versions let each service upgrade its dependencies on its own 
   the missing permissions.
 - An option the user explicitly requested but lacks permission for MUST fail with 403, never be
   skipped silently. An automatic side effect the user lacks permission for is skipped.
+- Permission caches MUST be invalidated only by returning `PermissionAssignmentsChanged` from
+  the handler that changed the role assignments. The outbox then delivers it after commit to every
+  instance of the service. Handlers MUST NOT call `IPermissionCache` directly. Same-service
+  broadcast listeners MUST NOT use the durable inbox, because instances share one database.
 - Every route requires an authenticated user with a tenant, except an explicit, reviewed
   allow-list.
 - Every service MUST have a test that discovers all routes, calls each as a user with no roles,
@@ -168,6 +172,7 @@ lines (e.g. `Co-Authored-By`, session links, "Generated with" footers).
 | Messaging | Wolverine with RabbitMQ transport, explicit routing per integration event, durable inbox and outbox. MassTransit and MediatR are not used |
 | Persistence | EF Core with PostgreSQL in every service. Marten is not used |
 | Sync vs async | Events by default. Consumers keep local read models (e.g. Order keeps product prices) |
+| Wolverine code generation | Runtime generation (`TypeLoadMode.Dynamic`, `WolverineFx.RuntimeCompilation` in Debug only) in development and tests. Pre-generated, committed code (`TypeLoadMode.Static`) in production images, with a CI guard that regenerates and fails on any diff, and a CI smoke start in Static mode. This applies to every service project from its creation, first in feature 010 |
 | Background work | Wolverine scheduled and timeout messages. Hangfire is not used |
 | Caching | Redis from phase 5 only, for HybridCache L2 on the catalog and gateway rate limiting |
 | Resilience | Microsoft.Extensions.Http.Resilience (Polly v8) |
@@ -211,4 +216,4 @@ MUST verify compliance with it.
 - Any deviation from a principle MUST be justified in the feature plan's complexity tracking and
   approved by the project owner before implementation.
 
-**Version**: 1.1.0 | **Ratified**: 2026-11-23 | **Last Amended**: 2026-11-23
+**Version**: 1.2.0 | **Ratified**: 2026-11-23 | **Last Amended**: 2026-11-23

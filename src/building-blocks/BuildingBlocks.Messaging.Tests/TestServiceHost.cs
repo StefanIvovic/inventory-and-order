@@ -1,4 +1,5 @@
 using BuildingBlocks.AspNetCore;
+using BuildingBlocks.Core.Permissions;
 using BuildingBlocks.Core.Tenancy;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
@@ -21,6 +22,7 @@ public sealed class TestServiceHost : IAsyncDisposable
         ServiceName = serviceName;
         ConnectionString = connectionString;
         Recorder = app.Services.GetRequiredService<Recorder>();
+        ProviderCalls = app.Services.GetRequiredService<ProviderCalls>();
     }
 
     public WebApplication App { get; }
@@ -31,6 +33,8 @@ public sealed class TestServiceHost : IAsyncDisposable
 
     public Recorder Recorder { get; }
 
+    public ProviderCalls ProviderCalls { get; }
+
     public HttpClient CreateClient() => App.GetTestClient();
 
     public static string UniqueName(string prefix) => $"{prefix}-{Guid.NewGuid():N}"[..(prefix.Length + 9)];
@@ -39,14 +43,25 @@ public sealed class TestServiceHost : IAsyncDisposable
         string serviceName,
         string connectionString,
         Uri rabbitMqUri,
-        Action<WolverineOptions> routing)
+        Action<WolverineOptions> routing,
+        ServiceHostOptions? hostOptions = null)
     {
+        var settings = hostOptions ?? new ServiceHostOptions();
         var builder = WebApplication.CreateBuilder();
         builder.WebHost.UseTestServer();
         builder.Logging.ClearProviders();
 
         builder.Services.AddBuildingBlocks();
-        builder.Services.AddBuildingBlocksPermissions<StaticPermissionProvider>();
+        if (settings.DbPermissions)
+        {
+            builder.Services.AddBuildingBlocksPermissions<DbPermissionProvider>();
+        }
+        else
+        {
+            builder.Services.AddBuildingBlocksPermissions<StaticPermissionProvider>();
+        }
+
+        builder.Services.AddSingleton<ProviderCalls>();
         builder.Services.AddSingleton<Recorder>();
         builder.Services
             .AddAuthentication(TestAuthHandler.SchemeName)
@@ -58,7 +73,12 @@ public sealed class TestServiceHost : IAsyncDisposable
         {
             options.ApplicationAssembly = typeof(TestServiceHost).Assembly;
             options.UseBuildingBlocksMessaging(new MessagingSettings(serviceName, connectionString, rabbitMqUri));
-            options.Durability.Mode = DurabilityMode.Solo;
+            options.Durability.Mode = settings.Durability;
+            if (settings.PermissionInvalidation)
+            {
+                options.UseBuildingBlocksPermissionInvalidation();
+            }
+
             routing(options);
         });
 
@@ -66,6 +86,8 @@ public sealed class TestServiceHost : IAsyncDisposable
         app.UseAuthentication();
         app.UseBuildingBlocks();
         app.MapPostToWolverine<CreateWidget, WidgetCreatedResponse>("/widgets");
+        app.MapGet("/permissions", async (IPermissionManager permissions, CancellationToken cancellationToken) =>
+            (await permissions.GetGrantedAsync(cancellationToken)).Order(StringComparer.Ordinal).ToArray());
 
         await using (var scope = app.Services.CreateAsyncScope())
         {
@@ -103,3 +125,5 @@ public sealed class TestServiceHost : IAsyncDisposable
         await App.DisposeAsync();
     }
 }
+
+public sealed record ServiceHostOptions(DurabilityMode Durability = DurabilityMode.Solo, bool DbPermissions = false, bool PermissionInvalidation = false);

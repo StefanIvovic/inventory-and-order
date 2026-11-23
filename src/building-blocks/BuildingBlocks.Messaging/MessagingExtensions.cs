@@ -33,7 +33,6 @@ public static class MessagingExtensions
         options.Policies.PropagateIncomingHeaderToOutgoing(MessageHeaders.UserId);
         options.MetadataRules.Add(new IdentityEnvelopeRule(new HttpContextAccessor()));
         options.Policies.AddMiddleware(typeof(TenantContextMiddleware));
-        options.CodeGeneration.AlwaysUseServiceLocationFor<TenantContext>();
         options.CodeGeneration.AlwaysUseServiceLocationFor<ITenantContext>();
         options.CodeGeneration.AlwaysUseServiceLocationFor<IEventContext>();
         options.CodeGeneration.AlwaysUseServiceLocationFor<IRequestContext>();
