@@ -2,9 +2,11 @@
   <Project Path="BuildingBlocks.Core/BuildingBlocks.Core.csproj" />
   <Project Path="BuildingBlocks.AspNetCore/BuildingBlocks.AspNetCore.csproj" />
   <Project Path="BuildingBlocks.EntityFrameworkCore/BuildingBlocks.EntityFrameworkCore.csproj" />
+  <Project Path="BuildingBlocks.Testing/BuildingBlocks.Testing.csproj" />
   <Folder Name="/tests/">
     <Project Path="BuildingBlocks.Core.Tests/BuildingBlocks.Core.Tests.csproj" />
     <Project Path="BuildingBlocks.AspNetCore.Tests/BuildingBlocks.AspNetCore.Tests.csproj" />
     <Project Path="BuildingBlocks.EntityFrameworkCore.Tests/BuildingBlocks.EntityFrameworkCore.Tests.csproj" />
+    <Project Path="BuildingBlocks.Testing.Tests/BuildingBlocks.Testing.Tests.csproj" />
   </Folder>
 </Solution>
