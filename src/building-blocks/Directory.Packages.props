@@ -5,4 +5,8 @@
   <ItemGroup>
     <GlobalPackageReference Include="MinVer" Version="8.0.0" PrivateAssets="all" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageVersion Include="Microsoft.AspNetCore.TestHost" Version="10.0.15" />
+    <PackageVersion Include="xunit.v3" Version="4.0.3" />
+  </ItemGroup>
 </Project>

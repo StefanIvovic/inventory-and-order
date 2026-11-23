@@ -44,6 +44,9 @@ jobs:
       - name: Repository tool tests
         run: dotnet test --solution tools/RepoChecks.slnx
 
+      - name: BuildingBlocks tests
+        run: dotnet test --solution src/building-blocks/BuildingBlocks.slnx
+
       - name: Image pin check
         run: dotnet run --project tools/RepoChecks -- images
 
@@ -53,4 +56,4 @@ jobs:
 
       - name: Consumer check
         shell: pwsh
-        run: ./scripts/check-consumer.ps1 -PackageId BuildingBlocks.Core
+        run: ./scripts/check-consumer.ps1 -PackageId BuildingBlocks.AspNetCore

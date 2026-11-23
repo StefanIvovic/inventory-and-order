@@ -1,3 +1,8 @@
 <Solution>
   <Project Path="BuildingBlocks.Core/BuildingBlocks.Core.csproj" />
+  <Project Path="BuildingBlocks.AspNetCore/BuildingBlocks.AspNetCore.csproj" />
+  <Folder Name="/tests/">
+    <Project Path="BuildingBlocks.Core.Tests/BuildingBlocks.Core.Tests.csproj" />
+    <Project Path="BuildingBlocks.AspNetCore.Tests/BuildingBlocks.AspNetCore.Tests.csproj" />
+  </Folder>
 </Solution>

@@ -1,6 +1,6 @@
 <Project>
   <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
-  <PropertyGroup>
+  <PropertyGroup Condition="!$(MSBuildProjectName.EndsWith('.Tests'))">
     <IsPackable>true</IsPackable>
     <MinVerTagPrefix>building-blocks/v</MinVerTagPrefix>
   </PropertyGroup>
