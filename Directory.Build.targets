@@ -1,0 +1,8 @@
+<Project>
+  <Target Name="RequireMinVerTagPrefix"
+          BeforeTargets="MinVer;GenerateNuspec;Pack"
+          Condition="'$(IsPackable)' == 'true' And '$(MinVerTagPrefix)' == ''">
+    <Error Code="IAO0001"
+           Text="Packable project '$(MSBuildProjectName)' has no MinVerTagPrefix. Set it in the folder's Directory.Build.props (e.g. building-blocks/v or &lt;service&gt;-contracts/v)." />
+  </Target>
+</Project>

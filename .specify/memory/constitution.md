@@ -126,12 +126,28 @@ from every service.
   broker, observability stack and, from phase 5, Redis.
 - Each service owns its `compose.yaml` (API plus its database). `deploy/compose.yaml` composes
   them with `include:` and the profiles `infra`, `apps`, `observability` and `cache`.
+- Every container image MUST be pinned to an exact version tag: the component's full published
+  release version plus its OS variant (e.g. `postgres:18.7-alpine3.24`,
+  `rabbitmq:4.4.1-management-alpine`). `latest`, missing tags and floating tags (major-only,
+  or major.minor where the project publishes patch releases) are forbidden.
+- All image versions MUST be defined once, in `deploy/versions.env`, as full image references
+  (`POSTGRES_IMAGE=postgres:18.7-alpine3.24`). Compose files reference them only through
+  variables (`image: ${POSTGRES_IMAGE}`), and Dockerfiles only through build arguments supplied
+  from the same file, with no default value. The .NET SDK image MUST match the SDK version
+  pinned in `global.json`. The same component MUST
+  run the same version everywhere: dev, e2e, CI and Testcontainers. Testcontainers reads the tag
+  from `deploy/versions.env`.
+- Upgrading an image is a deliberate change to `deploy/versions.env`, made through its own
+  Spec Kit feature or as part of the feature that needs it.
+- An automated image-pin check MUST fail CI if any compose file, Dockerfile or test fixture
+  references an image that is not pinned through `deploy/versions.env`.
 
 ### IX. Code Without Comments
 
 Source code MUST NOT contain comments of any kind. Intent is expressed through naming, small
-focused types and tests. This applies to C#, TypeScript, HTML, SCSS, Dockerfiles, YAML and
-scripts.
+focused types and tests. This applies to C#, TypeScript, HTML, SCSS, Dockerfiles, YAML, MSBuild
+files and scripts. It is an authoring discipline checked in review. No comment-detection tooling
+is built.
 
 ### X. No Attribution
 
@@ -178,8 +194,10 @@ implemented as Wolverine middleware.
   (unit, integration, end-to-end), 7 Deployment (CI/CD, later Kubernetes).
 - A plan MUST include a Constitution Check that confirms compliance with every principle, or
   documents and justifies any deviation in its complexity tracking.
-- Merge gates: build, unit tests, integration tests, the no-roles 403 route test and the test
-  cleanup check all pass for every affected service.
+- Merge gates: build, unit tests, integration tests, the no-roles 403 route test, the test
+  cleanup check and the image-pin check all pass for every affected service.
+- Every feature ships as its own branch (`NNN-short-name`) and its own pull request. Phases are
+  split into small, independently reviewable features that each leave the system working.
 
 ## Governance
 
@@ -193,4 +211,4 @@ MUST verify compliance with it.
 - Any deviation from a principle MUST be justified in the feature plan's complexity tracking and
   approved by the project owner before implementation.
 
-**Version**: 1.0.0 | **Ratified**: 2026-11-23 | **Last Amended**: 2026-11-23
+**Version**: 1.1.0 | **Ratified**: 2026-11-23 | **Last Amended**: 2026-11-23

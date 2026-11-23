@@ -1,0 +1,56 @@
+name: building-blocks
+
+on:
+  pull_request:
+    paths:
+      - 'src/building-blocks/**'
+      - 'tools/**'
+      - 'scripts/**'
+      - 'deploy/versions.env'
+      - 'global.json'
+      - 'nuget.config'
+      - 'Directory.Build.props'
+      - 'Directory.Build.targets'
+      - '.github/workflows/building-blocks.yml'
+  push:
+    branches:
+      - master
+    paths:
+      - 'src/building-blocks/**'
+      - 'tools/**'
+      - 'scripts/**'
+      - 'deploy/versions.env'
+      - 'global.json'
+      - 'nuget.config'
+      - 'Directory.Build.props'
+      - 'Directory.Build.targets'
+      - '.github/workflows/building-blocks.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@v6.1.0
+        with:
+          global-json-file: global.json
+
+      - name: Repository tool tests
+        run: dotnet test --solution tools/RepoChecks.slnx
+
+      - name: Image pin check
+        run: dotnet run --project tools/RepoChecks -- images
+
+      - name: Pack shared packages
+        shell: pwsh
+        run: ./scripts/pack.ps1
+
+      - name: Consumer check
+        shell: pwsh
+        run: ./scripts/check-consumer.ps1 -PackageId BuildingBlocks.Core
