@@ -15,6 +15,13 @@
     <PackageVersion Include="Npgsql" Version="10.0.4" />
     <PackageVersion Include="RabbitMQ.Client" Version="7.3.0" />
     <PackageVersion Include="xunit.v3.extensibility.core" Version="4.0.3" />
+    <PackageVersion Include="WolverineFx" Version="6.65.1" />
+    <PackageVersion Include="WolverineFx.EntityFrameworkCore" Version="6.65.1" />
+    <PackageVersion Include="WolverineFx.Postgresql" Version="6.65.1" />
+    <PackageVersion Include="WolverineFx.RabbitMQ" Version="6.65.1" />
+    <PackageVersion Include="WolverineFx.Http" Version="6.65.1" />
+    <PackageVersion Include="WolverineFx.RuntimeCompilation" Version="6.65.1" />
+    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.4" />
     <PackageVersion Include="xunit.v3" Version="4.0.3" />
   </ItemGroup>
 </Project>
