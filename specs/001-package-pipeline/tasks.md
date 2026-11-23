@@ -158,8 +158,8 @@ description: "Task list for feature 001 Package Pipeline"
 
 ## Phase 8: Polish & Cross-Cutting Concerns
 
-- [ ] T029 Run the full quickstart.md (steps 1–9) end to end on a clean clone in a temporary folder, record the pack timing for the PR description, then delete the clone
-- [ ] T030 Review every added file for comments (authoring rule IX). Commit on `001-package-pipeline` with no attribution, push, open the PR against `master` with the timing and the analyze results, and confirm the workflow passes (quickstart.md step 10)
+- [X] T029 Run the full quickstart.md (steps 1–9) end to end on a clean clone in a temporary folder, record the pack timing for the PR description, then delete the clone
+- [X] T030 Review every added file for comments (authoring rule IX). Commit on `001-package-pipeline` with no attribution, push, open the PR against `master` with the timing and the analyze results, and confirm the workflow passes (quickstart.md step 10)
 
 ---
 
