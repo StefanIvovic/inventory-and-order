@@ -130,7 +130,7 @@ description: "Task list for feature 002 BuildingBlocks Core"
 **Independent Test**: quickstart.md steps 2–5
 
 - [X] T023 [US4] Write `src/building-blocks/BuildingBlocks.AspNetCore.Tests/AdoptionTests.cs`. It asserts that a TestServer configured with exactly `AddBuildingBlocks()`, `UseAuthentication()` and `UseBuildingBlocks()` serves US1–US3 behaviour together in one request flow (SC-002)
-- [ ] T024 [US4] Run `pwsh scripts/pack.ps1` and quickstart.md steps 2–5:
+- [X] T024 [US4] Run `pwsh scripts/pack.ps1` and quickstart.md steps 2–5:
   - both packages share one version, and there is no Tests package
   - Core's nuspec has no dependencies (SC-005)
   - AspNetCore depends on Core at the same version
@@ -140,9 +140,9 @@ description: "Task list for feature 002 BuildingBlocks Core"
 
 ## Phase 7: Polish & Cross-Cutting
 
-- [ ] T025 Add the step `dotnet test --solution src/building-blocks/BuildingBlocks.slnx` to `.github/workflows/building-blocks.yml`, after the repository tool tests
-- [ ] T026 Run all quickstart.md steps on a clean clone in a temporary folder, then delete it. Run the image check (exit 0). Confirm no temporary folders remain
-- [ ] T027 Review every added file for comments. Commit with no attribution, push, open the PR with the validation results, and confirm CI passes
+- [X] T025 Add the step `dotnet test --solution src/building-blocks/BuildingBlocks.slnx` to `.github/workflows/building-blocks.yml`, after the repository tool tests
+- [X] T026 Run all quickstart.md steps on a clean clone in a temporary folder, then delete it. Run the image check (exit 0). Confirm no temporary folders remain
+- [X] T027 Review every added file for comments. Commit with no attribution, push, open the PR with the validation results, and confirm CI passes
 
 ---
 
