@@ -114,8 +114,8 @@ description: "Task list for feature 004 BuildingBlocks Permissions"
   - remove the 403 case from the exception handler → the US2 tests fail
 
   Then restore both
-- [ ] T017 Run quickstart.md steps 1–4 on a clean clone in a temporary folder and delete it. Confirm Core's nuspec still has no dependencies (SC-005 of feature 002) and that no temporary folders remain
-- [ ] T018 Review for comments. Commit with no attribution, push, open the PR, and confirm CI passes
+- [X] T017 Run quickstart.md steps 1–4 on a clean clone in a temporary folder and delete it. Confirm Core's nuspec still has no dependencies (SC-005 of feature 002) and that no temporary folders remain
+- [X] T018 Review for comments. Commit with no attribution, push, open the PR, and confirm CI passes
 
 ---
 
