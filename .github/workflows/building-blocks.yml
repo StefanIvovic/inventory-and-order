@@ -54,6 +54,10 @@ jobs:
         shell: pwsh
         run: ./scripts/pack.ps1
 
-      - name: Consumer check
+      - name: Consumer check AspNetCore
         shell: pwsh
         run: ./scripts/check-consumer.ps1 -PackageId BuildingBlocks.AspNetCore
+
+      - name: Consumer check EntityFrameworkCore
+        shell: pwsh
+        run: ./scripts/check-consumer.ps1 -PackageId BuildingBlocks.EntityFrameworkCore
