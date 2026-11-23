@@ -114,6 +114,8 @@ description: "Task list for feature 005 BuildingBlocks Testing"
 - [X] T016 Run quickstart.md steps 1–7 on a clean clone in a temporary folder and delete it. Steps 5–6 cover the pack and consumer check for `BuildingBlocks.Testing`. Confirm the cleanup check is green afterwards
 - [X] T017 Review for comments. Commit with no attribution, push, open the PR, and confirm CI passes, including the cleanup check step
 
+- [X] T018 Add a `Consumer check Testing` step (`-PackageId BuildingBlocks.Testing`) to `.github/workflows/building-blocks.yml`, so CI covers FR-008 like the other packages (owner request after the first CI run)
+
 ---
 
 ## Dependencies & Execution Order

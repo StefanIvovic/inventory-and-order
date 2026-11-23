@@ -69,6 +69,10 @@ jobs:
         shell: pwsh
         run: ./scripts/check-consumer.ps1 -PackageId BuildingBlocks.EntityFrameworkCore
 
+      - name: Consumer check Testing
+        shell: pwsh
+        run: ./scripts/check-consumer.ps1 -PackageId BuildingBlocks.Testing
+
       - name: Test cleanup check
         if: always()
         shell: pwsh
