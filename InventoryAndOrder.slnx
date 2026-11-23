@@ -1,6 +1,9 @@
 <Solution>
   <Folder Name="/building-blocks/">
     <Project Path="src/building-blocks/BuildingBlocks.Core/BuildingBlocks.Core.csproj" />
+    <Project Path="src/building-blocks/BuildingBlocks.AspNetCore/BuildingBlocks.AspNetCore.csproj" />
+    <Project Path="src/building-blocks/BuildingBlocks.Core.Tests/BuildingBlocks.Core.Tests.csproj" />
+    <Project Path="src/building-blocks/BuildingBlocks.AspNetCore.Tests/BuildingBlocks.AspNetCore.Tests.csproj" />
   </Folder>
   <Folder Name="/tools/">
     <Project Path="tools/RepoChecks/RepoChecks.csproj" />
