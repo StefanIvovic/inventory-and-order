@@ -23,12 +23,16 @@ public sealed class TestAuthHandler(
             return Task.FromResult(AuthenticateResult.NoResult());
         }
 
-        var claims = new List<Claim>
+        var claims = new List<Claim> { new(AppClaimTypes.Subject, user.ToString()) };
+        if (Request.Headers.TryGetValue(TenantHeader, out var tenant))
         {
-            new(AppClaimTypes.Subject, user.ToString()),
-            new(AppClaimTypes.UserType, "staff"),
-            new(AppClaimTypes.TenantId, Request.Headers[TenantHeader].ToString()),
-        };
+            claims.Add(new Claim(AppClaimTypes.UserType, "staff"));
+            claims.Add(new Claim(AppClaimTypes.TenantId, tenant.ToString()));
+        }
+        else
+        {
+            claims.Add(new Claim(AppClaimTypes.UserType, "platform"));
+        }
         var principal = new ClaimsPrincipal(new ClaimsIdentity(claims, SchemeName));
         return Task.FromResult(AuthenticateResult.Success(new AuthenticationTicket(principal, SchemeName)));
     }

@@ -29,6 +29,70 @@ public sealed class TestDbContext(DbContextOptions<TestDbContext> options, ITena
     : TenantDbContext(options, tenantContext)
 {
     public DbSet<Widget> Widgets => Set<Widget>();
+
+    public DbSet<PermissionGrant> PermissionGrants => Set<PermissionGrant>();
+}
+
+public sealed class PermissionGrant : ITenantOwned
+{
+    private PermissionGrant()
+    {
+    }
+
+    public Guid Id { get; private set; }
+
+    public Guid UserId { get; private set; }
+
+    public string Permission { get; private set; } = string.Empty;
+
+    public string TenantId { get; private set; } = string.Empty;
+
+    public static PermissionGrant Create(Guid userId, string permission) => new() { Id = Guid.NewGuid(), UserId = userId, Permission = permission };
+}
+
+public sealed record GrantAccess(Guid UserId, string Permission, bool FailAfterAdd);
+
+public static class GrantAccessHandler
+{
+    public static PermissionAssignmentsChanged Handle(GrantAccess command, TestDbContext db, ITenantContext tenant)
+    {
+        db.PermissionGrants.Add(PermissionGrant.Create(command.UserId, command.Permission));
+        if (command.FailAfterAdd)
+        {
+            throw new InvalidOperationException("grant failed after adding");
+        }
+
+        return new PermissionAssignmentsChanged(tenant.TenantId, command.UserId);
+    }
+}
+
+public sealed class ProviderCalls
+{
+    private readonly ConcurrentDictionary<Guid, int> calls = new();
+
+    public int For(Guid userId) => calls.TryGetValue(userId, out var count) ? count : 0;
+
+    public void Record(Guid userId) => calls.AddOrUpdate(userId, 1, (_, count) => count + 1);
+}
+
+public sealed class DbPermissionProvider(TestDbContext db, ProviderCalls calls) : IPermissionProvider
+{
+    public const string PlatformPermission = "platform.view";
+
+    public async Task<IReadOnlySet<string>> GetPermissionsAsync(ICurrentUser user, CancellationToken cancellationToken)
+    {
+        calls.Record(user.UserId);
+        if (user.TenantId is null)
+        {
+            return new HashSet<string>(StringComparer.Ordinal) { PlatformPermission };
+        }
+
+        var granted = await db.PermissionGrants
+            .Where(g => g.UserId == user.UserId)
+            .Select(g => g.Permission)
+            .ToListAsync(cancellationToken);
+        return granted.ToHashSet(StringComparer.Ordinal);
+    }
 }
 
 [MessageIdentity("test.widget-created.v1")]
