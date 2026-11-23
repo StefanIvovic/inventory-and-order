@@ -1,6 +1,8 @@
 using System.Net.Http.Json;
 using System.Text.Json;
+using BuildingBlocks.AspNetCore.Tests.Permissions;
 using BuildingBlocks.Core.Errors;
+using BuildingBlocks.Core.Permissions;
 using BuildingBlocks.Core.Identity;
 using BuildingBlocks.Core.Tenancy;
 using Microsoft.AspNetCore.Authentication;
@@ -10,6 +12,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Time.Testing;
 
 namespace BuildingBlocks.AspNetCore.Tests;
 
@@ -34,9 +37,20 @@ public sealed class TestApp : IAsyncDisposable
         Logs = logs;
         Client = app.GetTestClient();
         Invocations = app.Services.GetRequiredService<InvocationCounter>();
+        Permissions = app.Services.GetRequiredService<PermissionStore>();
+        Clock = app.Services.GetRequiredService<FakeTimeProvider>();
+        PermissionCache = app.Services.GetRequiredService<IPermissionCache>();
     }
 
+    public PermissionStore Permissions { get; }
+
+    public FakeTimeProvider Clock { get; }
+
+    public IPermissionCache PermissionCache { get; }
+
     public HttpClient Client { get; }
+
+    public IServiceProvider Services => app.Services;
 
     public CapturingLoggerProvider Logs { get; }
 
@@ -53,6 +67,13 @@ public sealed class TestApp : IAsyncDisposable
 
         builder.Services.AddBuildingBlocks();
         builder.Services.AddSingleton<InvocationCounter>();
+        builder.Services.AddSingleton<PermissionStore>();
+        builder.Services.AddSingleton(new FakeTimeProvider(new DateTimeOffset(2026, 11, 23, 12, 0, 0, TimeSpan.Zero)));
+        builder.Services.AddSingleton<TimeProvider>(provider => provider.GetRequiredService<FakeTimeProvider>());
+        builder.Services.AddMemoryCache(options => options.SizeLimit = 1);
+        builder.Services.AddBuildingBlocksPermissions<FakePermissionProvider>();
+        builder.Services.AddScoped<SampleDb>();
+        builder.Services.AddScoped<SampleHandler>();
         builder.Services
             .AddAuthentication(TestAuthHandler.SchemeName)
             .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(TestAuthHandler.SchemeName, null);
@@ -98,6 +119,30 @@ public sealed class TestApp : IAsyncDisposable
         app.MapGet("/rule", () => Throw(new DomainException("inventory.transfer.insufficient-stock", DomainErrorKind.Rule, "Not enough stock in the source warehouse.")));
         app.MapGet("/missing", () => Throw(new NotFoundException("order")));
         app.MapGet("/boom", () => Throw(new InvalidOperationException(Secret)));
+
+        app.MapGet("/perm/has", (string p, IPermissionManager pm, CancellationToken ct) => pm.HasAsync(p, ct));
+        app.MapGet("/perm/all", (string[] p, IPermissionManager pm, CancellationToken ct) => pm.HasAllAsync(p, ct));
+        app.MapGet("/perm/any", (string[] p, IPermissionManager pm, CancellationToken ct) => pm.HasAnyAsync(p, ct));
+        app.MapGet("/perm/ensure", async (string p, IPermissionManager pm, CancellationToken ct) =>
+        {
+            await pm.EnsureAsync(p, ct);
+            return "ok";
+        });
+        app.MapGet("/perm/ensure-all", async (string[]? p, IPermissionManager pm, CancellationToken ct) =>
+        {
+            await pm.EnsureAllAsync(p ?? [], ct);
+            return "ok";
+        });
+        app.MapGet("/perm/granted", async (IPermissionManager pm, CancellationToken ct) =>
+            (await pm.GetGrantedAsync(ct)).Order(StringComparer.Ordinal).ToArray());
+        app.MapGet("/perm/repeat", async (IPermissionManager pm, CancellationToken ct) =>
+        {
+            await pm.HasAsync("a", ct);
+            await pm.HasAllAsync(["a", "b"], ct);
+            await pm.HasAnyAsync(["c"], ct);
+            return (await pm.GetGrantedAsync(ct)).Count;
+        });
+        app.MapGet("/handler", (SampleHandler handler, CancellationToken ct) => handler.Handle(ct));
 
         await app.StartAsync();
         return new TestApp(app, logs);
