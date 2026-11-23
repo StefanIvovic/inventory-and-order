@@ -117,7 +117,7 @@ description: "Task list for feature 003 BuildingBlocks EF Tenancy"
   - remove the interceptor registration → US2 tests fail
 
   Then restore both
-- [ ] T016 Run the full quickstart on a clean clone in a temporary folder and delete it, with no temporary folders left. Review for comments. Commit with no attribution, push, open the PR, and confirm CI passes
+- [X] T016 Run the full quickstart on a clean clone in a temporary folder and delete it, with no temporary folders left. Review for comments. Commit with no attribution, push, open the PR, and confirm CI passes
 
 ---
 
