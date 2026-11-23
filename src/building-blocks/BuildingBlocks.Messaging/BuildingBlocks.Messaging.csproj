@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="WolverineFx" />
+    <PackageReference Include="WolverineFx.EntityFrameworkCore" />
+    <PackageReference Include="WolverineFx.Postgresql" />
+    <PackageReference Include="WolverineFx.RabbitMQ" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../BuildingBlocks.AspNetCore/BuildingBlocks.AspNetCore.csproj" />
+    <ProjectReference Include="../BuildingBlocks.EntityFrameworkCore/BuildingBlocks.EntityFrameworkCore.csproj" />
+  </ItemGroup>
+</Project>
