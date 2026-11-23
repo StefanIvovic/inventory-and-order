@@ -172,7 +172,7 @@ lines (e.g. `Co-Authored-By`, session links, "Generated with" footers).
 | Messaging | Wolverine with RabbitMQ transport, explicit routing per integration event, durable inbox and outbox. MassTransit and MediatR are not used |
 | Persistence | EF Core with PostgreSQL in every service. Marten is not used |
 | Sync vs async | Events by default. Consumers keep local read models (e.g. Order keeps product prices) |
-| Wolverine code generation | Runtime generation (`TypeLoadMode.Dynamic`, `WolverineFx.RuntimeCompilation` in Debug only) in development and tests. Pre-generated, committed code (`TypeLoadMode.Static`) in production images, with a CI guard that regenerates and fails on any diff, and a CI smoke start in Static mode. This applies to every service project from its creation, first in feature 010 |
+| Wolverine code generation | Runtime generation (`TypeLoadMode.Dynamic`, `WolverineFx.RuntimeCompilation` in Debug only) in development and tests. Pre-generated, committed code (`TypeLoadMode.Static`) in production images, with a CI guard that regenerates and fails on any diff, and a CI smoke start in Static mode. This applies to every service project from its creation, first in feature 011 (identity-authentication) |
 | Background work | Wolverine scheduled and timeout messages. Hangfire is not used |
 | Caching | Redis from phase 5 only, for HybridCache L2 on the catalog and gateway rate limiting |
 | Resilience | Microsoft.Extensions.Http.Resilience (Polly v8) |
