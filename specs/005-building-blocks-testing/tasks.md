@@ -111,8 +111,8 @@ description: "Task list for feature 005 BuildingBlocks Testing"
   - result: all three caught. The reaper mutation needed an extra settings-level test, because the library default equals our pin (research.md R2)
 
   Restore all three
-- [ ] T016 Run quickstart.md steps 1–7 on a clean clone in a temporary folder and delete it. Steps 5–6 cover the pack and consumer check for `BuildingBlocks.Testing`. Confirm the cleanup check is green afterwards
-- [ ] T017 Review for comments. Commit with no attribution, push, open the PR, and confirm CI passes, including the cleanup check step
+- [X] T016 Run quickstart.md steps 1–7 on a clean clone in a temporary folder and delete it. Steps 5–6 cover the pack and consumer check for `BuildingBlocks.Testing`. Confirm the cleanup check is green afterwards
+- [X] T017 Review for comments. Commit with no attribution, push, open the PR, and confirm CI passes, including the cleanup check step
 
 ---
 
