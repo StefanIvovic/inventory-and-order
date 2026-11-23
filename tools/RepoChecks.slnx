@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="RepoChecks/RepoChecks.csproj" />
+  <Project Path="RepoChecks.Tests/RepoChecks.Tests.csproj" />
+</Solution>
