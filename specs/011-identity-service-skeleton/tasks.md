@@ -176,7 +176,7 @@ description: "Task list for feature 011 Identity Service Skeleton"
 
 ## Phase 11: Polish
 
-- [ ] T032 Run the full quickstart.md and both solutions' tests. Count the setup lines Identity needs for the shared authentication and the route test, against SC-006 (about 10 each) (analysis C3). Confirm no comments were added, then `dev.ps1 reset` and `check-test-cleanup.ps1`
+- [X] T032 Run the full quickstart.md and both solutions' tests. Count the setup lines Identity needs for the shared authentication and the route test, against SC-006 (about 10 each) (analysis C3). Confirm no comments were added, then `dev.ps1 reset` and `check-test-cleanup.ps1`
 - [ ] T033 Commit, push, open the PR, and confirm that `building-blocks.yml`, `deploy.yml` and `identity.yml` pass
 
 ---

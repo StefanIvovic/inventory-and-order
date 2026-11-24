@@ -24,7 +24,7 @@ Rules:
 | `AssignedAt` | timestamptz | required, set from `TimeProvider` |
 
 - Primary key: (`TenantId`, `UserId`, `Role`).
-- Index: (`TenantId`, `UserId`).
+- Lookups by (`TenantId`, `UserId`) use the primary key prefix. The BuildingBlocks tenant setup also adds an index on `TenantId`.
 - Platform-level assignments (no tenant) are out of scope until 013.
 
 ## Permission resolution (`IdentityPermissionProvider : IPermissionProvider`)

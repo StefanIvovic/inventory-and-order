@@ -41,7 +41,7 @@ static class TestTokens {
 }
 IServiceCollection AddTestTokenValidation(this IServiceCollection services, string? audience = null);
 static class NoRolesRouteCheck {
-  Task<RouteCheckReport> RunAsync(IServiceProvider services, HttpClient client, CancellationToken ct = default);
+  Task<RouteCheckReport> RunAsync(IServiceProvider services, HttpClient client, string? audience = null, CancellationToken ct = default);
 }
 sealed record RouteCheckReport(IReadOnlyList<string> Checked, IReadOnlyList<string> Skipped, IReadOnlyList<string> Failures);
 ```
@@ -50,3 +50,5 @@ sealed record RouteCheckReport(IReadOnlyList<string> Checked, IReadOnlyList<stri
 
 - `scripts/restore-feed.ps1 -Service <name>`: packs the BuildingBlocks version pinned by `src/services/<name>/Directory.Packages.props` from its tag into `artifacts/packages`. Exits 1 if the pin is a prerelease or the tag is missing.
 - `scripts/dev.ps1`: unchanged. `-Profile infra,apps` starts Identity.
+- `scripts/codegen.ps1 -Service <name> [-Check]`: deletes and regenerates the Wolverine code for a service (placeholder configuration, no database needed). `-Check` fails if the result differs from what is committed.
+- `UseBuildingBlocks()` now also adds an inner exception handler, so mapped errors keep their status in the Development environment, where ASP.NET's developer exception page would otherwise catch them first.
