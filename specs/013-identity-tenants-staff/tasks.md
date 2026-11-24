@@ -87,22 +87,22 @@ description: "Task list for feature 013 Identity Tenants and Staff"
 
 ## Phase 6: User Story 4 - Events and contracts (P2)
 
-- [ ] T026 [US4] Tests in `Identity.Tests/Events/OutboxTests.cs`: headers (`tenant-id` of the new tenant for `TenantCreated`), and a forced failure after the events were produced sends nothing. See them fail where the behaviour is missing, then fix
-- [ ] T027 [US4] `pack.ps1` produces `Identity.Contracts` with no dependencies; a test in `src/services/identity/Identity.Tests/ContractsPackageTests.cs` asserts the assembly references only the base library
+- [X] T026 [US4] Tests in `Identity.Tests/Events/OutboxTests.cs`: headers (`tenant-id` of the new tenant for `TenantCreated`), and a forced failure after the events were produced sends nothing. See them fail where the behaviour is missing, then fix
+- [X] T027 [US4] `pack.ps1` produces `Identity.Contracts` with no dependencies; a test in `src/services/identity/Identity.Tests/ContractsPackageTests.cs` asserts the assembly references only the base library
 
 ---
 
 ## Phase 7: User Story 5 - Demo tenant in dev (P3)
 
-- [ ] T028 [US5] Tests first in `Identity.Tests/Tenants/DemoTenantSeedTests.cs`: created once with events, unchanged on restart, absent without settings. See them fail
-- [ ] T029 [US5] `Tenants/DemoTenantSeeder.cs` with `IDbContextOutbox<IdentityDbContext>` (research.md R8), called from `Persistence/StartupTasks.cs`; `Identity:DemoTenant:*` settings; `DEMO_TENANT_SLUG`, `DEMO_TENANT_NAME`, `DEMO_ADMIN_EMAIL`, `DEMO_ADMIN_PASSWORD` in `deploy/dev.env` and `src/services/identity/compose.yaml`
+- [X] T028 [US5] Tests first in `Identity.Tests/Tenants/DemoTenantSeedTests.cs`: created once with events, unchanged on restart, absent without settings. See them fail
+- [X] T029 [US5] `Tenants/DemoTenantSeeder.cs` with `IDbContextOutbox<IdentityDbContext>` (research.md R8), called from `Persistence/StartupTasks.cs`; `Identity:DemoTenant:*` settings; `DEMO_TENANT_SLUG`, `DEMO_TENANT_NAME`, `DEMO_ADMIN_EMAIL`, `DEMO_ADMIN_PASSWORD` in `deploy/dev.env` and `src/services/identity/compose.yaml`
 
 ---
 
 ## Phase 8: Polish
 
-- [ ] T030 `NoRolesRouteTests.cs` and `OwnTokenTests.ProtocolAndLoginEndpointsAreAllowListed`: all 8 non-allow-listed routes (7 new plus `GET /roles`) checked, none skipped, no 400 (SC-006)
-- [ ] T031 `codegen.ps1 -Service identity` and commit the generated code
+- [X] T030 `NoRolesRouteTests.cs` and `OwnTokenTests.ProtocolAndLoginEndpointsAreAllowListed`: all 8 non-allow-listed routes (7 new plus `GET /roles`) checked, none skipped, no 400 (SC-006)
+- [X] T031 `codegen.ps1 -Service identity` and commit the generated code
 - [ ] T032 Run all BuildingBlocks and Identity tests, the pin checks and the cleanup check; run quickstart.md sections 2–5; scan the new files for comments
 - [ ] T033 Commit. After the owner confirms, push the branch and the tags `building-blocks/v0.3.0` and `identity-contracts/v0.1.0`, open the PR, and confirm `building-blocks.yml`, `identity.yml` and `deploy.yml` pass
 

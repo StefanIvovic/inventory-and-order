@@ -45,6 +45,10 @@ services:
       Identity__Clients__storefront-bff__PostLogoutRedirectUri: "${GATEWAY_ORIGIN}/shop/"
       Identity__PlatformAdmin__Email: "${PLATFORM_ADMIN_EMAIL}"
       Identity__PlatformAdmin__Password: "${PLATFORM_ADMIN_PASSWORD}"
+      Identity__DemoTenant__Slug: "${DEMO_TENANT_SLUG}"
+      Identity__DemoTenant__Name: "${DEMO_TENANT_NAME}"
+      Identity__DemoTenant__AdminEmail: "${DEMO_ADMIN_EMAIL}"
+      Identity__DemoTenant__AdminPassword: "${DEMO_ADMIN_PASSWORD}"
     ports:
       - "127.0.0.1:${IDENTITY_API_PORT}:8080"
     volumes:

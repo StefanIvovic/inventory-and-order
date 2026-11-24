@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using Npgsql;
 using OpenIddict.Server;
 using Wolverine;
 using Wolverine.Tracking;
@@ -96,6 +97,16 @@ public sealed class IdentityApp : WebApplicationFactory<Program>
         ["Identity:PlatformAdmin:Email"] = AdminEmail,
         ["Identity:PlatformAdmin:Password"] = AdminPassword,
     };
+
+    public override async ValueTask DisposeAsync()
+    {
+        await base.DisposeAsync();
+        if (settings.TryGetValue("ConnectionStrings:Identity", out var connectionString) && connectionString is not null)
+        {
+            using var connection = new NpgsqlConnection(connectionString);
+            NpgsqlConnection.ClearPool(connection);
+        }
+    }
 
     public HttpClient CreateBrowser() =>
         CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false, HandleCookies = true });

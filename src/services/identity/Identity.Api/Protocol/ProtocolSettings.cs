@@ -14,6 +14,8 @@ public sealed class ProtocolSettings
 
     public PlatformAdminSettings PlatformAdmin { get; set; } = new();
 
+    public DemoTenantSettings DemoTenant { get; set; } = new();
+
     public static ProtocolSettings Read(IConfiguration configuration)
     {
         ArgumentNullException.ThrowIfNull(configuration);
@@ -61,4 +63,19 @@ public sealed class PlatformAdminSettings
     public string? Email { get; set; }
 
     public string? Password { get; set; }
+}
+
+public sealed class DemoTenantSettings
+{
+    public string? Slug { get; set; }
+
+    public string? Name { get; set; }
+
+    public string? AdminEmail { get; set; }
+
+    public string? AdminPassword { get; set; }
+
+    public bool IsConfigured =>
+        !string.IsNullOrWhiteSpace(Slug) && !string.IsNullOrWhiteSpace(Name)
+        && !string.IsNullOrWhiteSpace(AdminEmail) && !string.IsNullOrWhiteSpace(AdminPassword);
 }

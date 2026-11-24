@@ -15,6 +15,7 @@ public sealed class IdentityDbContext(DbContextOptions<IdentityDbContext> option
 {
     public const string StaffEmailIndex = "ux_identity_users_staff_email";
     public const string TenantSlugIndex = "ux_tenants_slug";
+    public const string UserNameIndex = "IX_identity_users_NormalizedUserName";
     private const int NameMaxLength = 256;
 
     public DbSet<RoleAssignment> RoleAssignments => Set<RoleAssignment>();

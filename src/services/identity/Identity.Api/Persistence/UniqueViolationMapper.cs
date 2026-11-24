@@ -12,6 +12,7 @@ public sealed class UniqueViolationMapper : IExceptionProblemMapper
     {
         [IdentityDbContext.TenantSlugIndex] = (TenantErrors.SlugTaken, TenantErrors.SlugTakenError().Message),
         [IdentityDbContext.StaffEmailIndex] = (IdentityResultErrors.EmailTaken, IdentityResultErrors.EmailTakenError().Message),
+        [IdentityDbContext.UserNameIndex] = (IdentityResultErrors.EmailTaken, IdentityResultErrors.EmailTakenError().Message),
     };
 
     public bool TryMap(Exception exception, HttpContext context, [NotNullWhen(true)] out MappedProblem? problem)

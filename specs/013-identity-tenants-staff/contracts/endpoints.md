@@ -36,19 +36,19 @@ Permission `identity.users.view`.
 - `canDisable`: the caller has `identity.users.manage`, the user is not the caller, and is not disabled
 - `canAssignRoles`: the caller has `identity.roles.assign` and the user is not disabled
 
-### `POST /users/{id}/disable`
+### `POST /users/{id:guid}/disable`
 Permission `identity.users.manage`.
 - 204. Repeating it on a disabled user is 204 with no event
 - 404 for unknown or other-tenant users, 409 `cannot-disable-self`
 - Publishes `UserDisabled` and `PermissionAssignmentsChanged`
 
-### `PUT /users/{id}/roles/{role}`
+### `PUT /users/{id:guid}/roles/{role}`
 Permission `identity.roles.assign`.
 - 204, also when already held
 - 400 for an unknown role, 404 for unknown or other-tenant users, 409 `user-disabled`
 - Publishes `PermissionAssignmentsChanged` when something changed
 
-### `DELETE /users/{id}/roles/{role}`
+### `DELETE /users/{id:guid}/roles/{role}`
 Permission `identity.roles.assign`.
 - 204, also when not held
 - 400 for an unknown role, 404 for unknown or other-tenant users, 409 `cannot-remove-own-admin`

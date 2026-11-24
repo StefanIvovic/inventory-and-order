@@ -139,6 +139,8 @@ builder.Host.UseWolverine(options =>
 #endif
 });
 
+builder.Services.AddHostedService<StartupCompletion>();
+
 var app = builder.Build();
 app.UseStaticFiles();
 app.UseBuildingBlocksAuthentication();

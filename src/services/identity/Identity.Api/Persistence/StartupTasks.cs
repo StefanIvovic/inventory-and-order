@@ -17,7 +17,6 @@ public sealed class MigrationState
 
 public sealed partial class StartupTasks(
     IServiceScopeFactory scopes,
-    MigrationState state,
     ProtocolSettings settings,
     ILogger<StartupTasks> logger) : IHostedService
 {
@@ -38,9 +37,6 @@ public sealed partial class StartupTasks(
             settings.PlatformAdmin,
             services.GetRequiredService<TimeProvider>(),
             cancellationToken);
-
-        state.MarkApplied();
-        LogReady(logger);
     }
 
     public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
@@ -63,9 +59,6 @@ public sealed partial class StartupTasks(
             }
         }
     }
-
-    [LoggerMessage(Level = LogLevel.Information, Message = "Identity is ready: migrations, scopes, clients and platform admin are in place")]
-    private static partial void LogReady(ILogger logger);
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Identity database migration attempt {Attempt} failed, retrying in {DelaySeconds}s: {Reason}")]
     private static partial void LogRetry(ILogger logger, int attempt, double delaySeconds, string reason);
