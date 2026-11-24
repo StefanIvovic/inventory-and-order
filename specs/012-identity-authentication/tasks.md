@@ -166,7 +166,7 @@ description: "Task list for feature 012 Identity Authentication"
 
 - [X] T027 Run `./scripts/codegen.ps1 -Service identity` and commit any changes. Run quickstart.md sections 2–4 on the dev stack, then `dev.ps1 reset`
 - [X] T028 Run all Identity, BuildingBlocks and RepoChecks tests, both pin checks and the cleanup check. Scan for comments in the new `.cs`, `.cshtml` and `.css` files
-- [ ] T029 Commit. After the owner confirms, push the branch and the tag `building-blocks/v0.2.0`, open the PR, and confirm `identity.yml`, `building-blocks.yml` and `deploy.yml` pass
+- [X] T029 Commit. After the owner confirms, push the branch and the tag `building-blocks/v0.2.0`, open the PR, and confirm `identity.yml`, `building-blocks.yml` and `deploy.yml` pass
 
 ---
 
