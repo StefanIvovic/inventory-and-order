@@ -80,8 +80,8 @@ description: "Task list for feature 009 BuildingBlocks Analyzers"
 
   Restore all four
 - [X] T012 Add an `Analyzer check` step (`pwsh ./scripts/check-analyzers.ps1`) after pack in `.github/workflows/building-blocks.yml`
-- [ ] T013 Run the quickstart on a clean clone in a temporary folder and delete it
-- [ ] T014 Review for comments. Commit with no attribution, push, open the PR, and confirm CI passes
+- [X] T013 Run the quickstart on a clean clone in a temporary folder and delete it
+- [X] T014 Review for comments. Commit with no attribution, push, open the PR, and confirm CI passes
 
 ---
 
