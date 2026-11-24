@@ -136,7 +136,7 @@ description: "Task list for feature 010 Development Compose Infrastructure"
 ## Phase 8: Polish
 
 - [X] T014 Run the full quickstart.md (sections 1–5) once more on a clean state. Confirm no comments were added to any new file. Finish with `./scripts/dev.ps1 reset` and `./scripts/check-test-cleanup.ps1`
-- [ ] T015 Commit, push the branch, open the PR, and confirm that `deploy.yml` and `building-blocks.yml` both pass in CI
+- [X] T015 Commit, push the branch, open the PR, and confirm that `deploy.yml` and `building-blocks.yml` both pass in CI
 
 ---
 
