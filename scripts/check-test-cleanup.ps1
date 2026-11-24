@@ -2,13 +2,15 @@
 [CmdletBinding()]
 param(
     [int]$TimeoutSeconds = 60,
-    [int]$PollSeconds = 2
+    [int]$PollSeconds = 2,
+    [string[]]$Project = @()
 )
 
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
-$filters = @('label=org.testcontainers', 'label=com.docker.compose.project=e2e-test')
+$filters = @('label=org.testcontainers', 'label=com.docker.compose.project=e2e-test') +
+    @($Project | ForEach-Object { "label=com.docker.compose.project=$_" })
 
 function Get-Leftovers {
     $found = [System.Collections.Generic.List[string]]::new()

@@ -1,0 +1,75 @@
+name: deploy
+
+on:
+  pull_request:
+    paths:
+      - 'deploy/**'
+      - 'scripts/dev.ps1'
+      - 'scripts/check-test-cleanup.ps1'
+      - '.github/workflows/deploy.yml'
+  push:
+    branches:
+      - master
+    paths:
+      - 'deploy/**'
+      - 'scripts/dev.ps1'
+      - 'scripts/check-test-cleanup.ps1'
+      - '.github/workflows/deploy.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - uses: actions/setup-dotnet@v6.1.0
+        with:
+          global-json-file: global.json
+
+      - name: Load image versions
+        run: grep -E '^[A-Z][A-Z0-9_]*=' deploy/versions.env >> "$GITHUB_ENV"
+
+      - name: Pull broker image
+        run: docker pull --quiet "$RABBITMQ_IMAGE"
+
+      - name: Validate compose configuration
+        run: |
+          docker compose -f deploy/compose.yaml config --quiet
+          docker compose -f deploy/compose.yaml --profile '*' config --quiet
+
+      - name: Image pin check
+        run: dotnet run --project tools/RepoChecks -- images
+
+      - name: Start canary
+        run: |
+          docker volume create --label com.docker.compose.project=canary canary-data
+          docker run -d --name canary --label com.docker.compose.project=canary -v canary-data:/data "$RABBITMQ_IMAGE" sleep 3600
+
+      - name: Dev stack up
+        shell: pwsh
+        run: ./scripts/dev.ps1 up
+
+      - name: Dev stack status
+        shell: pwsh
+        run: ./scripts/dev.ps1 status
+
+      - name: Dev stack reset
+        if: always()
+        shell: pwsh
+        run: ./scripts/dev.ps1 reset
+
+      - name: Canary survived reset
+        if: always()
+        run: |
+          test "$(docker inspect -f '{{.State.Running}}' canary)" = "true"
+          docker volume inspect canary-data > /dev/null
+          docker rm -f canary
+          docker volume rm canary-data
+
+      - name: Cleanup check
+        if: always()
+        shell: pwsh
+        run: ./scripts/check-test-cleanup.ps1 -Project inventory-and-order
