@@ -30,7 +30,9 @@ public sealed class RoleAssignmentTests(ContainersFixture containers)
 
         await app.TrackAsync(() => client.DeleteAsync($"/users/{clerk}/roles/{IdentityRoles.Viewer}", admin));
 
-        Assert.Equal(HttpStatusCode.Forbidden, (await client.GetAsync("/users", clerkToken)).StatusCode);
+        await Eventually.AssertAsync(
+            async () => (await client.GetAsync("/users", clerkToken)).StatusCode == HttpStatusCode.Forbidden,
+            "the clerk loses GET /users after the Viewer role is removed");
     }
 
     [Fact]

@@ -51,18 +51,18 @@ A tenant administrator creates staff users in their own tenant, lists them, and 
 
 ### User Story 3 - A tenant administrator assigns Identity roles (Priority: P2)
 
-A tenant administrator gives a staff user the Administrator or Viewer role in Identity, or takes it away. The change applies to that user's next request.
+A tenant administrator gives a staff user the Administrator or Viewer role in Identity, or takes it away. The change applies to that user's requests within seconds, once Identity has handled the cache invalidation published after the commit.
 
 **Why this priority**: Without it, only the first admin can manage users. It is less urgent than creating and disabling users.
 
-**Independent Test**: As the tenant admin, create a clerk, assign Viewer, and check with the clerk's token that `GET /users` returns 200 and `POST /users` returns 403. Unassign Viewer: `GET /users` returns 403 on the next request.
+**Independent Test**: As the tenant admin, create a clerk, assign Viewer, and check with the clerk's token that `GET /users` returns 200 and `POST /users` returns 403. Unassign Viewer: `GET /users` returns 403 within seconds.
 
 **Acceptance Scenarios**:
 
-1. **Given** a tenant administrator and a staff user in the tenant, **When** they assign a known role, **Then** the user holds it, and the user's next request sees the new permissions.
+1. **Given** a tenant administrator and a staff user in the tenant, **When** they assign a known role, **Then** the user holds it, and their requests see the new permissions within seconds, once Identity has handled the cache invalidation published after the commit.
 2. **Given** the user already holds the role, **When** it is assigned again, **Then** the request succeeds with no change.
 3. **Given** an unknown role name, **When** it is assigned, **Then** the request is refused with a field error.
-4. **Given** a user holding a role, **When** a tenant administrator unassigns it, **Then** the user loses it on their next request.
+4. **Given** a user holding a role, **When** a tenant administrator unassigns it, **Then** the user loses it within seconds, once Identity has handled the cache invalidation published after the commit.
 5. **Given** a tenant administrator, **When** they try to unassign Administrator from themselves, **Then** the request is refused, so a tenant always keeps at least one administrator.
 6. **Given** a disabled user, **When** a role is assigned to them, **Then** the request is refused as a conflict.
 
@@ -107,7 +107,7 @@ In the dev stack, Identity creates a demo tenant and its admin on start, from th
 - **Email case and spacing.** `Admin@Acme.test` and `admin@acme.test` are the same email.
 - **Slug format.** Lowercase letters, digits and single hyphens, 3 to 63 characters, not starting or ending with a hyphen. Slugs can't change in this feature.
 - **The route test's empty body on command routes.** A caller without the permission gets 403 before the body is validated, so missing permissions never show up as 400.
-- **A disabled user still holds a 15-minute access token.** Other services may accept it until it expires (accepted in the constitution's token-lifetime decision). In Identity itself, a disabled user has no permissions, and the cache drop makes that apply to their very next request.
+- **A disabled user still holds a 15-minute access token.** Other services may accept it until it expires (accepted in the constitution's token-lifetime decision). In Identity itself, a disabled user has no permissions, and it applies within seconds, once Identity has handled the cache invalidation published after the commit.
 - **The platform admin calls tenant routes, or a tenant user calls platform routes.** 403, from the route categories.
 - **A second platform user without the platform role.** 403 on the tenant routes. Managing platform users and their roles is out of scope.
 - **Creating a staff user without the permission but with an invalid body.** 403, not 400.
@@ -136,7 +136,7 @@ In the dev stack, Identity creates a demo tenant and its admin on start, from th
 
 - **FR-011**: Identity MUST define fixed roles in code. Tenant roles: Administrator (view users, manage users, view roles, assign roles) and Viewer (view users, view roles). Platform role: Platform Administrator (view tenants, manage tenants). Tenant roles can't be assigned without a tenant, and the platform role can't be assigned inside one.
 - **FR-012**: A user with the assign-roles permission MUST be able to assign and unassign Identity roles for users of their own tenant. Assigning a held role or unassigning a missing one succeeds with no change. Unknown roles are a field error. Assigning to a disabled user is a conflict. Unassigning Administrator from yourself MUST be refused.
-- **FR-013**: Every role change MUST invalidate the affected user's cached permissions, so the change applies to their next request.
+- **FR-013**: Every role change MUST invalidate the affected user's cached permissions through the invalidation message, so the change applies on every Identity instance within seconds of the commit. Without the message, the change would wait for the cache to expire.
 
 **Events and contracts**
 
@@ -169,7 +169,7 @@ In the dev stack, Identity creates a demo tenant and its admin on start, from th
 - **SC-001**: A platform admin creates a tenant and its admin signs in within one automated test, end to end.
 - **SC-002**: 100% of duplicate slugs and emails, including concurrent duplicates, are refused with 409 and leave no partial data or events.
 - **SC-003**: A disabled user's next refresh, authorization and sign-in are refused in 100% of tests.
-- **SC-004**: A role change applies to the user's very next request.
+- **SC-004**: A role change or disabling applies to the user's requests within 10 seconds in every test, well before the cache would expire on its own.
 - **SC-005**: Each committed change publishes exactly its events, and a rolled-back change publishes none.
 - **SC-006**: The no-roles route test passes for every new route, with no 400 in place of 403.
 - **SC-007**: A tenant can never be left with no active administrator through these routes.

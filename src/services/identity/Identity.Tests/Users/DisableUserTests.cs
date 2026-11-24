@@ -76,7 +76,7 @@ public sealed class DisableUserTests(ContainersFixture containers)
     }
 
     [Fact]
-    public async Task DisabledUserLosesPermissionsOnTheNextRequest()
+    public async Task DisabledUserLosesPermissionsWithinSeconds()
     {
         await using var app = await IdentityApp.StartAsync(containers);
         var tenant = await app.CreateTenantAsync("acme");
@@ -87,6 +87,8 @@ public sealed class DisableUserTests(ContainersFixture containers)
 
         await app.TrackAsync(() => client.PostAsync($"/users/{viewer}/disable", null, IdentityApp.StaffToken(tenant.AdminUserId, tenant.Id)));
 
-        Assert.Equal(HttpStatusCode.Forbidden, (await client.GetAsync("/users", viewerToken)).StatusCode);
+        await Eventually.AssertAsync(
+            async () => (await client.GetAsync("/users", viewerToken)).StatusCode == HttpStatusCode.Forbidden,
+            "the disabled viewer loses GET /users");
     }
 }
