@@ -1,3 +1,4 @@
+using RepoChecks.Images;
 using static RepoChecks.Tests.TempRepo;
 
 namespace RepoChecks.Tests.Images;
@@ -211,6 +212,34 @@ public sealed class ImageRulesTests
         var finding = Assert.Single(repo.Run());
 
         Assert.Equal("deploy/compose.yaml:3: IP003", finding.ToString()[..28]);
+    }
+
+    [Fact]
+    public void RealDeployComposeFilesHaveNoFindings()
+    {
+        var root = FindRepositoryRoot();
+        var versions = VersionsFile.Parse(File.ReadAllText(Path.Combine(root, "deploy", "versions.env")), "deploy/versions.env");
+
+        foreach (var relative in new[] { "deploy/compose.yaml", "deploy/infra/compose.yaml" })
+        {
+            var text = File.ReadAllText(Path.Combine(root, relative));
+            Assert.Empty(ComposeRule.Check(text, relative, versions));
+        }
+
+        Assert.Empty(versions.Findings);
+    }
+
+    private static string FindRepositoryRoot()
+    {
+        for (var directory = new DirectoryInfo(AppContext.BaseDirectory); directory is not null; directory = directory.Parent)
+        {
+            if (File.Exists(Path.Combine(directory.FullName, "deploy", "versions.env")))
+            {
+                return directory.FullName;
+            }
+        }
+
+        throw new InvalidOperationException("deploy/versions.env not found above the test output folder.");
     }
 
     private static void AppendVersions(TempRepo repo, string line)

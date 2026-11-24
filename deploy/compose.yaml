@@ -1,0 +1,7 @@
+name: inventory-and-order
+
+include:
+  - path: infra/compose.yaml
+    env_file:
+      - versions.env
+      - dev.env

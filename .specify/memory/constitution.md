@@ -120,9 +120,9 @@ from every service.
   whether the tests pass or fail. CI does the same in an `if: always()` step.
 - After every test run, no containers or volumes labelled `com.docker.compose.project=e2e-test`
   or by Testcontainers may remain, and an automated check MUST verify this.
-- Test stack: xUnit v3, Testcontainers, Respawn, Wolverine tracked sessions for messaging, and
-  Playwright for end-to-end tests. The domain is covered by plain unit tests with no
-  infrastructure.
+- Test stack: xUnit v3, Testcontainers (each integration test gets its own database), Wolverine
+  tracked sessions for messaging, and Playwright for end-to-end tests. The domain is covered by
+  plain unit tests with no infrastructure.
 
 ### VIII. Everything Runs in Docker
 
@@ -216,4 +216,4 @@ MUST verify compliance with it.
 - Any deviation from a principle MUST be justified in the feature plan's complexity tracking and
   approved by the project owner before implementation.
 
-**Version**: 1.2.0 | **Ratified**: 2026-11-23 | **Last Amended**: 2026-11-23
+**Version**: 1.2.1 | **Ratified**: 2026-11-23 | **Last Amended**: 2026-11-24
