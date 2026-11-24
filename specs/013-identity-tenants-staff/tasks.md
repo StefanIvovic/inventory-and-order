@@ -25,8 +25,8 @@ description: "Task list for feature 013 Identity Tenants and Staff"
 
 ## Phase 1: BuildingBlocks 0.3.0 (blocks every command handler)
 
-- [ ] T001 Write tests first in `src/building-blocks/BuildingBlocks.Validation.Tests/CommandValidationTests.cs`: a handler that calls `Permissions.EnsureAsync` and then `ICommandValidation.EnsureValidAsync` returns 403 for a caller without the permission and an invalid body, and 400 with every field error when permitted; a plain `AbstractValidator<T>` on a message still runs automatically. See them fail (research.md R3)
-- [ ] T002 Implement in `src/building-blocks/BuildingBlocks.Validation/`: `CommandValidator<T>`, `ICommandValidation` and its implementation, and the registration split in `ValidationExtensions.UseBuildingBlocksValidation` (`RegistrationBehavior.ExplicitRegistration`, own assembly scan). T001 and the 008 tests pass
+- [X] T001 Write tests first in `src/building-blocks/BuildingBlocks.Validation.Tests/CommandValidationTests.cs`: a handler that calls `Permissions.EnsureAsync` and then `ICommandValidation<T>.EnsureValidAsync` returns 403 for a caller without the permission and an invalid body, and 400 with every field error when permitted; a plain `AbstractValidator<T>` on a message still runs automatically. See them fail (research.md R3)
+- [X] T002 Implement in `src/building-blocks/BuildingBlocks.Validation/`: `CommandValidator<T>`, `ICommandValidation<T>` and `CommandValidation<T>`, and the registration split in `ValidationExtensions.UseBuildingBlocksValidation` (`RegistrationBehavior.ExplicitRegistration`, own assembly scan). T001 and the 008 tests pass
 - [ ] T003 Run the full BuildingBlocks tests, `pack.ps1`, `check-consumer.ps1`, `check-analyzers.ps1` and the cleanup check. Commit. After the owner confirms, tag `building-blocks/v0.3.0` (local first; pushed with the PR)
 
 ---

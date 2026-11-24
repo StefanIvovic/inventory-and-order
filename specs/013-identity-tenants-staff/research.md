@@ -17,10 +17,10 @@
 - **Spike (2026-11-24)**: in BuildingBlocks.Validation.Tests, a message with a failing validator and a handler `BeforeAsync` that throws: `IMessageBus.InvokeAsync` threw `ValidationException` for both a static and an instance handler. Wolverine's FluentValidation middleware runs before any handler code, including `Before` methods. Ordering inside the handler cannot fix it.
 - **Decision**: BuildingBlocks 0.3.0, additive, in BuildingBlocks.Validation:
   - `CommandValidator<T> : AbstractValidator<T>`: the base class for validators of HTTP commands.
-  - `ICommandValidation.EnsureValidAsync<T>(T command, CancellationToken)`: runs every `CommandValidator<T>` registered for `T` and throws `ValidationException` with all failures. The existing `ValidationProblemMapper` turns it into 400 with every field error.
+  - `ICommandValidation<T>.EnsureValidAsync(T command, CancellationToken)`, implemented by `CommandValidation<T>` over `IEnumerable<CommandValidator<T>>` and registered as an open generic: runs every validator for `T` and throws `ValidationException` with all failures. It is generic because Wolverine's code generation refuses handler dependencies on `IServiceProvider` (found while implementing T002). The existing `ValidationProblemMapper` turns it into 400 with every field error.
   - `UseBuildingBlocksValidation()` switches Wolverine to `UseFluentValidation(RegistrationBehavior.ExplicitRegistration)` and scans the application assembly itself: plain `AbstractValidator<T>` types are registered as `IValidator<T>` (automatic middleware, unchanged for messages), `CommandValidator<T>` types only as `CommandValidator<T>`, so the middleware never sees them.
   - Tests: a command with a `CommandValidator` gets 403 from a handler that checks permissions first, and 400 with all errors when permitted. The existing 008 tests stay green.
-- **Handler shape**: `await Permissions.EnsureAsync(...)`, then `await validation.EnsureValidAsync(command, ct)`, then the work.
+- **Handler shape**: the handler takes `ICommandValidation<TCommand>`; `await Permissions.EnsureAsync(...)`, then `await validation.EnsureValidAsync(command, ct)`, then the work.
 - **Alternatives considered**: a permission middleware policy before validation (a declarative permission check, forbidden by principle VI); letting the route test accept 400 (contradicts FR-016 and the 011 carry-over).
 
 ## R4. Uniqueness and 409
