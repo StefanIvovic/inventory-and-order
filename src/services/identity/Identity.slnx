@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="Identity.Api/Identity.Api.csproj" />
+  <Project Path="Identity.Contracts/Identity.Contracts.csproj" />
+  <Folder Name="/tests/">
+    <Project Path="Identity.Tests/Identity.Tests.csproj" />
+  </Folder>
+</Solution>

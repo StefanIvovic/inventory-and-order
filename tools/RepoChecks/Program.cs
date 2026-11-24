@@ -1,5 +1,6 @@
 using RepoChecks;
 using RepoChecks.Images;
+using RepoChecks.PackagePins;
 
 return CommandLine.Run(args, Console.Out, Console.Error);
 
@@ -13,9 +14,9 @@ namespace RepoChecks
 
         public static int Run(string[] args, TextWriter output, TextWriter error)
         {
-            if (args.Length == 0 || args[0] != "images")
+            if (args.Length == 0 || args[0] is not ("images" or "packages"))
             {
-                error.WriteLine("Usage: RepoChecks images [--root <path>]");
+                error.WriteLine("Usage: RepoChecks <images|packages> [--root <path>]");
                 return UsageError;
             }
 
@@ -35,7 +36,8 @@ namespace RepoChecks
 
             try
             {
-                var findings = ImageCheck.Run(Path.GetFullPath(root));
+                var fullRoot = Path.GetFullPath(root);
+                var findings = args[0] == "images" ? ImageCheck.Run(fullRoot) : PinCheck.Run(fullRoot);
                 foreach (var finding in findings)
                 {
                     output.WriteLine(finding);

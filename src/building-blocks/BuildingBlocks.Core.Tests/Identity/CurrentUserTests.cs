@@ -31,12 +31,13 @@ public sealed class CurrentUserTests
     }
 
     [Fact]
-    public void PlatformUserWithTenantKeepsTenant()
+    public void PlatformUserWithTenantIsRejected()
     {
         var principal = Principal(UserId.ToString(), "acme", "platform");
 
-        Assert.True(CurrentUser.TryCreate(principal, out var user, out _));
-        Assert.Equal("acme", user.TenantId);
+        Assert.False(CurrentUser.TryCreate(principal, out var user, out var reason));
+        Assert.Null(user);
+        Assert.Contains("tenant_id", reason, StringComparison.Ordinal);
     }
 
     [Theory]

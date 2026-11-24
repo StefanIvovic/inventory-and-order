@@ -89,19 +89,23 @@ Rationale: pinned versions let each service upgrade its dependencies on its own 
   default permission set defined in code, with no per-customer assignments. Ownership rules (e.g.
   a customer sees only their own orders) are enforced in handlers.
 - Permission checks MUST be explicit calls to the injected `IPermissionManager` (`EnsureAsync`,
-  `EnsureAllAsync`, `HasAsync`, `HasAnyAsync`, `HasAllAsync`, `GetGrantedAsync`). Authorization
-  attributes and policies are not used. A failed `Ensure*` produces 403 problem details that list
-  the missing permissions.
+  `EnsureAllAsync`, `HasAsync`, `HasAnyAsync`, `HasAllAsync`, `GetGrantedAsync`), never
+  authorization attributes or policies. A failed `Ensure*` produces 403 problem details that list
+  the missing permissions. Route-category markers and policies (tenant default, platform-only,
+  allow-list) are allowed, because they check who the caller is, not what the caller may do.
 - An option the user explicitly requested but lacks permission for MUST fail with 403, never be
   skipped silently. An automatic side effect the user lacks permission for is skipped.
 - Permission caches MUST be invalidated only by returning `PermissionAssignmentsChanged` from
   the handler that changed the role assignments. The outbox then delivers it after commit to every
   instance of the service. Handlers MUST NOT call `IPermissionCache` directly. Same-service
   broadcast listeners MUST NOT use the durable inbox, because instances share one database.
-- Every route requires an authenticated user with a tenant, except an explicit, reviewed
-  allow-list.
-- Every service MUST have a test that discovers all routes, calls each as a user with no roles,
-  and expects 403 (allow-list excepted). A route that is missing its permission check MUST fail CI.
+- By default, a route requires an authenticated user with a tenant. Platform-only routes are an
+  explicit, reviewed category open only to `user_type=platform` with no tenant. Routes that need no
+  authentication are an explicit, reviewed allow-list. A token whose identity is malformed (for
+  example a platform user with a tenant) is rejected with 401.
+- Every service MUST have a test that discovers all routes, calls each as a user with no roles (a
+  tenant user for tenant routes, a platform user for platform routes), and expects 403 (allow-list
+  excepted). A route that is missing its permission check MUST fail CI.
 - Query responses MUST include boolean action flags (`canCreate`, `canEdit`, `canCancel`, ...) at
   screen and item level, combining permission with resource state. UIs show and enable controls
   only from these flags. The server still enforces every action.
@@ -216,4 +220,4 @@ MUST verify compliance with it.
 - Any deviation from a principle MUST be justified in the feature plan's complexity tracking and
   approved by the project owner before implementation.
 
-**Version**: 1.2.1 | **Ratified**: 2026-11-23 | **Last Amended**: 2026-11-24
+**Version**: 1.3.0 | **Ratified**: 2026-11-23 | **Last Amended**: 2026-11-24

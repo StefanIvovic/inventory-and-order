@@ -1,11 +1,13 @@
 name: deploy
 
 on:
+  workflow_dispatch:
   pull_request:
     paths:
       - 'deploy/**'
       - 'scripts/dev.ps1'
       - 'scripts/check-test-cleanup.ps1'
+      - 'tools/RepoChecks/**'
       - '.github/workflows/deploy.yml'
   push:
     branches:
@@ -14,6 +16,7 @@ on:
       - 'deploy/**'
       - 'scripts/dev.ps1'
       - 'scripts/check-test-cleanup.ps1'
+      - 'tools/RepoChecks/**'
       - '.github/workflows/deploy.yml'
 
 permissions:
