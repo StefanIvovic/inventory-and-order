@@ -118,8 +118,8 @@ description: "Task list for feature 008 BuildingBlocks Validation"
 
   Restore all three
 - [X] T014 Add a `Consumer check Validation` step to `.github/workflows/building-blocks.yml` (FR-008)
-- [ ] T015 Run quickstart.md steps 1–3 on a clean clone in a temporary folder and delete it
-- [ ] T016 Review for comments. Commit with no attribution, push, open the PR, and confirm CI passes
+- [X] T015 Run quickstart.md steps 1–3 on a clean clone in a temporary folder and delete it
+- [X] T016 Review for comments. Commit with no attribution, push, open the PR, and confirm CI passes
 
 ---
 
