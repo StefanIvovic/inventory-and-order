@@ -13,5 +13,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../BuildingBlocks.AspNetCore/BuildingBlocks.AspNetCore.csproj" />
+    <ProjectReference Include="../BuildingBlocks.Testing/BuildingBlocks.Testing.csproj" />
   </ItemGroup>
 </Project>

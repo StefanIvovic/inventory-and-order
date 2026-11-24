@@ -41,6 +41,12 @@ public sealed record CurrentUser(Guid UserId, string? TenantId, UserType UserTyp
             return false;
         }
 
+        if (tenantClaim is not null && userType == UserType.Platform)
+        {
+            rejectionReason = $"claim '{AppClaimTypes.TenantId}' is not allowed for {userType} users";
+            return false;
+        }
+
         user = new CurrentUser(userId, tenantClaim?.Value, userType);
         rejectionReason = null;
         return true;

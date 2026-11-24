@@ -1,0 +1,74 @@
+using BuildingBlocks.Core.Identity;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+
+namespace BuildingBlocks.AspNetCore.Authentication;
+
+public static class AuthenticationExtensions
+{
+    public static IServiceCollection AddBuildingBlocksAuthentication(this IServiceCollection services, IConfiguration configuration)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(configuration);
+
+        services.AddOptions<AuthenticationSettings>()
+            .Bind(configuration.GetSection(AuthenticationSettings.SectionName))
+            .Validate(settings => !string.IsNullOrWhiteSpace(settings.Authority), "Authentication:Authority is required.")
+            .Validate(settings => !string.IsNullOrWhiteSpace(settings.Audience), "Authentication:Audience is required.")
+            .ValidateOnStart();
+
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
+        services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme)
+            .Configure<IOptions<AuthenticationSettings>>((options, settings) =>
+            {
+                options.Authority = settings.Value.Authority;
+                options.Audience = settings.Value.Audience;
+                options.RequireHttpsMetadata = settings.Value.RequireHttpsMetadata;
+                options.MapInboundClaims = false;
+                options.RefreshOnIssuerKeyNotFound = true;
+                options.TokenValidationParameters.ValidateIssuer = true;
+                options.TokenValidationParameters.ValidateAudience = true;
+                options.TokenValidationParameters.ValidateLifetime = true;
+                options.TokenValidationParameters.ValidateIssuerSigningKey = true;
+                options.TokenValidationParameters.NameClaimType = AppClaimTypes.Subject;
+            });
+
+        var tenant = Policy(RouteCategory.Tenant);
+        services.AddAuthorizationBuilder()
+            .AddPolicy(AuthorizationPolicies.Tenant, tenant)
+            .AddPolicy(AuthorizationPolicies.Platform, Policy(RouteCategory.Platform))
+            .SetDefaultPolicy(tenant)
+            .SetFallbackPolicy(tenant);
+
+        services.AddHostedService<RouteCategoryValidator>();
+        return services;
+    }
+
+    public static IApplicationBuilder UseBuildingBlocksAuthentication(this IApplicationBuilder app)
+    {
+        ArgumentNullException.ThrowIfNull(app);
+
+        app.UseAuthentication();
+        app.UseBuildingBlocks();
+        app.UseAuthorization();
+        return app;
+    }
+
+    public static TBuilder RequirePlatform<TBuilder>(this TBuilder builder)
+        where TBuilder : IEndpointConventionBuilder
+    {
+        ArgumentNullException.ThrowIfNull(builder);
+
+        return builder.WithMetadata(new PlatformOnlyAttribute());
+    }
+
+    private static AuthorizationPolicy Policy(RouteCategory category) =>
+        new AuthorizationPolicyBuilder(JwtBearerDefaults.AuthenticationScheme)
+            .RequireAuthenticatedUser()
+            .AddRequirements(new RouteCategoryRequirement(category))
+            .Build();
+}
