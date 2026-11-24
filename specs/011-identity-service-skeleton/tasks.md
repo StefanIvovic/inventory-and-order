@@ -73,7 +73,7 @@ description: "Task list for feature 011 Identity Service Skeleton"
   - fails if they differ from each other, if the version is a prerelease, or if the tag `building-blocks/v<version>` is missing
   - packs that tag from a temporary `git worktree` with `scripts/pack.ps1 -Output <repo>/artifacts/packages`, and always removes the worktree (research.md R1)
 - [X] T010 [P] Add a RepoChecks command `packages` (`dotnet run --project tools/RepoChecks -- packages`) plus tests in `tools/RepoChecks/` and `tools/RepoChecks.Tests/`: a `BuildingBlocks.*` or `*.Contracts` pin in `src/services/*/Directory.Packages.props` that is a prerelease fails (research.md R1)
-- [ ] T011 Commit the BuildingBlocks work. After the owner confirms, create and push the tag `building-blocks/v0.1.0` on that commit. Never move it: any later BuildingBlocks fix gets `v0.1.1` and a pin bump (research.md R1, analysis R1). Run `./scripts/restore-feed.ps1` once against a scratch props file to prove it packs `0.1.0`
+- [X] T011 Commit the BuildingBlocks work. After the owner confirms, create and push the tag `building-blocks/v0.1.0` on that commit. Never move it: any later BuildingBlocks fix gets `v0.1.1` and a pin bump (research.md R1, analysis R1). Run `./scripts/restore-feed.ps1` once against a scratch props file to prove it packs `0.1.0`
 
 ---
 
@@ -161,7 +161,7 @@ description: "Task list for feature 011 Identity Service Skeleton"
 
 ## Phase 10: CI and the constitution
 
-- [ ] T030 [US6] Create `.github/workflows/identity.yml` per research.md R11. It triggers on `src/services/identity/**` and the workflow file, with steps:
+- [X] T030 [US6] Create `.github/workflows/identity.yml` per research.md R11. It triggers on `src/services/identity/**` and the workflow file, with steps:
   1. full-history checkout, setup-dotnet
   2. `restore-feed.ps1`
   3. pull the test images
@@ -177,7 +177,7 @@ description: "Task list for feature 011 Identity Service Skeleton"
 ## Phase 11: Polish
 
 - [X] T032 Run the full quickstart.md and both solutions' tests. Count the setup lines Identity needs for the shared authentication and the route test, against SC-006 (about 10 each) (analysis C3). Confirm no comments were added, then `dev.ps1 reset` and `check-test-cleanup.ps1`
-- [ ] T033 Commit, push, open the PR, and confirm that `building-blocks.yml`, `deploy.yml` and `identity.yml` pass
+- [X] T033 Commit, push, open the PR, and confirm that `building-blocks.yml`, `deploy.yml` and `identity.yml` pass
 
 ---
 
