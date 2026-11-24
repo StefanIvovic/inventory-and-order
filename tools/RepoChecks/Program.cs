@@ -1,6 +1,6 @@
 using RepoChecks;
 using RepoChecks.Images;
-using RepoChecks.Packages;
+using RepoChecks.PackagePins;
 
 return CommandLine.Run(args, Console.Out, Console.Error);
 
