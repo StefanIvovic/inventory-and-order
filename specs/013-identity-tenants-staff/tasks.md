@@ -103,7 +103,7 @@ description: "Task list for feature 013 Identity Tenants and Staff"
 
 - [X] T030 `NoRolesRouteTests.cs` and `OwnTokenTests.ProtocolAndLoginEndpointsAreAllowListed`: all 8 non-allow-listed routes (7 new plus `GET /roles`) checked, none skipped, no 400 (SC-006)
 - [X] T031 `codegen.ps1 -Service identity` and commit the generated code
-- [ ] T032 Run all BuildingBlocks and Identity tests, the pin checks and the cleanup check; run quickstart.md sections 2–5; scan the new files for comments
+- [X] T032 Run all BuildingBlocks and Identity tests, the pin checks and the cleanup check; run quickstart.md sections 2–5; scan the new files for comments
 - [ ] T033 Commit. After the owner confirms, push the branch and the tags `building-blocks/v0.3.0` and `identity-contracts/v0.1.0`, open the PR, and confirm `building-blocks.yml`, `identity.yml` and `deploy.yml` pass
 
 ---
