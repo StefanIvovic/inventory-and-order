@@ -27,17 +27,22 @@ catch {
 
 $composeFile = Join-Path (Split-Path $PSScriptRoot -Parent) 'deploy/compose.yaml'
 $base = @('compose', '-f', $composeFile)
-$allProfiles = @('--profile', '*')
 
+$profiles = if ($Command -eq 'up') { $Profile -join ',' } else { '*' }
 $arguments = switch ($Command) {
-    'up' {
-        $selected = foreach ($name in $Profile) { '--profile'; $name }
-        $base + @($selected) + @('up', '--detach', '--wait', '--wait-timeout', '120')
-    }
-    'down' { $base + $allProfiles + @('down', '--remove-orphans') }
-    'reset' { $base + $allProfiles + @('down', '--volumes', '--remove-orphans') }
-    'status' { $base + $allProfiles + @('ps', '--all') }
+    'up' { $base + @('up', '--detach', '--wait', '--wait-timeout', '120') }
+    'down' { $base + @('down', '--remove-orphans') }
+    'reset' { $base + @('down', '--volumes', '--remove-orphans') }
+    'status' { $base + @('ps', '--all') }
 }
 
-& docker @arguments
-exit $LASTEXITCODE
+$previous = $env:COMPOSE_PROFILES
+try {
+    $env:COMPOSE_PROFILES = $profiles
+    & docker @arguments
+    $code = $LASTEXITCODE
+}
+finally {
+    $env:COMPOSE_PROFILES = $previous
+}
+exit $code

@@ -86,3 +86,8 @@
 
 - **Decision**: `deploy.yml` runs on pull requests and on pushes to master, for these paths: `deploy/**`, `scripts/dev.ps1`, `scripts/check-test-cleanup.ps1` and `.github/workflows/deploy.yml`.
 - **Rationale**: FR-013. The cleanup script is added because the workflow depends on its new parameter. `building-blocks.yml` already triggers on `scripts/**` and `deploy/versions.env`, so that workflow stays as it is.
+
+## R12. Found during implementation: wildcard expansion on Unix
+
+- **Finding**: The first CI run failed with `unknown docker command: "compose deploy"`. On Linux, pwsh expands the `'*'` array element passed to `docker` into names from the working directory. Windows doesn't, so the local runs passed.
+- **Decision**: Set `COMPOSE_PROFILES` for the compose call and restore it in `finally`. Compose reads the same profile list from the variable, and no argument contains `*`.

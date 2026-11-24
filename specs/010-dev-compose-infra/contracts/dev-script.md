@@ -26,3 +26,7 @@
 - The new `-Project` parameter defaults to empty.
 - Each value adds a filter `label=com.docker.compose.project=<value>` to the containers and volumes it checks.
 - With no `-Project`, the behaviour is unchanged: it checks Testcontainers and `e2e-test` only.
+
+## Profile selection
+
+The script selects profiles through `COMPOSE_PROFILES` (`infra` or the `-Profile` values for `up`, and `*` for the other commands), not through `--profile` arguments, and it restores the previous value afterwards. On Linux and macOS, PowerShell expands a `*` argument passed to a native command into file names, so `--profile '*'` breaks there (research.md R2).
