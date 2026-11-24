@@ -5,6 +5,7 @@ using BuildingBlocks.Core.Tenancy;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
 using Wolverine;
 using Wolverine.EntityFrameworkCore;
 using Wolverine.Postgresql;
@@ -30,6 +31,7 @@ public static class MessagingExtensions
         options.Policies.UseDurableLocalQueues();
         options.UseRabbitMq(settings.RabbitMqUri).AutoProvision();
 
+        options.Policies.MessageFailureLogLevel(LogLevel.None);
         options.Policies.PropagateIncomingHeaderToOutgoing(MessageHeaders.UserId);
         options.MetadataRules.Add(new IdentityEnvelopeRule(new HttpContextAccessor()));
         options.Policies.AddMiddleware(typeof(TenantContextMiddleware));

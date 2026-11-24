@@ -77,6 +77,10 @@ jobs:
         shell: pwsh
         run: ./scripts/check-consumer.ps1 -PackageId BuildingBlocks.Messaging
 
+      - name: Consumer check Validation
+        shell: pwsh
+        run: ./scripts/check-consumer.ps1 -PackageId BuildingBlocks.Validation
+
       - name: Test cleanup check
         if: always()
         shell: pwsh
