@@ -31,11 +31,23 @@ services:
     environment:
       ConnectionStrings__Identity: "Host=identity-db;Port=5432;Database=identity;Username=${IDENTITY_DB_USER};Password=${IDENTITY_DB_PASSWORD};GSS Encryption Mode=Disable"
       RabbitMq__Uri: "amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672"
-      Authentication__Authority: "http://identity-api:8080"
-      Authentication__Audience: identity
-      Authentication__RequireHttpsMetadata: "false"
+      Identity__Issuer: "${IDENTITY_ISSUER}"
+      Identity__RequireHttps: "${IDENTITY_REQUIRE_HTTPS}"
+      Identity__Keys__Mode: Directory
+      Identity__Keys__Path: /keys
+      Identity__Keys__Password: "${IDENTITY_KEYS_PASSWORD}"
+      Identity__Clients__backoffice-bff__Secret: "${BACKOFFICE_BFF_SECRET}"
+      Identity__Clients__backoffice-bff__RedirectUri: "${GATEWAY_ORIGIN}/bff/backoffice/signin-oidc"
+      Identity__Clients__backoffice-bff__PostLogoutRedirectUri: "${GATEWAY_ORIGIN}/backoffice/"
+      Identity__Clients__storefront-bff__Secret: "${STOREFRONT_BFF_SECRET}"
+      Identity__Clients__storefront-bff__RedirectUri: "${GATEWAY_ORIGIN}/bff/storefront/signin-oidc"
+      Identity__Clients__storefront-bff__PostLogoutRedirectUri: "${GATEWAY_ORIGIN}/shop/"
+      Identity__PlatformAdmin__Email: "${PLATFORM_ADMIN_EMAIL}"
+      Identity__PlatformAdmin__Password: "${PLATFORM_ADMIN_PASSWORD}"
     ports:
       - "127.0.0.1:${IDENTITY_API_PORT}:8080"
+    volumes:
+      - identity-keys:/keys
     depends_on:
       identity-db:
         condition: service_healthy
@@ -51,3 +63,4 @@ services:
 
 volumes:
   identity-db-data:
+  identity-keys:

@@ -1,0 +1,100 @@
+:root {
+  color-scheme: light dark;
+  --surface: light-dark(#ffffff, #1e1f22);
+  --ground: light-dark(#eef1f5, #121315);
+  --ink: light-dark(#1b1c1f, #e6e7ea);
+  --muted: light-dark(#5c6068, #a5a9b0);
+  --primary: #3f51b5;
+  --error: #c62828;
+  --line: light-dark(#c4c7cd, #44474d);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: var(--ground);
+  color: var(--ink);
+  font: 16px/1.5 Roboto, "Segoe UI", system-ui, sans-serif;
+}
+
+.card {
+  width: 100%;
+  max-width: 400px;
+  padding: 32px 24px;
+  background: var(--surface);
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 20%), 0 4px 12px rgb(0 0 0 / 8%);
+}
+
+.brand {
+  margin: 0 0 8px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+h1 {
+  margin: 0 0 24px;
+  font-size: 24px;
+  font-weight: 500;
+}
+
+.field {
+  display: block;
+  margin-bottom: 20px;
+}
+
+.field span {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.field input {
+  width: 100%;
+  padding: 12px 14px;
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+
+.field input:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: -1px;
+  border-color: var(--primary);
+}
+
+button {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 16px;
+  font: inherit;
+  font-weight: 500;
+  color: #ffffff;
+  background: var(--primary);
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+button:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--primary) 45%, transparent);
+  outline-offset: 2px;
+}
+
+.error {
+  margin: 0 0 20px;
+  padding: 10px 12px;
+  color: var(--error);
+  background: color-mix(in srgb, var(--error) 10%, transparent);
+  border-radius: 6px;
+}

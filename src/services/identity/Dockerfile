@@ -13,6 +13,7 @@ RUN dotnet publish Identity.Api/Identity.Api.csproj -c Release --no-restore -o /
 FROM ${DOTNET_ASPNET_IMAGE} AS final
 WORKDIR /app
 COPY --from=build /app .
+RUN mkdir /keys && chown $APP_UID /keys
 ENV ASPNETCORE_HTTP_PORTS=8080
 EXPOSE 8080
 USER $APP_UID

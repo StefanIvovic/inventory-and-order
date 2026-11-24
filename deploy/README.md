@@ -36,6 +36,12 @@ The compose project is `inventory-and-order`. Plain `docker compose -f deploy/co
 
 RabbitMQ management UI: http://127.0.0.1:15672, user `dev`, password `dev-only-not-a-secret`.
 
+## Identity sign-in in development
+
+Identity issues tokens for the issuer `IDENTITY_ISSUER` (the future gateway origin, `http://localhost:8080/`). Its signing and encryption certificates are created on first start in the `identity-keys` volume, so tokens survive restarts. `dev.ps1 reset` removes them.
+
+The platform admin is created on first start from `PLATFORM_ADMIN_EMAIL` and `PLATFORM_ADMIN_PASSWORD`. Sign in by hand at http://127.0.0.1:5101/account/login. HTTPS is not required in dev (`IDENTITY_REQUIRE_HTTPS=false`). Production keeps the default, which requires HTTPS.
+
 ## Adding a service
 
 A service keeps its API and database in its own `src/services/<name>/compose.yaml`, with the database port bound as `127.0.0.1:${<NAME>_DB_PORT}:5432`. Plug it in with one entry in `compose.yaml`:

@@ -1,0 +1,14 @@
+@page "/connect/endsession"
+@model Identity.Api.Pages.Connect.EndSessionModel
+@{
+    ViewData["Title"] = "Sign out";
+}
+<h1>Sign out?</h1>
+<p>You will be signed out of Inventory &amp; Order on this device.</p>
+<form method="post" asp-page="/Connect/EndSession">
+    @foreach (var field in Model.Fields)
+    {
+        <input type="hidden" name="@field.Key" value="@field.Value">
+    }
+    <button type="submit">Sign out</button>
+</form>
