@@ -81,6 +81,10 @@ jobs:
         shell: pwsh
         run: ./scripts/check-consumer.ps1 -PackageId BuildingBlocks.Validation
 
+      - name: Analyzer check
+        shell: pwsh
+        run: ./scripts/check-analyzers.ps1
+
       - name: Test cleanup check
         if: always()
         shell: pwsh

@@ -12,6 +12,8 @@
     <Project Path="src/building-blocks/BuildingBlocks.Messaging.Tests/BuildingBlocks.Messaging.Tests.csproj" />
     <Project Path="src/building-blocks/BuildingBlocks.Validation/BuildingBlocks.Validation.csproj" />
     <Project Path="src/building-blocks/BuildingBlocks.Validation.Tests/BuildingBlocks.Validation.Tests.csproj" />
+    <Project Path="src/building-blocks/BuildingBlocks.Analyzers/BuildingBlocks.Analyzers.csproj" />
+    <Project Path="src/building-blocks/BuildingBlocks.Analyzers.Tests/BuildingBlocks.Analyzers.Tests.csproj" />
   </Folder>
   <Folder Name="/tools/">
     <Project Path="tools/RepoChecks/RepoChecks.csproj" />
