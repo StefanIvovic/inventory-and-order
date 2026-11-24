@@ -69,7 +69,7 @@ public sealed class RefreshTests(ContainersFixture containers)
         var tokens = await CodeFlow.SignInAsync(app);
         using var client = app.CreateClient();
 
-        var results = await Task.WhenAll(Enumerable.Range(0, 4).Select(_ => CodeFlow.RefreshAsync(client, tokens.RefreshToken!)));
+        var results = await Task.WhenAll(Enumerable.Range(0, 8).Select(_ => CodeFlow.RefreshAsync(client, tokens.RefreshToken!)));
 
         Assert.True(results.Count(r => r.Status == HttpStatusCode.OK) <= 1);
     }

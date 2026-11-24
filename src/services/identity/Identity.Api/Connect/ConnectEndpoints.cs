@@ -1,8 +1,10 @@
+using Identity.Api.Persistence;
 using Identity.Api.Protocol;
 using Identity.Api.Users;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using OpenIddict.Abstractions;
 using OpenIddict.Server.AspNetCore;
 using static OpenIddict.Abstractions.OpenIddictConstants;
@@ -60,6 +62,8 @@ public static class ConnectEndpoints
         HttpContext context,
         UserManager<AppUser> users,
         PrincipalFactory principals,
+        IdentityDbContext db,
+        TimeProvider clock,
         CancellationToken cancellationToken)
     {
         var request = context.GetOpenIddictServerRequest()
@@ -82,8 +86,27 @@ public static class ConnectEndpoints
             return Reject(Errors.InvalidGrant, "The token is no longer valid.");
         }
 
+        if (request.IsRefreshTokenGrantType() && !await ClaimRefreshTokenAsync(db, stored.GetTokenId(), clock, cancellationToken))
+        {
+            return Reject(Errors.InvalidGrant, "The token is no longer valid.");
+        }
+
         var principal = await principals.CreateAsync(user, stored.GetScopes(), cancellationToken);
         return Results.SignIn(principal, authenticationScheme: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+    }
+
+    private static async Task<bool> ClaimRefreshTokenAsync(IdentityDbContext db, string? tokenId, TimeProvider clock, CancellationToken cancellationToken)
+    {
+        if (!Guid.TryParse(tokenId, out var id))
+        {
+            return false;
+        }
+
+        var now = clock.GetUtcNow().UtcDateTime;
+        var claimed = await db.Database.ExecuteSqlInterpolatedAsync(
+            $"UPDATE openiddict_tokens SET \"Status\" = {Statuses.Redeemed}, \"RedemptionDate\" = {now} WHERE \"Id\" = {id} AND \"Status\" = {Statuses.Valid}",
+            cancellationToken);
+        return claimed == 1;
     }
 
     private static IResult Reject(string error, string description) =>

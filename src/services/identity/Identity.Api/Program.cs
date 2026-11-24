@@ -82,7 +82,7 @@ builder.Services.AddOpenIddict()
             .RequireProofKeyForCodeExchange()
             .SetAccessTokenLifetime(TimeSpan.FromMinutes(15))
             .SetRefreshTokenLifetime(TimeSpan.FromHours(12))
-            .SetRefreshTokenReuseLeeway(TimeSpan.Zero)
+            .SetRefreshTokenReuseLeeway(null)
             .DisableAccessTokenEncryption()
             .RegisterScopes(["openid", "offline_access", .. Scopes.Api]);
         server.Configure(options => options.CodeChallengeMethods.Remove(OpenIddict.Abstractions.OpenIddictConstants.CodeChallengeMethods.Plain));
