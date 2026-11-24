@@ -30,7 +30,7 @@ $base = @('compose', '-f', $composeFile)
 
 $profiles = if ($Command -eq 'up') { $Profile -join ',' } else { '*' }
 $arguments = switch ($Command) {
-    'up' { $base + @('up', '--detach', '--wait', '--wait-timeout', '120') }
+    'up' { $base + @('up', '--build', '--detach', '--wait', '--wait-timeout', '120') }
     'down' { $base + @('down', '--remove-orphans') }
     'reset' { $base + @('down', '--volumes', '--remove-orphans') }
     'status' { $base + @('ps', '--all') }

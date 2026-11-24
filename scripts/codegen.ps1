@@ -27,6 +27,15 @@ $placeholders = @{
     'Authentication__Authority' = 'http://127.0.0.1:9'
     'Authentication__Audience' = $Service
 }
+$extra = Join-Path $serviceRoot 'codegen.env'
+if (Test-Path $extra) {
+    foreach ($line in Get-Content $extra) {
+        if ($line -match '^([A-Za-z0-9_]+)=(.*)$') {
+            $placeholders[$Matches[1]] = $Matches[2]
+        }
+    }
+}
+
 $previous = @{}
 foreach ($key in $placeholders.Keys) {
     $previous[$key] = [Environment]::GetEnvironmentVariable($key)

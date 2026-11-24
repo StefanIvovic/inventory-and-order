@@ -9,6 +9,7 @@ public static class TestTokens
 {
     public const string Issuer = "https://identity.test";
     public const string DefaultAudience = "test";
+    public const string AccessTokenType = "at+jwt";
 
     private static readonly JsonWebTokenHandler Handler = new();
     private static readonly Lazy<RsaSecurityKey> SigningKey = new(() => CreateKey("test-key"));
@@ -57,6 +58,7 @@ public static class TestTokens
             NotBefore = expiry.AddMinutes(-20),
             Expires = expiry,
             SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.RsaSha256),
+            TokenType = AccessTokenType,
         });
     }
 

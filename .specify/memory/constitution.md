@@ -53,6 +53,9 @@ Rationale: pinned versions let each service upgrade its dependencies on its own 
   the domain.
 - Code is organized in vertical slices: `Features/<UseCase>/` holds the command, handler and
   validator together.
+- Exception: Identity's OpenID Connect protocol endpoints and its server-rendered sign-in and
+  sign-out pages use the framework's sign-in, sign-out and challenge APIs directly, because a
+  message handler cannot. They contain authentication only and no business rules.
 
 ### IV. Transactional Consistency and Reliable Messaging (NON-NEGOTIABLE)
 
@@ -169,8 +172,8 @@ lines (e.g. `Co-Authored-By`, session links, "Generated with" footers).
 | Purpose | Portfolio/learning project: polish over feature count |
 | Services (v1) | YARP Gateway, Identity, Product, Inventory, Order, Payment (fake provider with configurable failure rate and latency) |
 | Services (later) | Shipping → Notification → Reporting |
-| Frontends | Two Angular SPAs, `backoffice` (tenant staff) and `storefront` (customers, tenant slug in the URL path `/shop/<tenant>/...`), each in its own nginx container with its own OpenIddict client |
-| SPA auth | Authorization code + PKCE. Tokens are sent through the gateway. 15-minute access tokens, refresh-token rotation, security stamp re-checked at refresh, no immediate revocation |
+| Frontends | Two Angular SPAs with Angular Material, `backoffice` (tenant staff) and `storefront` (customers, tenant slug in the URL path `/shop/<tenant>/...`), each in its own nginx container behind the gateway. The gateway holds one confidential OpenIddict client per SPA (`backoffice-bff`, `storefront-bff`) |
+| SPA auth | Backend for frontend (BFF). The gateway is a confidential OpenID Connect client and runs the authorization code flow with PKCE and a client secret. Browsers hold only the gateway's encrypted session cookie (`HttpOnly`, `Secure`, `SameSite=Strict`) and send an anti-forgery header on API calls. Tokens never reach the browser. Everything is served from one origin through the gateway. Identity's own login cookie is `SameSite=Lax`, because it must survive the redirect back from sign-in. 15-minute signed (not encrypted) access tokens whose audience is the requested API scopes, refresh tokens rotated with no reuse, security stamp re-checked at refresh, no immediate revocation |
 | Request flow | Gateway validates the JWT (401). The service validates again via cached JWKS, sets the tenant context, and the handler checks permissions (403). The tenant filter makes cross-tenant access 404 |
 | User awareness | Identity publishes `TenantCreated`, `UserRegistered` and `UserDisabled`. Services keep a local user table and grant their admin role to a new tenant's first admin |
 | Messaging | Wolverine with RabbitMQ transport, explicit routing per integration event, durable inbox and outbox. MassTransit and MediatR are not used |
@@ -220,4 +223,4 @@ MUST verify compliance with it.
 - Any deviation from a principle MUST be justified in the feature plan's complexity tracking and
   approved by the project owner before implementation.
 
-**Version**: 1.3.0 | **Ratified**: 2026-11-23 | **Last Amended**: 2026-11-24
+**Version**: 1.4.0 | **Ratified**: 2026-11-23 | **Last Amended**: 2026-11-24
