@@ -10,12 +10,18 @@ namespace BuildingBlocks.AspNetCore.Errors;
 
 internal sealed partial class BuildingBlocksExceptionHandler(
     IProblemDetailsService problemDetails,
+    IEnumerable<IExceptionProblemMapper> mappers,
     ILogger<BuildingBlocksExceptionHandler> logger) : IExceptionHandler
 {
     public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
     {
         var traceId = ProblemDetailsSetup.TraceIdOf(httpContext);
         var problem = new ProblemDetails();
+
+        if (TryMapWithExtensions(exception, httpContext, problem, traceId))
+        {
+            return await WriteAsync(httpContext, problem);
+        }
 
         switch (exception)
         {
@@ -53,13 +59,50 @@ internal sealed partial class BuildingBlocksExceptionHandler(
                 break;
         }
 
-        httpContext.Response.StatusCode = problem.Status.Value;
+        return await WriteAsync(httpContext, problem);
+    }
+
+    private bool TryMapWithExtensions(Exception exception, HttpContext httpContext, ProblemDetails problem, string traceId)
+    {
+        foreach (var mapper in mappers)
+        {
+            if (!mapper.TryMap(exception, httpContext, out var mapped))
+            {
+                continue;
+            }
+
+            problem.Status = mapped.Status;
+            problem.Detail = mapped.Detail;
+            problem.Title = mapped.Title;
+            if (mapped.Code is not null)
+            {
+                problem.Extensions["code"] = mapped.Code;
+            }
+
+            foreach (var (key, value) in mapped.Extensions)
+            {
+                problem.Extensions[key] = value;
+            }
+
+            LogMapped(logger, mapped.LogLevel, mapped.Code ?? "none", mapped.Status, traceId);
+            return true;
+        }
+
+        return false;
+    }
+
+    private async ValueTask<bool> WriteAsync(HttpContext httpContext, ProblemDetails problem)
+    {
+        httpContext.Response.StatusCode = problem.Status!.Value;
         return await problemDetails.TryWriteAsync(new ProblemDetailsContext
         {
             HttpContext = httpContext,
             ProblemDetails = problem,
         });
     }
+
+    [LoggerMessage(Message = "Request rejected with {Code} ({Status}) (trace {TraceId})")]
+    private static partial void LogMapped(ILogger logger, LogLevel level, string code, int status, string traceId);
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Request rejected with {Code} ({Status}) (trace {TraceId})")]
     private static partial void LogDomainError(ILogger logger, string code, int status, string traceId);

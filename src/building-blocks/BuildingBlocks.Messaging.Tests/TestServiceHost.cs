@@ -23,6 +23,7 @@ public sealed class TestServiceHost : IAsyncDisposable
         ConnectionString = connectionString;
         Recorder = app.Services.GetRequiredService<Recorder>();
         ProviderCalls = app.Services.GetRequiredService<ProviderCalls>();
+        Logs = app.Services.GetRequiredService<CapturingLoggerProvider>();
     }
 
     public WebApplication App { get; }
@@ -34,6 +35,8 @@ public sealed class TestServiceHost : IAsyncDisposable
     public Recorder Recorder { get; }
 
     public ProviderCalls ProviderCalls { get; }
+
+    public CapturingLoggerProvider Logs { get; }
 
     public HttpClient CreateClient() => App.GetTestClient();
 
@@ -50,6 +53,9 @@ public sealed class TestServiceHost : IAsyncDisposable
         var builder = WebApplication.CreateBuilder();
         builder.WebHost.UseTestServer();
         builder.Logging.ClearProviders();
+        var logs = new CapturingLoggerProvider();
+        builder.Logging.AddProvider(logs);
+        builder.Services.AddSingleton(logs);
 
         builder.Services.AddBuildingBlocks();
         if (settings.DbPermissions)

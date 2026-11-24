@@ -22,9 +22,14 @@ public sealed class CapturingLoggerProvider : ILoggerProvider
         public IDisposable? BeginScope<TState>(TState state)
             where TState : notnull => null;
 
-        public bool IsEnabled(LogLevel logLevel) => true;
+        public bool IsEnabled(LogLevel logLevel) => logLevel != LogLevel.None;
 
-        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter) =>
-            entries.Enqueue(new LogEntry(category, logLevel, formatter(state, exception), exception));
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
+        {
+            if (IsEnabled(logLevel))
+            {
+                entries.Enqueue(new LogEntry(category, logLevel, formatter(state, exception), exception));
+            }
+        }
     }
 }

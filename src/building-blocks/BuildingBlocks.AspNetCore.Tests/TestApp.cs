@@ -1,5 +1,7 @@
 using System.Net.Http.Json;
 using System.Text.Json;
+using BuildingBlocks.AspNetCore.Errors;
+using BuildingBlocks.AspNetCore.Tests.Errors;
 using BuildingBlocks.AspNetCore.Tests.Permissions;
 using BuildingBlocks.Core.Errors;
 using BuildingBlocks.Core.Permissions;
@@ -74,6 +76,8 @@ public sealed class TestApp : IAsyncDisposable
         builder.Services.AddBuildingBlocksPermissions<FakePermissionProvider>();
         builder.Services.AddScoped<SampleDb>();
         builder.Services.AddScoped<SampleHandler>();
+        builder.Services.AddSingleton<IExceptionProblemMapper, TeapotMapper>();
+        builder.Services.AddSingleton<IExceptionProblemMapper, LateTeapotMapper>();
         builder.Services
             .AddAuthentication(TestAuthHandler.SchemeName)
             .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(TestAuthHandler.SchemeName, null);
@@ -119,6 +123,7 @@ public sealed class TestApp : IAsyncDisposable
         app.MapGet("/rule", () => Throw(new DomainException("inventory.transfer.insufficient-stock", DomainErrorKind.Rule, "Not enough stock in the source warehouse.")));
         app.MapGet("/missing", () => Throw(new NotFoundException("order")));
         app.MapGet("/boom", () => Throw(new InvalidOperationException(Secret)));
+        app.MapGet("/teapot", () => Throw(new TeapotException()));
 
         app.MapGet("/perm/has", (string p, IPermissionManager pm, CancellationToken ct) => pm.HasAsync(p, ct));
         app.MapGet("/perm/all", (string[] p, IPermissionManager pm, CancellationToken ct) => pm.HasAllAsync(p, ct));

@@ -42,6 +42,7 @@ public sealed class TransactionTests(MessagingFixture infra)
 
         Assert.Equal(0, await publisher.CountAllWidgetsAsync());
         Assert.Empty(session.Sent.MessagesOf<WidgetCreated>());
+        Assert.DoesNotContain(publisher.Logs.Entries, e => e.Message.Contains("boom", StringComparison.Ordinal));
         await Task.Delay(TimeSpan.FromSeconds(2), TestContext.Current.CancellationToken);
         Assert.Equal(0, subscriber.Recorder.Count(nameof(WidgetCreated)));
     }
