@@ -26,11 +26,11 @@ public sealed class EndSessionModel(
     {
         var request = HttpContext.GetOpenIddictServerRequest();
         var session = await HttpContext.AuthenticateAsync(IdentityConstants.ApplicationScheme);
-        var subject = session.Principal?.FindFirstValue(ClaimTypes.NameIdentifier);
+        var hint = await HttpContext.AuthenticateAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+        var subject = session.Principal?.FindFirstValue(ClaimTypes.NameIdentifier) ?? hint.Principal?.GetClaim(Claims.Subject);
 
         if (subject is not null)
         {
-            var hint = await HttpContext.AuthenticateAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
             var authorizationId = hint.Principal?.GetClaim(Claims.Subject) == subject ? hint.Principal.GetAuthorizationId() : null;
             if (authorizationId is not null)
             {

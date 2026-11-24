@@ -179,6 +179,7 @@ description: "Task list for feature 012 Identity Authentication"
 - [X] T034 `Protocol/SigningKeys.cs`: Production accepts only `Certificates` (FR-019); `compose.yaml` sets `ASPNETCORE_ENVIRONMENT=Development`. Test: Production with `Ephemeral` stops startup
 - [X] T035 `Users/AppUser.cs`: private constructor, `ForTenant` validates its arguments
 - [X] T036 Test fixes: status assertions in `CodeFlowTests`, no timing assert, signature test without the test key, `QueryHelpers` in `CodeFlow.cs`, tidy `ClientRegistrarTests` concurrency read
+- [X] T038 `Pages/Connect/EndSession.cshtml.cs`: take the user from the `id_token_hint` when the login cookie is gone (FR-009). Test: sign-out with no cookie and an expired hint revokes the refresh token
 - [ ] T037 Run the Identity suite, `codegen.ps1 -Service identity`, the cleanup check; commit; push after the owner confirms
 
 ---

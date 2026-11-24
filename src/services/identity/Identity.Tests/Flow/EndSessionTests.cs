@@ -1,5 +1,9 @@
 using System.Net;
 using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.DependencyInjection;
+using OpenIddict.Server;
 
 namespace Identity.Tests.Flow;
 
@@ -45,6 +49,28 @@ public sealed partial class EndSessionTests(ContainersFixture containers)
         Assert.Equal(HttpStatusCode.Redirect, posted.StatusCode);
         Assert.Equal("invalid_grant", (await CodeFlow.RefreshAsync(first, signedOut.RefreshToken!)).Error);
         Assert.Equal(HttpStatusCode.OK, (await CodeFlow.RefreshAsync(second, other.RefreshToken!)).Status);
+    }
+
+    [Fact]
+    public async Task SignOutWithExpiredHintAndNoLoginSessionStillRevokes()
+    {
+        await using var app = await IdentityApp.StartAsync(containers);
+        await using var shortIdTokens = app.WithWebHostBuilder(builder => builder.ConfigureTestServices(services =>
+            services.PostConfigure<OpenIddictServerOptions>(options => options.IdentityTokenLifetime = TimeSpan.FromSeconds(1))));
+        await app.WaitUntilMigratedAsync();
+        using var signIn = shortIdTokens.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false, HandleCookies = true });
+        var (code, verifier) = await CodeFlow.AuthorizeAsync(signIn, IdentityApp.AdminEmail, IdentityApp.AdminPassword);
+        var tokens = await CodeFlow.RedeemAsync(signIn, code, verifier);
+        await Task.Delay(TimeSpan.FromSeconds(3), TestContext.Current.CancellationToken);
+        using var noSession = shortIdTokens.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false, HandleCookies = true });
+        var url = EndSessionUrl(IdentityApp.PostLogoutRedirectUri, tokens.IdToken);
+
+        var page = await noSession.GetStringAsync(url, TestContext.Current.CancellationToken);
+        var posted = await noSession.PostAsync(url, Form(page), TestContext.Current.CancellationToken);
+
+        Assert.Equal(HttpStatusCode.Redirect, posted.StatusCode);
+        Assert.StartsWith(IdentityApp.PostLogoutRedirectUri, posted.Headers.Location!.ToString(), StringComparison.Ordinal);
+        Assert.Equal("invalid_grant", (await CodeFlow.RefreshAsync(noSession, tokens.RefreshToken!)).Error);
     }
 
     [Fact]
