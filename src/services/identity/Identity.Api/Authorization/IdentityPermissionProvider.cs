@@ -7,9 +7,16 @@ namespace Identity.Api.Authorization;
 
 public sealed class IdentityPermissionProvider(IdentityDbContext db) : IPermissionProvider
 {
+    private static readonly IReadOnlySet<string> None = new HashSet<string>();
+
     public async Task<IReadOnlySet<string>> GetPermissionsAsync(ICurrentUser user, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(user);
+
+        if (await db.Users.AnyAsync(u => u.Id == user.UserId && u.DisabledAt != null, cancellationToken))
+        {
+            return None;
+        }
 
         var roles = user.TenantId is { } tenantId
             ? await db.RoleAssignments

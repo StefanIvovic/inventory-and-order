@@ -107,7 +107,7 @@ In the dev stack, Identity creates a demo tenant and its admin on start, from th
 - **Email case and spacing.** `Admin@Acme.test` and `admin@acme.test` are the same email.
 - **Slug format.** Lowercase letters, digits and single hyphens, 3 to 63 characters, not starting or ending with a hyphen. Slugs can't change in this feature.
 - **The route test's empty body on command routes.** A caller without the permission gets 403 before the body is validated, so missing permissions never show up as 400.
-- **A disabled user still holds a 15-minute access token.** It keeps working until it expires (accepted in the constitution's token-lifetime decision). Identity's own permission cache for that user is dropped at once.
+- **A disabled user still holds a 15-minute access token.** Other services may accept it until it expires (accepted in the constitution's token-lifetime decision). In Identity itself, a disabled user has no permissions, and the cache drop makes that apply to their very next request.
 - **The platform admin calls tenant routes, or a tenant user calls platform routes.** 403, from the route categories.
 - **A second platform user without the platform role.** 403 on the tenant routes. Managing platform users and their roles is out of scope.
 - **Creating a staff user without the permission but with an invalid body.** 403, not 400.
@@ -128,7 +128,7 @@ In the dev stack, Identity creates a demo tenant and its admin on start, from th
 
 - **FR-006**: A user with the manage-users permission MUST be able to create a staff user in their own tenant with an email and a password that meets the password policy from 012. The new user has no roles.
 - **FR-007**: A user with the view-users permission MUST be able to list the users of their own tenant with email, user type, disabled state, Identity roles and creation time, ordered by email. The list carries action flags that combine permission and state: `canCreate` for the list (manage-users permission); per user, `canDisable` (manage-users permission, not yourself, not disabled) and `canAssignRoles` (assign-roles permission, not disabled).
-- **FR-008**: A user with the manage-users permission MUST be able to disable a user of their own tenant. Disabling sets the disabled state, changes the security stamp, drops the user's cached permissions, and publishes `UserDisabled` once. Disabling yourself MUST be refused. Disabling an already disabled user succeeds with no effect.
+- **FR-008**: A user with the manage-users permission MUST be able to disable a user of their own tenant. Disabling sets the disabled state, changes the security stamp, drops the user's cached permissions (a disabled user has no Identity permissions), and publishes `UserDisabled` once. Disabling yourself MUST be refused. Disabling an already disabled user succeeds with no effect.
 - **FR-009**: A disabled user MUST be refused at sign-in with the generic error from 012, at authorization even with a live login session, and at refresh.
 - **FR-010**: Staff and platform emails MUST be unique among all non-customer users, enforced by a database constraint on the normalized email. Customer uniqueness per tenant is added in 014.
 

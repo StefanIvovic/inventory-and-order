@@ -66,11 +66,11 @@ description: "Task list for feature 013 Identity Tenants and Staff"
 
 **Independent test**: create a clerk, sign in as the clerk, disable them: refresh refused, new sign-in shows the generic error, `UserDisabled` observed.
 
-- [ ] T019 [US2] Tests first in `Identity.Tests/Users/CreateStaffUserTests.cs`, `ListUsersTests.cs`, `DisableUserTests.cs` and `Flow/DisabledUserTests.cs` for every acceptance scenario of US2, including cross-tenant 404, self-disable 409, repeated disable with no second event, the action flags, a weak password (400 on `password`), an email already used by the platform admin (409), and two concurrent creations with the same email (one 201, one 409, one user row). See them fail
-- [ ] T020 [US2] `Features/CreateStaffUser/` (validator per data-model.md `AppUser.Email`, `AppUser.Password`; password policy failures through `IdentityResultErrors` as 400 on `password`), endpoint `POST /users`
-- [ ] T021 [US2] `Features/ListUsers/` with roles and action flags per contracts/endpoints.md, endpoint `GET /users`
-- [ ] T022 [US2] `Features/DisableUser/`: `Disable`, security stamp change, `UserDisabled` once, `PermissionAssignmentsChanged`; endpoint `POST /users/{id}/disable`
-- [ ] T023 [US2] Disabled checks in `Connect/ConnectEndpoints.cs` (authorize and refresh) next to the lockout check (research.md R6)
+- [X] T019 [US2] Tests first in `Identity.Tests/Users/StaffUsersTests.cs` (create and list), `DisableUserTests.cs` and `Flow/DisabledUserTests.cs` for every acceptance scenario of US2, including cross-tenant 404, self-disable 409, repeated disable with no second event, the action flags, a weak password (400 on `password`), an email already used by the platform admin (409), and two concurrent creations with the same email (one 201, one 409, one user row). See them fail
+- [X] T020 [US2] `Features/CreateStaffUser/` (validator per data-model.md `AppUser.Email`, `AppUser.Password`; password policy failures through `IdentityResultErrors` as 400 on `password`), endpoint `POST /users`
+- [X] T021 [US2] `Features/ListUsers/` with roles and action flags per contracts/endpoints.md, endpoint `GET /users`
+- [X] T022 [US2] `Features/DisableUser/`: `Disable`, security stamp change, `UserDisabled` once, `PermissionAssignmentsChanged`; endpoint `POST /users/{id}/disable`
+- [X] T023 [US2] Disabled checks in `Connect/ConnectEndpoints.cs` (authorize and refresh) next to the lockout check (research.md R6)
 
 ---
 
@@ -80,8 +80,8 @@ description: "Task list for feature 013 Identity Tenants and Staff"
 
 **Independent test**: assign Viewer, `GET /users` 200 and `POST /users` 403 for the clerk; unassign, `GET /users` 403 on the next request.
 
-- [ ] T024 [US3] Tests first in `Identity.Tests/Users/RoleAssignmentTests.cs` for every acceptance scenario of US3, including removing your own Administrator (409), assigning to a disabled user (409), and assigning `identity.platform-administrator` inside a tenant (400). See them fail
-- [ ] T025 [US3] `Features/AssignRole/`: assign and unassign handlers (validator per data-model.md `RoleAssignment.Role`), endpoints `PUT` and `DELETE /users/{id}/roles/{role}`, `PermissionAssignmentsChanged` only when something changed
+- [X] T024 [US3] Tests first in `Identity.Tests/Users/RoleAssignmentTests.cs` for every acceptance scenario of US3, including removing your own Administrator (409), assigning to a disabled user (409), and assigning `identity.platform-administrator` inside a tenant (400). See them fail
+- [X] T025 [US3] `Features/AssignRole/`: assign and unassign handlers (validator per data-model.md `RoleAssignment.Role`), endpoints `PUT` and `DELETE /users/{id}/roles/{role}`, `PermissionAssignmentsChanged` only when something changed
 
 ---
 
