@@ -26,7 +26,7 @@ public static class ClientRegistrar
             {
                 await manager.CreateAsync(descriptor, cancellationToken);
             }
-            else if (!await IsCurrentAsync(manager, existing, secret, redirect, postLogout, cancellationToken))
+            else if (!await IsCurrentAsync(manager, existing, descriptor, cancellationToken))
             {
                 await manager.UpdateAsync(existing, descriptor, cancellationToken);
             }
@@ -67,16 +67,18 @@ public static class ClientRegistrar
     private static async Task<bool> IsCurrentAsync(
         IOpenIddictApplicationManager manager,
         object application,
-        string secret,
-        Uri redirect,
-        Uri postLogout,
+        OpenIddictApplicationDescriptor wanted,
         CancellationToken cancellationToken)
     {
-        var redirects = await manager.GetRedirectUrisAsync(application, cancellationToken);
-        var postLogouts = await manager.GetPostLogoutRedirectUrisAsync(application, cancellationToken);
-        return redirects.SequenceEqual([redirect.AbsoluteUri], StringComparer.Ordinal)
-            && postLogouts.SequenceEqual([postLogout.AbsoluteUri], StringComparer.Ordinal)
-            && await manager.ValidateClientSecretAsync(application, secret, cancellationToken);
+        var current = new OpenIddictApplicationDescriptor();
+        await manager.PopulateAsync(current, application, cancellationToken);
+        return string.Equals(current.ClientType, wanted.ClientType, StringComparison.Ordinal)
+            && string.Equals(current.ConsentType, wanted.ConsentType, StringComparison.Ordinal)
+            && current.RedirectUris.SetEquals(wanted.RedirectUris)
+            && current.PostLogoutRedirectUris.SetEquals(wanted.PostLogoutRedirectUris)
+            && current.Permissions.SetEquals(wanted.Permissions)
+            && current.Requirements.SetEquals(wanted.Requirements)
+            && await manager.ValidateClientSecretAsync(application, wanted.ClientSecret!, cancellationToken);
     }
 
     private static string Require(string? value, string clientId, string name) =>

@@ -6,10 +6,14 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using OpenIddict.Abstractions;
 using OpenIddict.Server.AspNetCore;
+using static OpenIddict.Abstractions.OpenIddictConstants;
 
 namespace Identity.Api.Pages.Connect;
 
-public sealed class EndSessionModel(IOpenIddictApplicationManager applications, IOpenIddictTokenManager tokens) : PageModel
+public sealed class EndSessionModel(
+    IOpenIddictApplicationManager applications,
+    IOpenIddictAuthorizationManager authorizations,
+    IOpenIddictTokenManager tokens) : PageModel
 {
     public IReadOnlyList<KeyValuePair<string, string>> Fields { get; private set; } = [];
 
@@ -26,11 +30,20 @@ public sealed class EndSessionModel(IOpenIddictApplicationManager applications, 
 
         if (subject is not null)
         {
-            var client = request?.ClientId is { } clientId ? await applications.FindByClientIdAsync(clientId, cancellationToken) : null;
-            var clientKey = client is null ? null : await applications.GetIdAsync(client, cancellationToken);
-            _ = clientKey is null
-                ? await tokens.RevokeBySubjectAsync(subject, cancellationToken)
-                : await tokens.RevokeAsync(subject, clientKey, status: null, type: null, cancellationToken);
+            var hint = await HttpContext.AuthenticateAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+            var authorizationId = hint.Principal?.GetClaim(Claims.Subject) == subject ? hint.Principal.GetAuthorizationId() : null;
+            if (authorizationId is not null)
+            {
+                await tokens.RevokeByAuthorizationIdAsync(authorizationId, cancellationToken);
+                if (await authorizations.FindByIdAsync(authorizationId, cancellationToken) is { } authorization)
+                {
+                    await authorizations.TryRevokeAsync(authorization, cancellationToken);
+                }
+            }
+            else if (request?.ClientId is { } clientId && await applications.FindByClientIdAsync(clientId, cancellationToken) is { } client)
+            {
+                await tokens.RevokeAsync(subject, (await applications.GetIdAsync(client, cancellationToken))!, status: null, type: null, cancellationToken);
+            }
         }
 
         await HttpContext.SignOutAsync(IdentityConstants.ApplicationScheme);

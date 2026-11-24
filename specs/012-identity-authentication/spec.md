@@ -149,11 +149,13 @@ The constitution states that browser apps use the BFF: the gateway is a confiden
 - **A disabled user** (security stamp changed, or account disabled) still holds a valid access token for up to 15 minutes. This is the accepted window (decision C5). Refresh is refused.
 - **A client asks for a scope that isn't registered**, or one it isn't allowed. The request is rejected.
 - **A client asks for no API scope.** Access tokens are issued only with at least one API scope. Otherwise the request is rejected.
-- **Two refreshes race with the same refresh token.** At most one succeeds.
+- **Two refreshes race with the same refresh token.** Exactly one succeeds. A request that arrives after the winner counts as reuse, which may also revoke the winner's new token, so a client MUST send one refresh at a time per session (the gateway in 014 does this).
 - **The login page is called directly, without an authorization request.** Signing in works, and the user lands on a minimal "signed in" page, not on an open redirect.
 - **The `returnUrl` on the login page points outside Identity.** It is ignored, because only local return URLs are allowed.
 - **The signing certificate in production expires soon.** Out of scope for automation here. Rotation is manual, by mounting a new certificate (both keys can be published during rotation later).
-- **The clock moves during a lockout.** Lockout uses the application's time provider, so tests can control it.
+- **The clock moves during a lockout.** ASP.NET Identity's lockout reads the system clock, so tests move the lockout end into the past instead of advancing time (research.md R7).
+- **Two code redemptions race with the same code.** Exactly one succeeds.
+- **The password or security stamp changes while a login session is open.** The next authorization request sends the user back to the login page.
 
 ## Requirements *(mandatory)*
 
@@ -172,12 +174,12 @@ The constitution states that browser apps use the BFF: the gateway is a confiden
 - **FR-006**: Access tokens MUST be signed, not encrypted, valid for 15 minutes, and contain only `sub`, `user_type` and, for non-platform users, `tenant_id`, plus the standard protocol claims (issuer, audience, issued-at, expiry, token id, scope, client). No role or permission claims.
 - **FR-007**: The API scopes `identity`, `product`, `inventory`, `order` and `payment` MUST be registered, each mapping to its service as an audience. A token's audience MUST be exactly the API scopes granted. Requests MUST include at least one API scope.
 - **FR-008**: Refresh tokens MUST be issued when the `offline_access` scope is requested, rotate on every use, and be refused when reused, when the user's security stamp changed since issue, or when the user is locked out. In 012, disabling a user means changing their security stamp. Feature 013 adds an explicit disabled state and checks it at refresh too.
-- **FR-009**: Signing out at the end-session endpoint MUST end the Identity session after confirmation, revoke the user's tokens for that client, and redirect only to a registered post-logout URI.
+- **FR-009**: Signing out at the end-session endpoint MUST end the Identity session after confirmation and redirect only to a registered post-logout URI. With an `id_token_hint` it MUST revoke the tokens of that sign-in's authorization only, so other sessions of the same user stay signed in. Without a hint but with a client it MUST revoke the user's tokens for that client. Without either it only ends the Identity session.
 - **FR-010**: Authorization requests with a redirect URI that isn't registered for the client MUST be rejected without redirecting.
 
 **Clients and scopes**
 
-- **FR-011**: Identity MUST register two confidential clients on startup, `backoffice-bff` and `storefront-bff`, each with its secret, its redirect URI and its post-logout URI from configuration, allowed the code flow, refresh tokens and all API scopes. Registration MUST be idempotent and update changed settings.
+- **FR-011**: Identity MUST register two confidential clients on startup, `backoffice-bff` and `storefront-bff`, each with its secret, its redirect URI and its post-logout URI from configuration, allowed the code flow, refresh tokens and all API scopes. Registration MUST be idempotent and update any changed setting: secret, redirect URIs, client type, consent type, permissions and requirements. Registered API scopes MUST likewise be updated when their resources change.
 - **FR-012**: Client secrets MUST come from configuration, with no defaults in code. Dev values are in the dev settings file.
 
 **Login page**
@@ -186,6 +188,7 @@ The constitution states that browser apps use the BFF: the gateway is a confiden
 - **FR-014**: Failed sign-ins MUST show one generic message, identical for an unknown email and a wrong password. A locked account MUST show a lockout message without revealing the remaining failure count.
 - **FR-015**: The login page MUST accept only local return URLs.
 - **FR-016**: Identity MUST serve a sign-out confirmation page.
+- **FR-016a**: The Identity login session MUST last at most 12 hours, sliding, matching the refresh-token lifetime. Every authorization request MUST check the session's security stamp against the user's current one and treat a mismatch as no session.
 
 **Platform admin**
 
@@ -194,13 +197,13 @@ The constitution states that browser apps use the BFF: the gateway is a confiden
 **Signing keys**
 
 - **FR-018**: In development, Identity MUST create a self-signed signing certificate on first start and keep it in persistent storage, reusing it on every restart.
-- **FR-019**: In production, Identity MUST sign with a mounted certificate, and MUST fail startup if none is configured.
+- **FR-019**: In production, Identity MUST sign with a mounted certificate, and MUST fail startup if none is configured or if the ephemeral or directory key mode is selected.
 - **FR-020**: In tests, Identity MUST use an in-memory signing key.
 
 **Identity's own API**
 
 - **FR-021**: Identity's API MUST validate tokens locally against its own keys, accepting only tokens whose audience includes `identity`. It keeps the route categories, the fallback policy and the 401/403 behaviour of the shared setup.
-- **FR-022**: The OpenID Connect endpoints, the login and sign-out pages and their assets MUST be marked allow-listed, and the no-roles route test MUST pass.
+- **FR-022**: The OpenID Connect endpoints, the login and sign-out pages and their assets MUST be marked allow-listed one by one (by page folder), never all pages at once, and the no-roles route test MUST pass.
 
 **Constitution**
 
@@ -218,7 +221,7 @@ The constitution states that browser apps use the BFF: the gateway is a confiden
 
 ### Measurable Outcomes
 
-- **SC-001**: The full sign-in flow (authorize, login, code redemption) completes in an automated test in under 5 seconds.
+- **SC-001**: The full sign-in flow (authorize, login, code redemption) completes in under 5 seconds on the dev stack (measured in quickstart.md; not asserted in CI, where timing is noisy).
 - **SC-002**: 100% of issued access tokens contain only the allowed identity claims, with no role or permission claims, and expire 15 minutes after issue.
 - **SC-003**: A reused refresh token is refused 100% of the time, and so is any refresh after a security-stamp change.
 - **SC-004**: The 6th sign-in attempt after 5 failures is refused even with the right password. Sign-in works again after 10 minutes.

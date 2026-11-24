@@ -20,6 +20,8 @@ Expected: the discovery document with `issuer` = `http://localhost:8080/`, the a
 ## 3. Login page by hand
 Open http://127.0.0.1:5101/account/login and sign in with `PLATFORM_ADMIN_EMAIL` / `PLATFORM_ADMIN_PASSWORD` from `deploy/dev.env`. Expected: the "signed in" page. Enter a wrong password 5 times: expected the lockout message.
 
+Timing (SC-001): run `dotnet test src/services/identity/Identity.Tests --filter FullFlowIssuesTokensAndTheyWorkOnTheApi --logger "console;verbosity=normal"` on a warm machine. Expected: the test finishes in under 5 seconds.
+
 ## 4. Keys survive a restart (US6)
 ```powershell
 curl.exe -s http://127.0.0.1:5101/.well-known/jwks > jwks-before.json

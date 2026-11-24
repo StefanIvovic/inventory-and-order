@@ -1,6 +1,7 @@
 using Identity.Tests.Flow;
 using Microsoft.Extensions.DependencyInjection;
 using OpenIddict.Abstractions;
+using OpenIddict.EntityFrameworkCore.Models;
 
 namespace Identity.Tests;
 
@@ -49,14 +50,45 @@ public sealed class ClientRegistrarTests(ContainersFixture containers)
         Assert.Equal(1, await CountAsync(second));
     }
 
+    [Fact]
+    public async Task RemovedPermissionAndChangedScopeResourceAreRestored()
+    {
+        var database = await containers.Postgres.CreateDatabaseAsync(TestContext.Current.CancellationToken);
+        await using (var first = await IdentityApp.StartAsync(containers, database))
+        {
+            await first.WaitUntilMigratedAsync();
+            await using var scope = first.Services.CreateAsyncScope();
+            var applications = scope.ServiceProvider.GetRequiredService<IOpenIddictApplicationManager>();
+            var scopes = scope.ServiceProvider.GetRequiredService<IOpenIddictScopeManager>();
+            var client = (await applications.FindByClientIdAsync(IdentityApp.Client, TestContext.Current.CancellationToken))!;
+            var descriptor = new OpenIddictApplicationDescriptor();
+            await applications.PopulateAsync(descriptor, client, TestContext.Current.CancellationToken);
+            descriptor.Permissions.Remove(OpenIddictConstants.Permissions.GrantTypes.RefreshToken);
+            descriptor.ClientSecret = IdentityApp.ClientSecret;
+            await applications.UpdateAsync(client, descriptor, TestContext.Current.CancellationToken);
+            var order = (await scopes.FindByNameAsync("order", TestContext.Current.CancellationToken))!;
+            await scopes.UpdateAsync(order, new OpenIddictScopeDescriptor { Name = "order", Resources = { "elsewhere" } }, TestContext.Current.CancellationToken);
+        }
+
+        await using var second = await IdentityApp.StartAsync(containers, database);
+        await second.WaitUntilMigratedAsync();
+
+        await using var check = second.Services.CreateAsyncScope();
+        var manager = check.ServiceProvider.GetRequiredService<IOpenIddictApplicationManager>();
+        var scopeManager = check.ServiceProvider.GetRequiredService<IOpenIddictScopeManager>();
+        var restored = (await manager.FindByClientIdAsync(IdentityApp.Client, TestContext.Current.CancellationToken))!;
+        var order2 = (await scopeManager.FindByNameAsync("order", TestContext.Current.CancellationToken))!;
+        Assert.True(await manager.HasPermissionAsync(restored, OpenIddictConstants.Permissions.GrantTypes.RefreshToken, TestContext.Current.CancellationToken));
+        Assert.True(await manager.ValidateClientSecretAsync(restored, IdentityApp.ClientSecret, TestContext.Current.CancellationToken));
+        Assert.Equal(["order"], await scopeManager.GetResourcesAsync(order2, TestContext.Current.CancellationToken));
+    }
+
     private static async Task<string?> ConcurrencyTokenAsync(IdentityApp app)
     {
         await using var scope = app.Services.CreateAsyncScope();
         var manager = scope.ServiceProvider.GetRequiredService<IOpenIddictApplicationManager>();
         var client = (await manager.FindByClientIdAsync(IdentityApp.Client, TestContext.Current.CancellationToken))!;
-        return await manager.GetPropertiesAsync(client, TestContext.Current.CancellationToken) is { } _
-            ? (client as OpenIddict.EntityFrameworkCore.Models.OpenIddictEntityFrameworkCoreApplication<Guid>)?.ConcurrencyToken
-            : null;
+        return ((OpenIddictEntityFrameworkCoreApplication<Guid>)client).ConcurrencyToken;
     }
 
     private static async Task<int> CountAsync(IdentityApp app)

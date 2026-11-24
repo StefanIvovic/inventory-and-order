@@ -29,6 +29,7 @@ services:
     profiles:
       - apps
     environment:
+      ASPNETCORE_ENVIRONMENT: Development
       ConnectionStrings__Identity: "Host=identity-db;Port=5432;Database=identity;Username=${IDENTITY_DB_USER};Password=${IDENTITY_DB_PASSWORD};GSS Encryption Mode=Disable"
       RabbitMq__Uri: "amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672"
       Identity__Issuer: "${IDENTITY_ISSUER}"

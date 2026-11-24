@@ -63,7 +63,7 @@ public sealed class RefreshTests(ContainersFixture containers)
     }
 
     [Fact]
-    public async Task ConcurrentRefreshSucceedsAtMostOnce()
+    public async Task ConcurrentRefreshSucceedsExactlyOnce()
     {
         await using var app = await IdentityApp.StartAsync(containers);
         var tokens = await CodeFlow.SignInAsync(app);
@@ -71,6 +71,7 @@ public sealed class RefreshTests(ContainersFixture containers)
 
         var results = await Task.WhenAll(Enumerable.Range(0, 8).Select(_ => CodeFlow.RefreshAsync(client, tokens.RefreshToken!)));
 
-        Assert.True(results.Count(r => r.Status == HttpStatusCode.OK) <= 1);
+        Assert.Single(results, r => r.Status == HttpStatusCode.OK);
+        Assert.All(results.Where(r => r.Status != HttpStatusCode.OK), r => Assert.Equal("invalid_grant", r.Error));
     }
 }

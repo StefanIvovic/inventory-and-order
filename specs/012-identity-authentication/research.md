@@ -133,3 +133,16 @@
 - **Lockout tests**: through the login page (R7).
 - **Seed tests**: an empty database with and without admin settings.
 - **Key tests**: Directory mode, by writing to a temp folder and restarting the factory.
+
+## R14. Review fixes before merge
+
+- **Client and scope registration**: the existing client is read back into a descriptor (`PopulateAsync`) and compared with the wanted one: client type, consent type, redirect URIs, post-logout URIs, permissions, requirements, plus `ValidateClientSecretAsync`. Any difference triggers one `UpdateAsync`. Scopes compare their resources the same way.
+- **Allow-list**: `AllowAnonymousToFolder("/Account")` and `AllowAnonymousToFolder("/Connect")` replace `MapRazorPages().AllowAnonymous()`, so a new page outside these folders falls under the fallback policy.
+- **Concurrent refresh**: the atomic claim gives exactly one winner. A loser that reaches OpenIddict after the winner's claim is treated as reuse and revokes the chain, which can include the winner's new token. This is kept on purpose (standard theft response). Clients MUST serialize refreshes per session; the 014 gateway does. The test asserts exactly one winner and nothing about the winner's token.
+- **Refresh claim**: EF Core `ExecuteUpdateAsync` on the OpenIddict token entity instead of raw SQL, equally atomic.
+- **Sign-out scope**: with an `id_token_hint`, the hint's authorization id is taken from the principal OpenIddict validated, and only that authorization and its tokens are revoked. Without a hint, the client's tokens for the user; without either, nothing is revoked. Revoking every token of the subject is removed.
+- **Login session**: the application cookie gets `ExpireTimeSpan = 12h` sliding. Authorize uses `SignInManager.ValidateSecurityStampAsync` on the cookie principal; a stale stamp is treated as no session.
+- **FR-019 in production**: `SigningKeys.Configure` gets the host environment and refuses `Ephemeral` and `Directory` in Production. The dev compose sets `ASPNETCORE_ENVIRONMENT=Development`.
+- **AppUser**: a private constructor for EF Core; `ForTenant` requires a tenant and a `staff` or `customer` type.
+- **Tests**: negative tests assert the status; both races assert exactly one winner; the 5-second timing moves to quickstart.md; the signature test runs without the extra test signing key; `QueryHelpers` parses redirect queries.
+- **Deferred**: forwarded headers and serialized refreshes (014); user type per client and email uniqueness (013); `prompt`/`max_age` and narrower refresh scopes (when a client needs them); login rate limiting, token pruning, certificate rotation, Data Protection key encryption at rest (phase 5).

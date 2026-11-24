@@ -4,9 +4,13 @@ namespace Identity.Api.Users;
 
 public sealed class AppUser : IdentityUser<Guid>
 {
-    public string UserType { get; set; } = UserTypes.Staff;
+    private AppUser()
+    {
+    }
 
-    public string? TenantId { get; set; }
+    public string UserType { get; private set; } = string.Empty;
+
+    public string? TenantId { get; private set; }
 
     public static AppUser Platform(string email) => new()
     {
@@ -17,13 +21,22 @@ public sealed class AppUser : IdentityUser<Guid>
         UserType = UserTypes.Platform,
     };
 
-    public static AppUser ForTenant(string email, string tenantId, string userType) => new()
+    public static AppUser ForTenant(string email, string tenantId, string userType)
     {
-        Id = Guid.NewGuid(),
-        UserName = email,
-        Email = email,
-        EmailConfirmed = true,
-        UserType = userType,
-        TenantId = tenantId,
-    };
+        ArgumentException.ThrowIfNullOrWhiteSpace(tenantId);
+        if (userType is not (UserTypes.Staff or UserTypes.Customer))
+        {
+            throw new ArgumentException("A tenant user must be staff or customer.", nameof(userType));
+        }
+
+        return new AppUser
+        {
+            Id = Guid.NewGuid(),
+            UserName = email,
+            Email = email,
+            EmailConfirmed = true,
+            UserType = userType,
+            TenantId = tenantId,
+        };
+    }
 }

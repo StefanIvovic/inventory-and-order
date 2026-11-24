@@ -3,6 +3,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Identity.Tests.Flow;
@@ -137,17 +138,9 @@ public static partial class CodeFlow
     public static string? Query(Uri uri, string name)
     {
         ArgumentNullException.ThrowIfNull(uri);
-        var query = uri.IsAbsoluteUri ? uri.Query : uri.OriginalString[(uri.OriginalString.IndexOf('?', StringComparison.Ordinal) + 1)..];
-        foreach (var part in query.TrimStart('?').Split('&', StringSplitOptions.RemoveEmptyEntries))
-        {
-            var pair = part.Split('=', 2);
-            if (pair[0] == name)
-            {
-                return Uri.UnescapeDataString(pair.Length > 1 ? pair[1] : string.Empty);
-            }
-        }
-
-        return null;
+        var text = uri.OriginalString;
+        var start = text.IndexOf('?', StringComparison.Ordinal);
+        return start >= 0 && QueryHelpers.ParseQuery(text[start..]).TryGetValue(name, out var value) ? value.ToString() : null;
     }
 
     private static async Task<TokenResult> PostTokenAsync(HttpClient client, Dictionary<string, string> form)

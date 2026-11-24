@@ -47,16 +47,19 @@ public sealed class IdentityApp : WebApplicationFactory<Program>
     public const string AdminPassword = "Admin#Pass1";
 
     private readonly Dictionary<string, string?> settings;
+    private readonly bool testSigningKey;
 
-    private IdentityApp(Dictionary<string, string?> settings)
+    private IdentityApp(Dictionary<string, string?> settings, bool testSigningKey)
     {
         this.settings = settings;
+        this.testSigningKey = testSigningKey;
     }
 
     public static async Task<IdentityApp> StartAsync(
         ContainersFixture containers,
         string? connectionString = null,
-        IReadOnlyDictionary<string, string?>? overrides = null)
+        IReadOnlyDictionary<string, string?>? overrides = null,
+        bool testSigningKey = true)
     {
         ArgumentNullException.ThrowIfNull(containers);
         var database = connectionString ?? await containers.Postgres.CreateDatabaseAsync(TestContext.Current.CancellationToken);
@@ -66,7 +69,7 @@ public sealed class IdentityApp : WebApplicationFactory<Program>
             values[key] = value;
         }
 
-        var app = new IdentityApp(values);
+        var app = new IdentityApp(values, testSigningKey);
         _ = app.Server;
         return app;
     }
@@ -141,8 +144,11 @@ public sealed class IdentityApp : WebApplicationFactory<Program>
         }
 
         builder.ConfigureLogging(logging => logging.ClearProviders());
-        builder.ConfigureTestServices(services =>
-            services.PostConfigure<OpenIddictServerOptions>(options =>
-                options.SigningCredentials.Add(new SigningCredentials(TestTokens.Key, SecurityAlgorithms.RsaSha256))));
+        if (testSigningKey)
+        {
+            builder.ConfigureTestServices(services =>
+                services.PostConfigure<OpenIddictServerOptions>(options =>
+                    options.SigningCredentials.Add(new SigningCredentials(TestTokens.Key, SecurityAlgorithms.RsaSha256))));
+        }
     }
 }

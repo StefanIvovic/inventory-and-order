@@ -170,6 +170,19 @@ description: "Task list for feature 012 Identity Authentication"
 
 ---
 
+## Phase 12: Review fixes (research.md R14)
+
+- [X] T030 `Protocol/ClientRegistrar.cs` and `Protocol/Scopes.cs`: compare the full descriptor and update on any change (FR-011). Tests in `ClientRegistrarTests.cs`: a removed permission and a changed scope resource are restored on restart
+- [X] T031 `Program.cs`: allow-list the `/Account` and `/Connect` page folders instead of all pages (FR-022)
+- [X] T032 `Connect/ConnectEndpoints.cs`: refresh claim with `ExecuteUpdateAsync`; authorize validates the cookie's security stamp. `Program.cs`: cookie `ExpireTimeSpan` 12h (FR-016a). Tests: a stamp change sends the next authorize to login; concurrent code and refresh races have exactly one winner
+- [X] T033 `Pages/Connect/EndSession.cshtml.cs`: revoke by the `id_token_hint` authorization, else by client, never the whole subject (FR-009). Test: signing out one session leaves another session's refresh token working
+- [X] T034 `Protocol/SigningKeys.cs`: Production accepts only `Certificates` (FR-019); `compose.yaml` sets `ASPNETCORE_ENVIRONMENT=Development`. Test: Production with `Ephemeral` stops startup
+- [X] T035 `Users/AppUser.cs`: private constructor, `ForTenant` validates its arguments
+- [X] T036 Test fixes: status assertions in `CodeFlowTests`, no timing assert, signature test without the test key, `QueryHelpers` in `CodeFlow.cs`, tidy `ClientRegistrarTests` concurrency read
+- [ ] T037 Run the Identity suite, `codegen.ps1 -Service identity`, the cleanup check; commit; push after the owner confirms
+
+---
+
 ## Dependencies
 
 - Phase 1 (BuildingBlocks 0.2.0) → T005

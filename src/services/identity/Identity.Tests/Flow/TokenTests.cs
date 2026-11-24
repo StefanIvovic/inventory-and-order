@@ -40,7 +40,7 @@ public sealed class TokenTests(ContainersFixture containers)
     [Fact]
     public async Task SignatureVerifiesAgainstPublishedKeys()
     {
-        await using var app = await IdentityApp.StartAsync(containers);
+        await using var app = await IdentityApp.StartAsync(containers, testSigningKey: false);
         var tokens = await CodeFlow.SignInAsync(app);
         using var client = app.CreateClient();
         var jwks = new JsonWebKeySet(await client.GetStringAsync("/.well-known/jwks", TestContext.Current.CancellationToken));

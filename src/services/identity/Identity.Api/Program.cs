@@ -63,6 +63,7 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.Cookie.SameSite = SameSiteMode.Lax;
     options.Cookie.SecurePolicy = protocol.RequireHttps ? CookieSecurePolicy.Always : CookieSecurePolicy.SameAsRequest;
     options.LoginPath = "/account/login";
+    options.ExpireTimeSpan = TimeSpan.FromHours(12);
     options.SlidingExpiration = true;
 });
 builder.Services.AddAntiforgery(options =>
@@ -86,7 +87,7 @@ builder.Services.AddOpenIddict()
             .DisableAccessTokenEncryption()
             .RegisterScopes(["openid", "offline_access", .. Scopes.Api]);
         server.Configure(options => options.CodeChallengeMethods.Remove(OpenIddict.Abstractions.OpenIddictConstants.CodeChallengeMethods.Plain));
-        SigningKeys.Configure(server, protocol.Keys);
+        SigningKeys.Configure(server, protocol.Keys, builder.Environment);
 
         var aspNetCore = server.UseAspNetCore()
             .EnableAuthorizationEndpointPassthrough()
@@ -107,7 +108,11 @@ builder.Services.AddOpenIddict()
 builder.Services.AddBuildingBlocksRouteAuthorization(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme);
 builder.Services.AddScoped<PrincipalFactory>();
 builder.Services.AddHealthChecks().AddCheck<ReadinessCheck>(ReadinessCheck.Tag, tags: [ReadinessCheck.Tag]);
-builder.Services.AddRazorPages();
+builder.Services.AddRazorPages(options =>
+{
+    options.Conventions.AllowAnonymousToFolder("/Account");
+    options.Conventions.AllowAnonymousToFolder("/Connect");
+});
 builder.Services.AddWolverineHttp();
 
 builder.Host.UseWolverine(options =>
@@ -127,7 +132,7 @@ app.UseBuildingBlocksAuthentication();
 app.MapHealthChecks("/health/live", new HealthCheckOptions { Predicate = _ => false }).AllowAnonymous();
 app.MapHealthChecks("/health/ready", new HealthCheckOptions { Predicate = check => check.Tags.Contains(ReadinessCheck.Tag) }).AllowAnonymous();
 app.MapConnectEndpoints();
-app.MapRazorPages().AllowAnonymous();
+app.MapRazorPages();
 app.MapWolverineEndpoints();
 
 return await app.RunJasperFxCommands(args);

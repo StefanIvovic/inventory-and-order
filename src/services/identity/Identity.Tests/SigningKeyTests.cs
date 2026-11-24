@@ -49,6 +49,25 @@ public sealed class SigningKeyTests(ContainersFixture containers)
         }
     }
 
+    [Theory]
+    [InlineData("Ephemeral")]
+    [InlineData("Directory")]
+    public async Task ProductionRefusesGeneratedKeys(string mode)
+    {
+        var error = await Assert.ThrowsAnyAsync<Exception>(async () =>
+        {
+            await using var app = await IdentityApp.StartAsync(containers, overrides: new Dictionary<string, string?>
+            {
+                ["environment"] = "Production",
+                ["Identity:Keys:Mode"] = mode,
+                ["Identity:Keys:Path"] = Path.GetTempPath(),
+                ["Identity:Keys:Password"] = "secret",
+            });
+        });
+
+        Assert.Contains("must be Certificates in Production", error.ToString(), StringComparison.Ordinal);
+    }
+
     [Fact]
     public async Task CertificatesModeWithoutPathsStopsStartup()
     {

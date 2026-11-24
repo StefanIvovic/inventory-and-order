@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using OpenIddict.Abstractions;
+using OpenIddict.EntityFrameworkCore.Models;
 using OpenIddict.Server.AspNetCore;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
@@ -29,6 +30,7 @@ public static class ConnectEndpoints
     private static async Task<IResult> AuthorizeAsync(
         HttpContext context,
         UserManager<AppUser> users,
+        SignInManager<AppUser> signIn,
         PrincipalFactory principals,
         CancellationToken cancellationToken)
     {
@@ -41,7 +43,7 @@ public static class ConnectEndpoints
         }
 
         var session = await context.AuthenticateAsync(IdentityConstants.ApplicationScheme);
-        var user = session.Succeeded ? await users.GetUserAsync(session.Principal!) : null;
+        var user = session.Succeeded ? await signIn.ValidateSecurityStampAsync(session.Principal) : null;
         if (user is null)
         {
             var parameters = context.Request.HasFormContentType ? context.Request.Form.ToList() : context.Request.Query.ToList();
@@ -103,9 +105,9 @@ public static class ConnectEndpoints
         }
 
         var now = clock.GetUtcNow().UtcDateTime;
-        var claimed = await db.Database.ExecuteSqlInterpolatedAsync(
-            $"UPDATE openiddict_tokens SET \"Status\" = {Statuses.Redeemed}, \"RedemptionDate\" = {now} WHERE \"Id\" = {id} AND \"Status\" = {Statuses.Valid}",
-            cancellationToken);
+        var claimed = await db.Set<OpenIddictEntityFrameworkCoreToken<Guid>>()
+            .Where(t => t.Id == id && t.Status == Statuses.Valid)
+            .ExecuteUpdateAsync(t => t.SetProperty(x => x.Status, Statuses.Redeemed).SetProperty(x => x.RedemptionDate, now), cancellationToken);
         return claimed == 1;
     }
 

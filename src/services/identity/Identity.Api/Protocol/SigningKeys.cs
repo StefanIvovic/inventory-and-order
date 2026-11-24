@@ -8,10 +8,16 @@ public static class SigningKeys
     public const string SigningFile = "signing.pfx";
     public const string EncryptionFile = "encryption.pfx";
 
-    public static void Configure(OpenIddictServerBuilder server, KeySettings keys)
+    public static void Configure(OpenIddictServerBuilder server, KeySettings keys, IHostEnvironment environment)
     {
         ArgumentNullException.ThrowIfNull(server);
         ArgumentNullException.ThrowIfNull(keys);
+        ArgumentNullException.ThrowIfNull(environment);
+
+        if (environment.IsProduction() && keys.Mode != KeyMode.Certificates)
+        {
+            throw new InvalidOperationException("Identity:Keys:Mode must be Certificates in Production.");
+        }
 
         switch (keys.Mode)
         {
