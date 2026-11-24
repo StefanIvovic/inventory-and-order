@@ -5,6 +5,7 @@
   <Project Path="BuildingBlocks.Testing/BuildingBlocks.Testing.csproj" />
   <Project Path="BuildingBlocks.Messaging/BuildingBlocks.Messaging.csproj" />
   <Project Path="BuildingBlocks.Validation/BuildingBlocks.Validation.csproj" />
+  <Project Path="BuildingBlocks.Analyzers/BuildingBlocks.Analyzers.csproj" />
   <Folder Name="/tests/">
     <Project Path="BuildingBlocks.Core.Tests/BuildingBlocks.Core.Tests.csproj" />
     <Project Path="BuildingBlocks.AspNetCore.Tests/BuildingBlocks.AspNetCore.Tests.csproj" />
@@ -12,5 +13,6 @@
     <Project Path="BuildingBlocks.Testing.Tests/BuildingBlocks.Testing.Tests.csproj" />
     <Project Path="BuildingBlocks.Messaging.Tests/BuildingBlocks.Messaging.Tests.csproj" />
     <Project Path="BuildingBlocks.Validation.Tests/BuildingBlocks.Validation.Tests.csproj" />
+    <Project Path="BuildingBlocks.Analyzers.Tests/BuildingBlocks.Analyzers.Tests.csproj" />
   </Folder>
 </Solution>
