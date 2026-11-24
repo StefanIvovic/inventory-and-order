@@ -30,6 +30,7 @@ public static class BuildingBlocksExtensions
     {
         ArgumentNullException.ThrowIfNull(app);
 
+        app.UseExceptionHandler();
         return app.UseMiddleware<IdentityMiddleware>();
     }
 }
