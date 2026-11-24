@@ -37,10 +37,18 @@ public static class AuthenticationExtensions
                 options.TokenValidationParameters.NameClaimType = AppClaimTypes.Subject;
             });
 
-        var tenant = Policy(RouteCategory.Tenant);
+        return services.AddBuildingBlocksRouteAuthorization(JwtBearerDefaults.AuthenticationScheme);
+    }
+
+    public static IServiceCollection AddBuildingBlocksRouteAuthorization(this IServiceCollection services, string authenticationScheme)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentException.ThrowIfNullOrWhiteSpace(authenticationScheme);
+
+        var tenant = Policy(authenticationScheme, RouteCategory.Tenant);
         services.AddAuthorizationBuilder()
             .AddPolicy(AuthorizationPolicies.Tenant, tenant)
-            .AddPolicy(AuthorizationPolicies.Platform, Policy(RouteCategory.Platform))
+            .AddPolicy(AuthorizationPolicies.Platform, Policy(authenticationScheme, RouteCategory.Platform))
             .SetDefaultPolicy(tenant)
             .SetFallbackPolicy(tenant);
 
@@ -66,8 +74,8 @@ public static class AuthenticationExtensions
         return builder.WithMetadata(new PlatformOnlyAttribute());
     }
 
-    private static AuthorizationPolicy Policy(RouteCategory category) =>
-        new AuthorizationPolicyBuilder(JwtBearerDefaults.AuthenticationScheme)
+    private static AuthorizationPolicy Policy(string authenticationScheme, RouteCategory category) =>
+        new AuthorizationPolicyBuilder(authenticationScheme)
             .RequireAuthenticatedUser()
             .AddRequirements(new RouteCategoryRequirement(category))
             .Build();
