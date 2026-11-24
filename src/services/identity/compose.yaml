@@ -1,0 +1,53 @@
+services:
+  identity-db:
+    image: ${POSTGRES_IMAGE}
+    profiles:
+      - infra
+    environment:
+      POSTGRES_DB: identity
+      POSTGRES_USER: ${IDENTITY_DB_USER}
+      POSTGRES_PASSWORD: ${IDENTITY_DB_PASSWORD}
+    ports:
+      - "127.0.0.1:${IDENTITY_DB_PORT}:5432"
+    volumes:
+      - identity-db-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+  identity-api:
+    build:
+      context: .
+      additional_contexts:
+        packages: ../../../artifacts/packages
+      args:
+        DOTNET_SDK_IMAGE: ${DOTNET_SDK_IMAGE}
+        DOTNET_ASPNET_IMAGE: ${DOTNET_ASPNET_IMAGE}
+    profiles:
+      - apps
+    environment:
+      ConnectionStrings__Identity: "Host=identity-db;Port=5432;Database=identity;Username=${IDENTITY_DB_USER};Password=${IDENTITY_DB_PASSWORD};GSS Encryption Mode=Disable"
+      RabbitMq__Uri: "amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672"
+      Authentication__Authority: "http://identity-api:8080"
+      Authentication__Audience: identity
+      Authentication__RequireHttpsMetadata: "false"
+    ports:
+      - "127.0.0.1:${IDENTITY_API_PORT}:8080"
+    depends_on:
+      identity-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    restart: on-failure
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/health/ready > /dev/null || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 24
+      start_period: 15s
+
+volumes:
+  identity-db-data:

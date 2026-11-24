@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <ItemGroup>
+    <PackageReference Include="BuildingBlocks.AspNetCore" />
+    <PackageReference Include="BuildingBlocks.EntityFrameworkCore" />
+    <PackageReference Include="BuildingBlocks.Messaging" />
+    <PackageReference Include="WolverineFx.Http" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" PrivateAssets="all" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(Configuration)' == 'Debug'">
+    <PackageReference Include="WolverineFx.RuntimeCompilation" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Identity.Tests" />
+  </ItemGroup>
+</Project>

@@ -9,7 +9,7 @@
 | Command | Effect |
 |---|---|
 | `./scripts/dev.ps1 up` | Start the `infra` profile and wait until healthy |
-| `./scripts/dev.ps1 up -Profile infra` | Choose the profiles explicitly |
+| `./scripts/dev.ps1 up -Profile infra,apps` | Also build and start the services (run `./scripts/restore-feed.ps1 -Service <name>` first) |
 | `./scripts/dev.ps1 status` | Show containers, state and health |
 | `./scripts/dev.ps1 down` | Stop and remove containers, keep data |
 | `./scripts/dev.ps1 reset` | Remove the containers and data of this project only |
@@ -32,6 +32,7 @@ The compose project is `inventory-and-order`. Plain `docker compose -f deploy/co
 | Shipping database | `SHIPPING_DB_PORT` | 5406 |
 | Notification database | `NOTIFICATION_DB_PORT` | 5407 |
 | Reporting database | `REPORTING_DB_PORT` | 5408 |
+| Identity API (temporary, until the gateway in feature 014) | `IDENTITY_API_PORT` | 5101 |
 
 RabbitMQ management UI: http://127.0.0.1:15672, user `dev`, password `dev-only-not-a-secret`.
 

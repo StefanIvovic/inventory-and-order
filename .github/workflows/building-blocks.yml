@@ -57,6 +57,9 @@ jobs:
       - name: Image pin check
         run: dotnet run --project tools/RepoChecks -- images
 
+      - name: Package pin check
+        run: dotnet run --project tools/RepoChecks -- packages
+
       - name: Pack shared packages
         shell: pwsh
         run: ./scripts/pack.ps1

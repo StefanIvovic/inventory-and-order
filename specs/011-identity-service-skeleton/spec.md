@@ -22,7 +22,7 @@ A developer runs the dev stack and gets a healthy Identity service with its own 
 
 1. **Given** a clean dev machine, **When** the developer starts the stack with the `infra` and `apps` profiles, **Then** the Identity database and the Identity API both become healthy, and the schema is migrated on startup.
 2. **Given** the stack is up, **When** anyone calls the liveness or readiness endpoint without a token, **Then** it answers 200.
-3. **Given** the Identity database is stopped, **When** the readiness endpoint is called, **Then** it reports unhealthy, while liveness still answers 200.
+3. **Given** the Identity database becomes unreachable while the service runs, **When** the readiness endpoint is called, **Then** it reports unhealthy, while liveness still answers 200.
 4. **Given** only the `infra` profile is started, **When** the developer looks at the stack, **Then** the Identity database runs and the API does not.
 
 ---
@@ -132,7 +132,8 @@ The constitution states that routes require an authenticated user with a tenant 
 - **The signing keys can't be fetched at start-up** (the authority is unreachable). The service still starts and stays live. Requests that need a token answer 401 until the keys can be fetched, and readiness does not depend on the authority.
 - **The signing keys rotate.** A token signed with a new key is accepted once the cache refreshes, without a restart.
 - **A route is marked both allow-listed and platform-only.** Startup fails with a clear configuration error.
-- **The database is unreachable at start-up.** The service starts, readiness reports unhealthy, and migrations run once the database is reachable, before readiness turns healthy.
+- **The database is unreachable at start-up.** The service fails fast, because the messaging store needs the database to start, and the container restarts until the database is reachable. Compose starts the API only after the database is healthy. *(Changed during implementation: Wolverine's message storage cannot start without its database.)*
+- **The database goes away while the service runs.** Readiness reports unhealthy and liveness stays 200, until the database is back.
 - **The same migration is started by two instances at once.** Only one applies it, and the other waits or does nothing.
 - **Dev and Testcontainers run in parallel.** The Identity tests never use the dev database or the dev broker.
 

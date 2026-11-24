@@ -5,3 +5,7 @@ include:
     env_file:
       - versions.env
       - dev.env
+  - path: ../src/services/identity/compose.yaml
+    env_file:
+      - versions.env
+      - dev.env

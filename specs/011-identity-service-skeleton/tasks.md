@@ -79,7 +79,7 @@ description: "Task list for feature 011 Identity Service Skeleton"
 
 ## Phase 4: User Story 6 - The service builds and ships on its own (P2, the base for the other stories)
 
-- [ ] T012 [US6] Create `src/services/identity/` with:
+- [X] T012 [US6] Create `src/services/identity/` with:
   - `Identity.slnx`
   - `Directory.Build.props`: the same settings as the root, no imports
   - `Directory.Packages.props`: BuildingBlocks `0.1.0`, Wolverine 6.65.1, EF and Npgsql, JwtBearer, xunit.v3, Testcontainers, `Microsoft.AspNetCore.Mvc.Testing` 10.0.15; MinVer as a global reference with `MinVerTagPrefix identity/v`
@@ -89,8 +89,8 @@ description: "Task list for feature 011 Identity Service Skeleton"
   - `Identity.Tests` (xunit.v3, references Identity.Api)
 
   Add the projects to `InventoryAndOrder.slnx` (plan.md, research.md R9)
-- [ ] T013 [US6] Create `src/services/identity/Dockerfile` per research.md R9: build args with no defaults, `COPY --from=packages`, publish in Release with `MinVerSkip`, non-root final stage on 8080
-- [ ] T014 [US6] Create `src/services/identity/compose.yaml` per research.md R10. Give `identity-api` the dev environment `Authentication__Authority=http://identity-api:8080`, `Authentication__Audience=identity` and `Authentication__RequireHttpsMetadata=false`, plus its connection string and RabbitMQ URI from `dev.env` values (analysis U1). Add `IDENTITY_DB_USER`, `IDENTITY_DB_PASSWORD` and `IDENTITY_API_PORT=5101` to `deploy/dev.env`, the include entry to `deploy/compose.yaml`, and the ports row plus the temporary-port note to `deploy/README.md`
+- [X] T013 [US6] Create `src/services/identity/Dockerfile` per research.md R9: build args with no defaults, `COPY --from=packages`, publish in Release with `MinVerSkip`, non-root final stage on 8080
+- [X] T014 [US6] Create `src/services/identity/compose.yaml` per research.md R10. Give `identity-api` the dev environment `Authentication__Authority=http://identity-api:8080`, `Authentication__Audience=identity` and `Authentication__RequireHttpsMetadata=false`, plus its connection string and RabbitMQ URI from `dev.env` values (analysis U1). Add `IDENTITY_DB_USER`, `IDENTITY_DB_PASSWORD` and `IDENTITY_API_PORT=5101` to `deploy/dev.env`, the include entry to `deploy/compose.yaml`, and the ports row plus the temporary-port note to `deploy/README.md`
 
 **Checkpoint**: `docker compose -f deploy/compose.yaml --profile '*' config --quiet` passes, and so does the image-pin check.
 
@@ -100,12 +100,12 @@ description: "Task list for feature 011 Identity Service Skeleton"
 
 **Independent Test**: quickstart.md sections 2 and 3.
 
-- [ ] T015 [US1] Create `Identity.Api/Persistence/`:
+- [X] T015 [US1] Create `Identity.Api/Persistence/`:
   - `IdentityDbContext : TenantDbContext`, with `RoleAssignment` per data-model.md "RoleAssignment" (all fields, key and index)
   - the initial migration in `Persistence/Migrations`, including a check constraint that `Role` is one of the `IdentityRoles` names, per data-model.md "RoleAssignment.Role" (analysis C4)
   - `MigrationRunner`, a hosted service with retry and backoff that sets a ready flag (research.md R7)
-- [ ] T021 [US1] Create `Identity.Api/Authorization/IdentityPermissions.cs` and `IdentityRoles.cs` per data-model.md "IdentityPermissions" and "IdentityRoles". Create `IdentityPermissionProvider.cs` per data-model.md "Permission resolution" It is moved here because T016 registers the provider (analysis F1)
-- [ ] T016 [US1] Create `Identity.Api/Program.cs`:
+- [X] T021 [US1] Create `Identity.Api/Authorization/IdentityPermissions.cs` and `IdentityRoles.cs` per data-model.md "IdentityPermissions" and "IdentityRoles". Create `IdentityPermissionProvider.cs` per data-model.md "Permission resolution" It is moved here because T016 registers the provider (analysis F1)
+- [X] T016 [US1] Create `Identity.Api/Program.cs`:
   - `AddBuildingBlocks`, `AddBuildingBlocksAuthentication`, `AddBuildingBlocksPermissions<IdentityPermissionProvider>`
   - Wolverine with `UseBuildingBlocksMessaging(new MessagingSettings("identity", …))`. Do not add `UseBuildingBlocksValidation` yet: nothing in 011 needs it, and it comes with the first command route in 013 (analysis S1)
   - `TypeLoadMode` Dynamic under DEBUG and Static otherwise (research.md R8)
@@ -114,9 +114,9 @@ description: "Task list for feature 011 Identity Service Skeleton"
   - `return await app.RunJasperFxCommands(args)`
 
   Configuration comes from `ConnectionStrings:Identity`, `RabbitMq:Uri` and `Authentication:*`. Reference `WolverineFx.RuntimeCompilation` only in Debug
-- [ ] T017 [US1] Create `Identity.Tests/IdentityAppFixture.cs`: `PostgresFixture` (a database per test class) and `RabbitMqFixture`, then a WebApplicationFactory that overrides the connection strings and calls `AddTestTokenValidation("identity")`
-- [ ] T018 [P] [US1] Add `Identity.Tests/HealthTests.cs`: live and ready answer 200 without a token, the migrations are applied on startup, and ready answers 503 while the runner hasn't finished (simulated with an unreachable database)
-- [ ] T019 [US1] Run quickstart.md sections 2 and 3 locally against the dev stack, and record how long `up` takes against SC-001. Then check concurrent migrations: run a second `identity-api` instance against an empty `identity-db` at the same time as the first (`docker compose ... up --scale identity-api=2` with the dev port removed in a scratch override), and confirm the migration is applied once and both instances become healthy. Then `dev.ps1 reset` (analysis C2)
+- [X] T017 [US1] Create `Identity.Tests/IdentityAppFixture.cs`: `PostgresFixture` (a database per test class) and `RabbitMqFixture`, then a WebApplicationFactory that overrides the connection strings and calls `AddTestTokenValidation("identity")`
+- [X] T018 [P] [US1] Add `Identity.Tests/HealthTests.cs`: live and ready answer 200 without a token, the migrations are applied on startup, and ready answers 503 while the runner hasn't finished (simulated with an unreachable database)
+- [X] T019 [US1] Run quickstart.md sections 2 and 3 locally against the dev stack, and record how long `up` takes against SC-001. Then check concurrent migrations: run a second `identity-api` instance against an empty `identity-db` at the same time as the first (`docker compose ... up --scale identity-api=2` with the dev port removed in a scratch override), and confirm the migration is applied once and both instances become healthy. Then `dev.ps1 reset` (analysis C2)
 
 ---
 
@@ -124,7 +124,7 @@ description: "Task list for feature 011 Identity Service Skeleton"
 
 **Independent Test**: `Identity.Tests/AuthenticationTests.cs`.
 
-- [ ] T020 [US2] Add `Identity.Tests/AuthenticationTests.cs` for `GET /roles`:
+- [X] T020 [US2] Add `Identity.Tests/AuthenticationTests.cs` for `GET /roles`:
   - no token, invalid signature, expired, wrong audience → 401
   - platform with tenant, staff without tenant → 401 `invalid-identity`
   - a valid platform token → 403
@@ -136,26 +136,26 @@ description: "Task list for feature 011 Identity Service Skeleton"
 
 **Independent Test**: `Identity.Tests/RolesTests.cs`.
 
-- [ ] T022 [US4] Create `Identity.Api/Roles/GetRoles.cs` (`GetRoles`, `RolesResponse`, `RoleDto` per data-model.md "GetRoles → RolesResponse"), `GetRolesHandler.cs` (`CommandHandler<IdentityDbContext>`, `EnsureAsync(RolesView)`, `CanAssign = HasAsync(RolesAssign)`) and `RolesEndpoint.cs` (Wolverine HTTP `GET /roles` delegating to `InvokeAsync`) (research.md R6)
-- [ ] T023 [P] [US4] Add `Identity.Tests/RolesTests.cs`:
+- [X] T022 [US4] Create `Identity.Api/Roles/GetRoles.cs` (`GetRoles`, `RolesResponse`, `RoleDto` per data-model.md "GetRoles → RolesResponse"), `GetRolesHandler.cs` (`CommandHandler<IdentityDbContext>`, `EnsureAsync(RolesView)`, `CanAssign = HasAsync(RolesAssign)`) and `RolesEndpoint.cs` (Wolverine HTTP `GET /roles` delegating to `InvokeAsync`) (research.md R6)
+- [X] T023 [P] [US4] Add `Identity.Tests/RolesTests.cs`:
   - a staff user assigned `identity.administrator` in their tenant gets 200 with the full catalogue and `canAssign=false`
   - an assignment in another tenant does not grant access (403 problem details listing `identity.roles.view`)
-- [ ] T024 [P] [US4] Add `Identity.Tests/CatalogueTests.cs`: every role's permissions exist in `IdentityPermissions`, and the names are unique, lowercase and dot-separated
+- [X] T024 [P] [US4] Add `Identity.Tests/CatalogueTests.cs`: every role's permissions exist in `IdentityPermissions`, and the names are unique, lowercase and dot-separated
 
 ---
 
 ## Phase 8: User Story 3 - Route test as a merge gate (P1)
 
-- [ ] T025 [US3] Add `Identity.Tests/NoRolesRouteTests.cs`. It runs `NoRolesRouteCheck.RunAsync` on the app, asserts no failures, asserts that `GET /roles` was checked and both health routes were skipped, and writes the report to the test output
-- [ ] T026 [US3] Mutation check (local only, not committed): add a scratch route that returns 200 without a permission check, confirm the route test fails and names it, then remove it
+- [X] T025 [US3] Add `Identity.Tests/NoRolesRouteTests.cs`. It runs `NoRolesRouteCheck.RunAsync` on the app, asserts no failures, asserts that `GET /roles` was checked and both health routes were skipped, and writes the report to the test output
+- [X] T026 [US3] Mutation check (local only, not committed): add a scratch route that returns 200 without a permission check, confirm the route test fails and names it, then remove it
 
 ---
 
 ## Phase 9: User Story 5 - Static code in production (P2)
 
-- [ ] T027 [US5] Run `dotnet run --project src/services/identity/Identity.Api -c Debug -- codegen write` and commit `Identity.Api/Internal/Generated/`. If the command needs the database or broker, start `dev.ps1 up` first and document that in quickstart.md (research.md R8)
-- [ ] T028 [US5] Mutation check (local, not committed): change the `GetRoles` handler signature without regenerating, and confirm `git status --porcelain` on the generated folder shows a difference after `codegen write`. Revert
-- [ ] T029 [US5] Build the image and start `dev.ps1 up -Profile infra,apps`. Confirm `identity-api` is healthy, check the logs for no runtime compilation, and confirm `/roles` answers 401. Then `dev.ps1 reset`
+- [X] T027 [US5] Run `dotnet run --project src/services/identity/Identity.Api -c Debug -- codegen write` and commit `Identity.Api/Internal/Generated/`. If the command needs the database or broker, start `dev.ps1 up` first and document that in quickstart.md (research.md R8)
+- [X] T028 [US5] Mutation check (local, not committed): change the `GetRoles` handler signature without regenerating, and confirm `git status --porcelain` on the generated folder shows a difference after `codegen write`. Revert
+- [X] T029 [US5] Build the image and start `dev.ps1 up -Profile infra,apps`. Confirm `identity-api` is healthy, check the logs for no runtime compilation, and confirm `/roles` answers 401. Then `dev.ps1 reset`
 
 ---
 
@@ -170,7 +170,7 @@ description: "Task list for feature 011 Identity Service Skeleton"
   6. the image-pin check and `RepoChecks -- packages`
   7. the smoke start through `dev.ps1 up -Profile infra,apps`
   8. `if: always()`: `reset`, then the cleanup check `-Project inventory-and-order`
-- [ ] T031 [US7] Run `/speckit-constitution` to amend to v1.3.0 per research.md R12, including the clarification about route-category markers and policies (analysis D1)
+- [X] T031 [US7] Run `/speckit-constitution` to amend to v1.3.0 per research.md R12, including the clarification about route-category markers and policies (analysis D1)
 
 ---
 

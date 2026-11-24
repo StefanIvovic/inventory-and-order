@@ -29,10 +29,9 @@ Expected: 503, then 200, and readiness is back to 200 shortly after the start.
 
 ## 4. Codegen guard (US5)
 ```powershell
-dotnet run --project src/services/identity/Identity.Api -c Debug -- codegen write
-git status --porcelain -- src/services/identity/Identity.Api/Internal/Generated
+./scripts/codegen.ps1 -Service identity -Check
 ```
-Expected: no output.
+Expected: "Generated code for identity is up to date." After changing a handler or endpoint, run `./scripts/codegen.ps1 -Service identity` (no `-Check`) and commit `Identity.Api/Internal/Generated`. The script deletes the old files first, because stale generated code doesn't compile.
 
 ## 5. Clean up
 ```powershell
