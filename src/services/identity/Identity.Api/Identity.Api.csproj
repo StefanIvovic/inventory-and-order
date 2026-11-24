@@ -3,6 +3,7 @@
     <PackageReference Include="BuildingBlocks.AspNetCore" />
     <PackageReference Include="BuildingBlocks.EntityFrameworkCore" />
     <PackageReference Include="BuildingBlocks.Messaging" />
+    <PackageReference Include="BuildingBlocks.Validation" />
     <PackageReference Include="WolverineFx.Http" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
     <PackageReference Include="OpenIddict.AspNetCore" />
@@ -13,6 +14,9 @@
   </ItemGroup>
   <ItemGroup Condition="'$(Configuration)' == 'Debug'">
     <PackageReference Include="WolverineFx.RuntimeCompilation" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Identity.Contracts/Identity.Contracts.csproj" />
   </ItemGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="Identity.Tests" />

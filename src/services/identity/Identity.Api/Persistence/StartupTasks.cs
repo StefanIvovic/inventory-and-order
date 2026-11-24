@@ -32,7 +32,12 @@ public sealed partial class StartupTasks(
         await MigrateAsync(services.GetRequiredService<IdentityDbContext>(), cancellationToken);
         await Scopes.RegisterAsync(services.GetRequiredService<IOpenIddictScopeManager>(), cancellationToken);
         await ClientRegistrar.RegisterAsync(services.GetRequiredService<IOpenIddictApplicationManager>(), settings, cancellationToken);
-        await PlatformAdminSeeder.SeedAsync(services.GetRequiredService<UserManager<AppUser>>(), settings.PlatformAdmin, cancellationToken);
+        await PlatformAdminSeeder.SeedAsync(
+            services.GetRequiredService<UserManager<AppUser>>(),
+            services.GetRequiredService<IdentityDbContext>(),
+            settings.PlatformAdmin,
+            services.GetRequiredService<TimeProvider>(),
+            cancellationToken);
 
         state.MarkApplied();
         LogReady(logger);

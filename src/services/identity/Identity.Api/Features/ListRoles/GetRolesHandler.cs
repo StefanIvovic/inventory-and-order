@@ -2,7 +2,7 @@ using BuildingBlocks.Core.Handlers;
 using Identity.Api.Authorization;
 using Identity.Api.Persistence;
 
-namespace Identity.Api.Roles;
+namespace Identity.Api.Features.ListRoles;
 
 public sealed class GetRolesHandler(IRequestContext context, IdentityDbContext db) : CommandHandler<IdentityDbContext>(context, db)
 {
@@ -11,7 +11,7 @@ public sealed class GetRolesHandler(IRequestContext context, IdentityDbContext d
         ArgumentNullException.ThrowIfNull(query);
         await Permissions.EnsureAsync(IdentityPermissions.RolesView, cancellationToken);
 
-        var roles = IdentityRoles.All
+        var roles = IdentityRoles.Tenant
             .OrderBy(role => role.Key, StringComparer.Ordinal)
             .Select(role => new RoleDto(role.Key, role.Value.Order(StringComparer.Ordinal).ToList()))
             .ToList();

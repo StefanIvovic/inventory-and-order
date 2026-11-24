@@ -6,7 +6,9 @@ WORKDIR /repo/src/services/identity
 COPY --from=packages . /repo/artifacts/packages
 COPY nuget.config Directory.Build.props Directory.Packages.props ./
 COPY Identity.Api/Identity.Api.csproj Identity.Api/
+COPY Identity.Contracts/Identity.Contracts.csproj Identity.Contracts/
 RUN dotnet restore Identity.Api/Identity.Api.csproj -p:Configuration=Release
+COPY Identity.Contracts/ Identity.Contracts/
 COPY Identity.Api/ Identity.Api/
 RUN dotnet publish Identity.Api/Identity.Api.csproj -c Release --no-restore -o /app -p:MinVerSkip=true
 

@@ -1,6 +1,8 @@
 using BuildingBlocks.AspNetCore;
 using BuildingBlocks.AspNetCore.Authentication;
 using BuildingBlocks.Messaging;
+using BuildingBlocks.Validation;
+using Identity.Contracts;
 using Identity.Api.Authorization;
 using Identity.Api.Connect;
 using Identity.Api.Health;
@@ -52,7 +54,9 @@ builder.Services
         options.User.RequireUniqueEmail = true;
     })
     .AddUserStore<Microsoft.AspNetCore.Identity.EntityFrameworkCore.UserOnlyStore<AppUser, IdentityDbContext, Guid>>()
-    .AddSignInManager();
+    .AddSignInManager<AppSignInManager>();
+builder.Services.AddScoped<HandlerUserManager>();
+builder.Services.AddSingleton<BuildingBlocks.AspNetCore.Errors.IExceptionProblemMapper, UniqueViolationMapper>();
 
 builder.Services
     .AddAuthentication(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)
@@ -119,6 +123,12 @@ builder.Host.UseWolverine(options =>
 {
     options.ApplicationAssembly = typeof(Program).Assembly;
     options.UseBuildingBlocksMessaging(new MessagingSettings("identity", connectionString, rabbitMqUri));
+    options.UseBuildingBlocksPermissionInvalidation();
+    options.UseBuildingBlocksValidation();
+    options.PublishEvent<TenantCreated>();
+    options.PublishEvent<UserRegistered>();
+    options.PublishEvent<UserDisabled>();
+    options.CodeGeneration.AlwaysUseServiceLocationFor<HandlerUserManager>();
 #if DEBUG
     options.CodeGeneration.TypeLoadMode = TypeLoadMode.Dynamic;
 #else

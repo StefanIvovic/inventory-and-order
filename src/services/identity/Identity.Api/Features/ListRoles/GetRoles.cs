@@ -1,4 +1,4 @@
-namespace Identity.Api.Roles;
+namespace Identity.Api.Features.ListRoles;
 
 public sealed record GetRoles;
 

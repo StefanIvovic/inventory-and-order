@@ -22,6 +22,26 @@ namespace Identity.Api.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Identity.Api.Persistence.PlatformRoleAssignment", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Role")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTimeOffset>("AssignedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("UserId", "Role");
+
+                    b.ToTable("platform_role_assignments", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_platform_role_assignments_role", "\"Role\" IN ('identity.platform-administrator')");
+                        });
+                });
+
             modelBuilder.Entity("Identity.Api.Persistence.RoleAssignment", b =>
                 {
                     b.Property<string>("TenantId")
@@ -44,7 +64,38 @@ namespace Identity.Api.Persistence.Migrations
 
                     b.ToTable("role_assignments", null, t =>
                         {
-                            t.HasCheckConstraint("ck_role_assignments_role", "\"Role\" IN ('identity.administrator')");
+                            t.HasCheckConstraint("ck_role_assignments_role", "\"Role\" IN ('identity.administrator', 'identity.viewer')");
+                        });
+                });
+
+            modelBuilder.Entity("Identity.Api.Tenants.Tenant", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasMaxLength(63)
+                        .HasColumnType("character varying(63)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Slug")
+                        .IsUnique()
+                        .HasDatabaseName("ux_tenants_slug");
+
+                    b.ToTable("tenants", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_tenants_slug", "\"Slug\" ~ '^[a-z0-9](?:[a-z0-9]|-(?!-)){1,61}[a-z0-9]$'");
                         });
                 });
 
@@ -60,6 +111,12 @@ namespace Identity.Api.Persistence.Migrations
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("text");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("DisabledAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
@@ -113,7 +170,9 @@ namespace Identity.Api.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("NormalizedEmail")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("ux_identity_users_staff_email")
+                        .HasFilter("\"UserType\" <> 'customer'");
 
                     b.HasIndex("NormalizedUserName")
                         .IsUnique();

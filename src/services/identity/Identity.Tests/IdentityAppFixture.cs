@@ -1,3 +1,4 @@
+using BuildingBlocks.Core.Identity;
 using BuildingBlocks.Core.Tenancy;
 using BuildingBlocks.Testing;
 using Identity.Api.Persistence;
@@ -8,9 +9,13 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using OpenIddict.Server;
+using Wolverine;
+using Wolverine.Tracking;
+using System.Net.Http.Json;
 
 [assembly: AssemblyFixture(typeof(Identity.Tests.ContainersFixture))]
 
@@ -45,6 +50,7 @@ public sealed class IdentityApp : WebApplicationFactory<Program>
     public const string PostLogoutRedirectUri = "https://gateway.test/backoffice/";
     public const string AdminEmail = "admin@platform.test";
     public const string AdminPassword = "Admin#Pass1";
+    public const string TenantAdminPassword = "Tenant#Pass1";
 
     private readonly Dictionary<string, string?> settings;
     private readonly bool testSigningKey;
@@ -122,10 +128,50 @@ public sealed class IdentityApp : WebApplicationFactory<Program>
         await WaitUntilMigratedAsync();
         await using var scope = Services.CreateAsyncScope();
         var users = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
-        var user = AppUser.ForTenant(email, tenantId, userType);
+        var user = AppUser.ForTenant(email, tenantId, userType, DateTimeOffset.UtcNow);
         var result = await users.CreateAsync(user, password);
         Assert.True(result.Succeeded, string.Join(" ", result.Errors.Select(e => e.Description)));
         return user;
+    }
+
+    public async Task<string> PlatformTokenAsync()
+    {
+        await WaitUntilMigratedAsync();
+        var admin = await FindUserAsync(AdminEmail);
+        return TestTokens.Platform(admin.Id, Audience);
+    }
+
+    public static string StaffToken(Guid userId, string tenantId) => TestTokens.For(userId, tenantId, UserType.Staff, Audience);
+
+    public async Task<CreatedTenant> CreateTenantAsync(string slug, string adminEmail = "", string adminPassword = TenantAdminPassword)
+    {
+        using var client = CreateClient();
+        var email = string.IsNullOrEmpty(adminEmail) ? $"admin@{slug}.test" : adminEmail;
+        var response = await client.PostAsync("/tenants", new { slug, name = slug + " Ltd", adminEmail = email, adminPassword }, await PlatformTokenAsync());
+        Assert.Equal(System.Net.HttpStatusCode.Created, response.StatusCode);
+        var created = await response.Content.ReadFromJsonAsync<CreatedTenant>(TestContext.Current.CancellationToken);
+        Assert.NotNull(created);
+        return created with { AdminEmail = email };
+    }
+
+    public async Task<AppUser> FindUserAsync(string email)
+    {
+        await using var scope = Services.CreateAsyncScope();
+        var users = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
+        var user = await users.FindByEmailAsync(email);
+        Assert.NotNull(user);
+        return user;
+    }
+
+    public async Task<ITrackedSession> TrackAsync(Func<Task> action)
+    {
+        ArgumentNullException.ThrowIfNull(action);
+        return await Services.GetRequiredService<IHost>()
+            .TrackActivity()
+            .IncludeExternalTransports()
+            .DoNotAssertOnExceptionsDetected()
+            .Timeout(TimeSpan.FromSeconds(60))
+            .ExecuteAndWaitAsync((IMessageContext _) => action());
     }
 
     public async Task WithUsersAsync(Func<UserManager<AppUser>, Task> action)
@@ -151,4 +197,9 @@ public sealed class IdentityApp : WebApplicationFactory<Program>
                     options.SigningCredentials.Add(new SigningCredentials(TestTokens.Key, SecurityAlgorithms.RsaSha256))));
         }
     }
+}
+
+public sealed record CreatedTenant(string Id, string Slug, Guid AdminUserId)
+{
+    public string AdminEmail { get; init; } = string.Empty;
 }
