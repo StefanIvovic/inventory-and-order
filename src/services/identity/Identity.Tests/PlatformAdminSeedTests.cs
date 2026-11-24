@@ -1,6 +1,11 @@
+using BuildingBlocks.Core.Tenancy;
+using BuildingBlocks.Testing;
+using Identity.Api.Persistence;
 using Identity.Api.Users;
 using Identity.Tests.Flow;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Identity.Tests;
 
@@ -20,6 +25,43 @@ public sealed class PlatformAdminSeedTests(ContainersFixture containers)
             Assert.Equal(UserTypes.Platform, admin.UserType);
             Assert.Null(admin.TenantId);
         });
+    }
+
+    [Fact]
+    public async Task SeededPlatformAdminHoldsThePlatformRole()
+    {
+        await using var app = await IdentityApp.StartAsync(containers);
+        using var client = app.CreateClient();
+
+        var response = await client.GetAsync("/tenants", await app.PlatformTokenAsync());
+
+        Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task PlatformUserFromA012DatabaseGetsThePlatformRoleOnUpgrade()
+    {
+        var database = await containers.Postgres.CreateDatabaseAsync(TestContext.Current.CancellationToken);
+        var userId = Guid.NewGuid();
+        var builder = new DbContextOptionsBuilder<IdentityDbContext>().UseNpgsql(database);
+        builder.UseOpenIddict<Guid>();
+        var options = builder.Options;
+        await using (var db = new IdentityDbContext(options, new TenantContext()))
+        {
+            await db.GetService<IMigrator>().MigrateAsync("20261124152319_Authentication", TestContext.Current.CancellationToken);
+            await db.Database.ExecuteSqlInterpolatedAsync(
+                $"INSERT INTO identity_users (\"Id\", \"UserName\", \"NormalizedUserName\", \"Email\", \"NormalizedEmail\", \"EmailConfirmed\", \"SecurityStamp\", \"ConcurrencyStamp\", \"PhoneNumberConfirmed\", \"TwoFactorEnabled\", \"LockoutEnabled\", \"AccessFailedCount\", \"UserType\") VALUES ({userId}, 'old@platform.test', 'OLD@PLATFORM.TEST', 'old@platform.test', 'OLD@PLATFORM.TEST', true, 'stamp', 'concurrency', false, false, true, 0, 'platform')",
+                TestContext.Current.CancellationToken);
+        }
+
+        await using var app = await IdentityApp.StartAsync(containers, database);
+        await app.WaitUntilMigratedAsync();
+        using var client = app.CreateClient();
+
+        var response = await client.GetAsync("/tenants", TestTokens.Platform(userId, IdentityApp.Audience));
+
+        Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
+        await app.WithUsersAsync(async users => Assert.Null(await users.FindByEmailAsync(IdentityApp.AdminEmail)));
     }
 
     [Theory]

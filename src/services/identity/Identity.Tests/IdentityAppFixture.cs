@@ -168,7 +168,6 @@ public sealed class IdentityApp : WebApplicationFactory<Program>
         ArgumentNullException.ThrowIfNull(action);
         return await Services.GetRequiredService<IHost>()
             .TrackActivity()
-            .IncludeExternalTransports()
             .DoNotAssertOnExceptionsDetected()
             .Timeout(TimeSpan.FromSeconds(60))
             .ExecuteAndWaitAsync((IMessageContext _) => action());

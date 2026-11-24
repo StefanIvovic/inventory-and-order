@@ -52,11 +52,11 @@ description: "Task list for feature 013 Identity Tenants and Staff"
 
 **Independent test**: create tenant `acme`, sign in as its admin through the code flow, `GET /users` is 200, `TenantCreated` and `UserRegistered` observed.
 
-- [ ] T014 [US1] Tests first in `Identity.Tests/Tenants/CreateTenantTests.cs` and `ListTenantsTests.cs` for every acceptance scenario of US1, including the concurrent duplicate slug and duplicate email (both 409, no partial rows, no events), and a platform user without the platform role (403). See them fail
-- [ ] T015 [US1] `Tenants/TenantCreation.cs` domain service: rules, tenant, admin user via `HandlerUserManager` (password failures through `IdentityResultErrors` as 400 on `adminPassword`), Administrator assignment, events; sets the scoped `TenantContext` to the new tenant (research.md R8)
-- [ ] T016 [US1] `Features/CreateTenant/`: `CreateTenant` command, `CreateTenantValidator : CommandValidator<CreateTenant>` (data-model.md `Tenant.Slug`, `Tenant.Name`, `AppUser.Email`, `AppUser.Password`), handler (permission, validation, conflicts, `TenantCreation`, envelope tenant), endpoint `POST /tenants` `.RequirePlatform()` per contracts/endpoints.md
-- [ ] T017 [US1] `Features/ListTenants/`: handler and endpoint `GET /tenants` with `canCreate`
-- [ ] T018 [US1] `Protocol/PlatformAdminSeeder.cs`: assign `identity.platform-administrator` when creating the admin. Test in `PlatformAdminSeedTests.cs`. Migration test: migrate an empty database to the last 012 migration (`Authentication`), insert a platform user without an assignment, migrate to the latest, and check that the user holds the platform role and can call `GET /tenants`
+- [X] T014 [US1] Tests first in `Identity.Tests/Tenants/CreateTenantTests.cs` and `ListTenantsTests.cs` for every acceptance scenario of US1, including the concurrent duplicate slug and duplicate email (both 409, no partial rows, no events), and a platform user without the platform role (403). See them fail
+- [X] T015 [US1] `Tenants/TenantCreation.cs` domain service: rules, tenant, admin user via `HandlerUserManager` (password failures through `IdentityResultErrors` as 400 on `adminPassword`), Administrator assignment, events; sets the scoped `TenantContext` to the new tenant (research.md R8)
+- [X] T016 [US1] `Features/CreateTenant/`: `CreateTenant` command, `CreateTenantValidator : CommandValidator<CreateTenant>` (data-model.md `Tenant.Slug`, `Tenant.Name`, `AppUser.Email`, `AppUser.Password`), handler (permission, validation, conflicts, `TenantCreation`, envelope tenant), endpoint `POST /tenants` `.RequirePlatform()` per contracts/endpoints.md
+- [X] T017 [US1] `Features/ListTenants/`: handler and endpoint `GET /tenants` with `canCreate`
+- [X] T018 [US1] `Protocol/PlatformAdminSeeder.cs`: assign `identity.platform-administrator` when creating the admin. Test in `PlatformAdminSeedTests.cs`. Migration test: migrate an empty database to the last 012 migration (`Authentication`), insert a platform user without an assignment, migrate to the latest, and check that the user holds the platform role and can call `GET /tenants`
 
 ---
 

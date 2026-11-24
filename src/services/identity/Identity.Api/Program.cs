@@ -8,6 +8,7 @@ using Identity.Api.Connect;
 using Identity.Api.Health;
 using Identity.Api.Persistence;
 using Identity.Api.Protocol;
+using Identity.Api.Tenants;
 using Identity.Api.Users;
 using JasperFx;
 using JasperFx.CodeGeneration;
@@ -56,6 +57,7 @@ builder.Services
     .AddUserStore<Microsoft.AspNetCore.Identity.EntityFrameworkCore.UserOnlyStore<AppUser, IdentityDbContext, Guid>>()
     .AddSignInManager<AppSignInManager>();
 builder.Services.AddScoped<HandlerUserManager>();
+builder.Services.AddScoped<TenantCreation>();
 builder.Services.AddSingleton<BuildingBlocks.AspNetCore.Errors.IExceptionProblemMapper, UniqueViolationMapper>();
 
 builder.Services
@@ -129,6 +131,7 @@ builder.Host.UseWolverine(options =>
     options.PublishEvent<UserRegistered>();
     options.PublishEvent<UserDisabled>();
     options.CodeGeneration.AlwaysUseServiceLocationFor<HandlerUserManager>();
+    options.CodeGeneration.AlwaysUseServiceLocationFor<TenantCreation>();
 #if DEBUG
     options.CodeGeneration.TypeLoadMode = TypeLoadMode.Dynamic;
 #else
