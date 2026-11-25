@@ -4,6 +4,10 @@
     ViewData["Title"] = "Sign in";
 }
 <h1>Sign in</h1>
+@if (Model.TenantName is not null)
+{
+    <p class="tenant">@Model.TenantName</p>
+}
 @if (Model.ErrorMessage is not null)
 {
     <p class="error" role="alert">@Model.ErrorMessage</p>
@@ -20,3 +24,7 @@
     </label>
     <button type="submit">Sign in</button>
 </form>
+@if (Model.RegisterUrl is not null)
+{
+    <p class="alternate"><a href="@Model.RegisterUrl">Create an account</a></p>
+}

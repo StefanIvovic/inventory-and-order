@@ -14,7 +14,14 @@ public sealed record AuthorizeRequest(
     string Scopes = "openid offline_access identity",
     string RedirectUri = IdentityApp.RedirectUri,
     bool Pkce = true,
-    string ClientId = IdentityApp.Client);
+    string ClientId = IdentityApp.Client,
+    string? Tenant = null)
+{
+    public string Secret => ClientId == IdentityApp.StorefrontClient ? IdentityApp.StorefrontSecret : IdentityApp.ClientSecret;
+
+    public static AuthorizeRequest Storefront(string? tenant, string scopes = "openid offline_access identity") =>
+        new(scopes, IdentityApp.StorefrontRedirectUri, true, IdentityApp.StorefrontClient, tenant);
+}
 
 public static partial class CodeFlow
 {
@@ -36,6 +43,11 @@ public static partial class CodeFlow
             ["scope"] = request.Scopes,
             ["state"] = "state-123",
         };
+        if (request.Tenant is not null)
+        {
+            query["tenant"] = request.Tenant;
+        }
+
         if (request.Pkce && challenge is not null)
         {
             query["code_challenge"] = challenge;
@@ -100,25 +112,52 @@ public static partial class CodeFlow
         return (code, verifier);
     }
 
-    public static Task<TokenResult> RedeemAsync(HttpClient client, string code, string verifier, string secret = IdentityApp.ClientSecret) =>
-        PostTokenAsync(client, new Dictionary<string, string>
+    public static Task<TokenResult> RedeemAsync(HttpClient client, string code, string verifier, string? secret = null, AuthorizeRequest? request = null)
+    {
+        request ??= new AuthorizeRequest();
+        return PostTokenAsync(client, new Dictionary<string, string>
         {
             ["grant_type"] = "authorization_code",
             ["code"] = code,
-            ["redirect_uri"] = IdentityApp.RedirectUri,
-            ["client_id"] = IdentityApp.Client,
-            ["client_secret"] = secret,
+            ["redirect_uri"] = request.RedirectUri,
+            ["client_id"] = request.ClientId,
+            ["client_secret"] = secret ?? request.Secret,
             ["code_verifier"] = verifier,
         });
+    }
 
-    public static Task<TokenResult> RefreshAsync(HttpClient client, string refreshToken) =>
-        PostTokenAsync(client, new Dictionary<string, string>
+    public static Task<TokenResult> RefreshAsync(HttpClient client, string refreshToken, AuthorizeRequest? request = null)
+    {
+        request ??= new AuthorizeRequest();
+        return PostTokenAsync(client, new Dictionary<string, string>
         {
             ["grant_type"] = "refresh_token",
             ["refresh_token"] = refreshToken,
-            ["client_id"] = IdentityApp.Client,
-            ["client_secret"] = IdentityApp.ClientSecret,
+            ["client_id"] = request.ClientId,
+            ["client_secret"] = request.Secret,
         });
+    }
+
+    public static async Task<HttpResponseMessage> RegisterAsync(HttpClient browser, string registerUrl, string email, string password, string? confirm = null)
+    {
+        ArgumentNullException.ThrowIfNull(browser);
+        var page = await browser.GetStringAsync(registerUrl, TestContext.Current.CancellationToken);
+        var form = new Dictionary<string, string>
+        {
+            ["Email"] = email,
+            ["Password"] = password,
+            ["ConfirmPassword"] = confirm ?? password,
+            ["__RequestVerificationToken"] = AntiforgeryToken(page),
+        };
+        return await browser.PostAsync(registerUrl, new FormUrlEncodedContent(form), TestContext.Current.CancellationToken);
+    }
+
+    public static string RegisterLink(string loginPage)
+    {
+        var match = RegisterLinkPattern().Match(loginPage);
+        Assert.True(match.Success, "The login page has no registration link.");
+        return WebUtility.HtmlDecode(match.Groups[1].Value);
+    }
 
     public static async Task<TokenResult> SignInAsync(
         IdentityApp app,
@@ -130,7 +169,7 @@ public static partial class CodeFlow
         await app.WaitUntilMigratedAsync();
         using var browser = app.CreateBrowser();
         var (code, verifier) = await AuthorizeAsync(browser, email, password, request);
-        var tokens = await RedeemAsync(browser, code, verifier);
+        var tokens = await RedeemAsync(browser, code, verifier, request: request);
         Assert.Equal(HttpStatusCode.OK, tokens.Status);
         return tokens;
     }
@@ -165,4 +204,7 @@ public static partial class CodeFlow
 
     [GeneratedRegex("name=\"ReturnUrl\" value=\"([^\"]*)\"")]
     private static partial Regex ReturnUrlPattern();
+
+    [GeneratedRegex("href=\"(/account/register[^\"]*)\"")]
+    private static partial Regex RegisterLinkPattern();
 }

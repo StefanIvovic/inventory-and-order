@@ -11,7 +11,7 @@ public static class TenantUsers
         ArgumentNullException.ThrowIfNull(db);
         ArgumentNullException.ThrowIfNull(tenant);
         var tenantId = tenant.TenantId;
-        return await db.Users.SingleOrDefaultAsync(u => u.Id == userId && u.TenantId == tenantId, cancellationToken)
+        return await db.Users.SingleOrDefaultAsync(u => u.Id == userId && u.TenantId == tenantId && u.UserType == UserTypes.Staff, cancellationToken)
             ?? throw UserErrors.NotFound();
     }
 }

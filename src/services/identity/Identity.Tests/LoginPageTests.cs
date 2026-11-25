@@ -39,7 +39,7 @@ public sealed class LoginPageTests(ContainersFixture containers)
 
         await app.WithUsersAsync(async users =>
         {
-            var admin = (await users.FindByEmailAsync(IdentityApp.AdminEmail))!;
+            var admin = (await users.FindByNameAsync(IdentityApp.AdminEmail))!;
             Assert.True(admin.LockoutEnd > DateTimeOffset.UtcNow.AddMinutes(9));
             await users.SetLockoutEndDateAsync(admin, DateTimeOffset.UtcNow.AddSeconds(-1));
         });
@@ -47,7 +47,7 @@ public sealed class LoginPageTests(ContainersFixture containers)
         var unlocked = await CodeFlow.LoginAsync(browser, LoginUrl, IdentityApp.AdminEmail, IdentityApp.AdminPassword);
         Assert.Equal(HttpStatusCode.Redirect, unlocked.StatusCode);
         await app.WithUsersAsync(async users =>
-            Assert.Equal(0, (await users.FindByEmailAsync(IdentityApp.AdminEmail))!.AccessFailedCount));
+            Assert.Equal(0, (await users.FindByNameAsync(IdentityApp.AdminEmail))!.AccessFailedCount));
     }
 
     [Fact]

@@ -40,7 +40,7 @@ public sealed class RefreshTests(ContainersFixture containers)
         await using var app = await IdentityApp.StartAsync(containers);
         var tokens = await CodeFlow.SignInAsync(app);
         await app.WithUsersAsync(async users =>
-            await users.UpdateSecurityStampAsync((await users.FindByEmailAsync(IdentityApp.AdminEmail))!));
+            await users.UpdateSecurityStampAsync((await users.FindByNameAsync(IdentityApp.AdminEmail))!));
         using var client = app.CreateClient();
 
         var refreshed = await CodeFlow.RefreshAsync(client, tokens.RefreshToken!);
@@ -54,7 +54,7 @@ public sealed class RefreshTests(ContainersFixture containers)
         await using var app = await IdentityApp.StartAsync(containers);
         var tokens = await CodeFlow.SignInAsync(app);
         await app.WithUsersAsync(async users =>
-            await users.SetLockoutEndDateAsync((await users.FindByEmailAsync(IdentityApp.AdminEmail))!, DateTimeOffset.UtcNow.AddMinutes(10)));
+            await users.SetLockoutEndDateAsync((await users.FindByNameAsync(IdentityApp.AdminEmail))!, DateTimeOffset.UtcNow.AddMinutes(10)));
         using var client = app.CreateClient();
 
         var refreshed = await CodeFlow.RefreshAsync(client, tokens.RefreshToken!);

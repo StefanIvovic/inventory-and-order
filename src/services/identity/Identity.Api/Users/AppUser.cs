@@ -39,7 +39,7 @@ public sealed class AppUser : IdentityUser<Guid>
         return new AppUser
         {
             Id = Guid.NewGuid(),
-            UserName = email,
+            UserName = userType == UserTypes.Customer ? CustomerUserName(tenantId, email) : email,
             Email = email,
             EmailConfirmed = true,
             UserType = userType,
@@ -47,6 +47,8 @@ public sealed class AppUser : IdentityUser<Guid>
             CreatedAt = createdAt,
         };
     }
+
+    public static string CustomerUserName(string tenantId, string email) => $"{tenantId}:{email}";
 
     public bool Disable(DateTimeOffset now)
     {

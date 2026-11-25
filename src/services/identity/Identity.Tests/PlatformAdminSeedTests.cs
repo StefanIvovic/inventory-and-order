@@ -21,7 +21,7 @@ public sealed class PlatformAdminSeedTests(ContainersFixture containers)
         Assert.NotNull(tokens.AccessToken);
         await app.WithUsersAsync(async users =>
         {
-            var admin = (await users.FindByEmailAsync(IdentityApp.AdminEmail))!;
+            var admin = (await users.FindByNameAsync(IdentityApp.AdminEmail))!;
             Assert.Equal(UserTypes.Platform, admin.UserType);
             Assert.Null(admin.TenantId);
         });
@@ -61,7 +61,7 @@ public sealed class PlatformAdminSeedTests(ContainersFixture containers)
         var response = await client.GetAsync("/tenants", TestTokens.Platform(userId, IdentityApp.Audience));
 
         Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
-        await app.WithUsersAsync(async users => Assert.Null(await users.FindByEmailAsync(IdentityApp.AdminEmail)));
+        await app.WithUsersAsync(async users => Assert.Null(await users.FindByNameAsync(IdentityApp.AdminEmail)));
     }
 
     [Theory]
@@ -105,7 +105,7 @@ public sealed class PlatformAdminSeedTests(ContainersFixture containers)
         await second.WithUsersAsync(async users =>
         {
             Assert.Equal(1, await users.Users.CountAsync(u => u.UserType == UserTypes.Platform, TestContext.Current.CancellationToken));
-            Assert.Null(await users.FindByEmailAsync("other@platform.test"));
+            Assert.Null(await users.FindByNameAsync("other@platform.test"));
         });
         Assert.Equal(stamp, await StampAsync(second));
     }
@@ -113,7 +113,7 @@ public sealed class PlatformAdminSeedTests(ContainersFixture containers)
     private static async Task<string?> StampAsync(IdentityApp app)
     {
         string? stamp = null;
-        await app.WithUsersAsync(async users => stamp = (await users.FindByEmailAsync(IdentityApp.AdminEmail))!.SecurityStamp);
+        await app.WithUsersAsync(async users => stamp = (await users.FindByNameAsync(IdentityApp.AdminEmail))!.SecurityStamp);
         return stamp;
     }
 }
