@@ -43,6 +43,7 @@ jobs:
 
       - name: Smoke checks
         run: |
+          set -x
           c=inventory-and-order-backoffice-spa-1
           get() { docker exec "$c" sh -c "wget -S -O /dev/null http://localhost:8080$1 2>&1"; }
           test "$(docker exec "$c" id -u)" != "0"
