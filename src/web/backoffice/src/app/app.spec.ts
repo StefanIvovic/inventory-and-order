@@ -1,4 +1,6 @@
+import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { MatDialog } from '@angular/material/dialog';
 import { App } from './app';
 import { SessionHarness, loadAs, setUpSession, staffUser } from './session/testing/session-harness';
 
@@ -60,4 +62,25 @@ describe('App', () => {
     retry?.click();
     harness.http.expectOne('/bff/backoffice/user').flush(staffUser);
   });
+
+  it('closes open dialogs when the session ends', async () => {
+    const fixture = TestBed.createComponent(App);
+    await loadAs(harness, staffUser);
+    fixture.detectChanges();
+    const dialogs = TestBed.inject(MatDialog);
+    const closeAll = vi.spyOn(dialogs, 'closeAll');
+    const opened = dialogs.open(OpenDialog);
+    fixture.detectChanges();
+
+    harness.session.markSignedOut();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(closeAll).toHaveBeenCalled();
+    expect(['closing', 'closed']).toContain(['open', 'closing', 'closed'][opened.getState()]);
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain('Sign in');
+  });
 });
+
+@Component({ template: '<p>open</p>' })
+class OpenDialog {}

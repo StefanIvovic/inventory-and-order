@@ -1,8 +1,14 @@
-import { Component, computed, inject } from '@angular/core';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { Component, DestroyRef, computed, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
+import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { RouterOutlet } from '@angular/router';
+import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { map } from 'rxjs';
 import { SessionService } from '../session/session.service';
 
 const roleLabels = {
@@ -10,11 +16,31 @@ const roleLabels = {
   platform: 'Platform administrator',
 } as const;
 
+interface NavigationEntry {
+  label: string;
+  path: string;
+}
+
+const homeEntry: NavigationEntry = { label: 'Home', path: '/' };
+const tenantsEntry: NavigationEntry = { label: 'Tenants', path: '/tenants' };
+
 @Component({
   selector: 'app-shell',
-  imports: [MatToolbarModule, MatButtonModule, MatMenuModule, RouterOutlet],
+  imports: [
+    MatToolbarModule,
+    MatButtonModule,
+    MatMenuModule,
+    MatSidenavModule,
+    MatListModule,
+    RouterOutlet,
+    RouterLink,
+    RouterLinkActive,
+  ],
   template: `
     <mat-toolbar>
+      @if (handset()) {
+        <button mat-button type="button" aria-label="Menu" (click)="navigation.toggle()">Menu</button>
+      }
       <span class="title">Backoffice</span>
       <span class="spacer"></span>
       @if (user(); as current) {
@@ -33,11 +59,34 @@ const roleLabels = {
         <button mat-button type="button" (click)="session.retry()">Try again</button>
       </div>
     }
-    <main class="content">
-      <router-outlet />
-    </main>
+    <mat-sidenav-container class="container">
+      <mat-sidenav #navigation [mode]="handset() ? 'over' : 'side'" [opened]="!handset()">
+        <mat-nav-list>
+          @for (entry of entries(); track entry.path) {
+            <a
+              mat-list-item
+              [routerLink]="entry.path"
+              routerLinkActive="active-entry"
+              [routerLinkActiveOptions]="{ exact: entry.path === '/' }"
+              (click)="handset() && navigation.close()"
+              >{{ entry.label }}</a
+            >
+          }
+        </mat-nav-list>
+      </mat-sidenav>
+      <mat-sidenav-content>
+        <main class="content">
+          <router-outlet />
+        </main>
+      </mat-sidenav-content>
+    </mat-sidenav-container>
   `,
   styles: `
+    :host {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
     .spacer {
       flex: 1;
     }
@@ -57,6 +106,15 @@ const roleLabels = {
       background: var(--mat-sys-error-container);
       color: var(--mat-sys-on-error-container);
     }
+    .container {
+      flex: 1;
+    }
+    mat-sidenav {
+      width: 14rem;
+    }
+    .active-entry {
+      background: var(--mat-sys-secondary-container);
+    }
     .content {
       padding: 1.5rem;
     }
@@ -64,6 +122,13 @@ const roleLabels = {
 })
 export class Shell {
   protected readonly session = inject(SessionService);
+
+  protected readonly handset = toSignal(
+    inject(BreakpointObserver)
+      .observe(Breakpoints.Handset)
+      .pipe(map((state) => state.matches)),
+    { initialValue: false },
+  );
 
   protected readonly user = computed(() => {
     const state = this.session.state();
@@ -74,4 +139,13 @@ export class Shell {
     const user = this.user();
     return user ? roleLabels[user.userType] : '';
   });
+
+  protected readonly entries = computed(() =>
+    this.user()?.userType === 'platform' ? [homeEntry, tenantsEntry] : [homeEntry],
+  );
+
+  constructor() {
+    const dialogs = inject(MatDialog);
+    inject(DestroyRef).onDestroy(() => dialogs.closeAll());
+  }
 }
