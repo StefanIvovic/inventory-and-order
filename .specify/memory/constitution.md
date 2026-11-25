@@ -108,7 +108,9 @@ Rationale: pinned versions let each service upgrade its dependencies on its own 
   example a platform user with a tenant) is rejected with 401.
 - Every service MUST have a test that discovers all routes, calls each as a user with no roles (a
   tenant user for tenant routes, a platform user for platform routes), and expects 403 (allow-list
-  excepted). A route that is missing its permission check MUST fail CI.
+  excepted). A route that is missing its permission check MUST fail CI. The gateway has no
+  permission checks, so instead it MUST have a route-table test proving that every `/api/**` route
+  requires a session and that every other route is on its reviewed list.
 - Query responses MUST include boolean action flags (`canCreate`, `canEdit`, `canCancel`, ...) at
   screen and item level, combining permission with resource state. UIs show and enable controls
   only from these flags. The server still enforces every action.
@@ -174,12 +176,12 @@ lines (e.g. `Co-Authored-By`, session links, "Generated with" footers).
 | Services (later) | Shipping → Notification → Reporting |
 | Frontends | Two Angular SPAs with Angular Material, `backoffice` (tenant staff) and `storefront` (customers, tenant slug in the URL path `/shop/<tenant>/...`), each in its own nginx container behind the gateway. The gateway holds one confidential OpenIddict client per SPA (`backoffice-bff`, `storefront-bff`) |
 | SPA auth | Backend for frontend (BFF). The gateway is a confidential OpenID Connect client and runs the authorization code flow with PKCE and a client secret. Browsers hold only the gateway's encrypted session cookie (`HttpOnly`, `Secure`, `SameSite=Strict`) and send an anti-forgery header on API calls. Tokens never reach the browser. Everything is served from one origin through the gateway. Identity's own login cookie is `SameSite=Lax`, because it must survive the redirect back from sign-in. 15-minute signed (not encrypted) access tokens whose audience is the requested API scopes, refresh tokens rotated with no reuse, security stamp re-checked at refresh, no immediate revocation |
-| Request flow | Gateway validates the JWT (401). The service validates again via cached JWKS, sets the tenant context, and the handler checks permissions (403). The tenant filter makes cross-tenant access 404 |
+| Request flow | The gateway checks the browser's session cookie (401) and forwards the session's access token as a bearer token. The service validates the token via cached JWKS, sets the tenant context, and the handler checks permissions (403). The tenant filter makes cross-tenant access 404 |
 | User awareness | Identity publishes `TenantCreated`, `UserRegistered` and `UserDisabled`. Services keep a local user table and grant their admin role to a new tenant's first admin |
 | Messaging | Wolverine with RabbitMQ transport, explicit routing per integration event, durable inbox and outbox. MassTransit and MediatR are not used |
 | Persistence | EF Core with PostgreSQL in every service. Marten is not used |
 | Sync vs async | Events by default. Consumers keep local read models (e.g. Order keeps product prices) |
-| Wolverine code generation | Runtime generation (`TypeLoadMode.Dynamic`, `WolverineFx.RuntimeCompilation` in Debug only) in development and tests. Pre-generated, committed code (`TypeLoadMode.Static`) in production images, with a CI guard that regenerates and fails on any diff, and a CI smoke start in Static mode. This applies to every service project from its creation, first in feature 011 (identity-authentication) |
+| Wolverine code generation | Runtime generation (`TypeLoadMode.Dynamic`, `WolverineFx.RuntimeCompilation` in Debug only) in development and tests. Pre-generated, committed code (`TypeLoadMode.Static`) in production images, with a CI guard that regenerates and fails on any diff, and a CI smoke start in Static mode. This applies to every service project from its creation, first in feature 011 (identity-service-skeleton) |
 | Background work | Wolverine scheduled and timeout messages. Hangfire is not used |
 | Caching | Redis from phase 5 only, for HybridCache L2 on the catalog and gateway rate limiting |
 | Resilience | Microsoft.Extensions.Http.Resilience (Polly v8) |
@@ -206,7 +208,8 @@ implemented as Wolverine middleware.
   (unit, integration, end-to-end), 7 Deployment (CI/CD, later Kubernetes).
 - A plan MUST include a Constitution Check that confirms compliance with every principle, or
   documents and justifies any deviation in its complexity tracking.
-- Merge gates: build, unit tests, integration tests, the no-roles 403 route test, the test
+- Merge gates: build, unit tests, integration tests, the no-roles 403 route test (the route-table
+  test for the gateway), the test
   cleanup check and the image-pin check all pass for every affected service.
 - Every feature ships as its own branch (`NNN-short-name`) and its own pull request. Phases are
   split into small, independently reviewable features that each leave the system working.
@@ -223,4 +226,4 @@ MUST verify compliance with it.
 - Any deviation from a principle MUST be justified in the feature plan's complexity tracking and
   approved by the project owner before implementation.
 
-**Version**: 1.4.0 | **Ratified**: 2026-11-23 | **Last Amended**: 2026-11-24
+**Version**: 1.5.0 | **Ratified**: 2026-11-23 | **Last Amended**: 2026-11-25
