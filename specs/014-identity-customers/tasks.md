@@ -58,7 +58,7 @@ description: "Task list for feature 014 Identity Customers"
 ## Phase 6: Polish
 
 - [X] T014 `codegen.ps1 -Service identity`; run the full Identity suite twice, the cleanup check, the comment scan; quickstart.md section 2 on the dev stack, then reset
-- [ ] T015 Commit. After the owner confirms, push and open the PR, and confirm `identity.yml` and `deploy.yml` pass
+- [X] T015 Commit. After the owner confirms, push and open the PR, and confirm `identity.yml` and `deploy.yml` pass
 
 ---
 
