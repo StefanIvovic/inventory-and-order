@@ -32,6 +32,16 @@ public sealed class PinCheckTests
     }
 
     [Fact]
+    public void GatewayPinsAreCheckedToo()
+    {
+        using var repo = new TempRepo().Write("src/gateway/Directory.Packages.props", Props("BuildingBlocks.Core", "0.*"));
+
+        var finding = Assert.Single(PinCheck.Run(repo.Root));
+
+        Assert.Equal("src/gateway/Directory.Packages.props", finding.Path);
+    }
+
+    [Fact]
     public void RepositoryWithoutServicesHasNoFindings()
     {
         using var repo = new TempRepo();

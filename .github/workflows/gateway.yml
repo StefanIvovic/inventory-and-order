@@ -1,0 +1,61 @@
+name: gateway
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'src/gateway/**'
+      - '.github/workflows/gateway.yml'
+  push:
+    branches:
+      - master
+    paths:
+      - 'src/gateway/**'
+      - '.github/workflows/gateway.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - uses: actions/setup-dotnet@v6.1.0
+        with:
+          global-json-file: global.json
+
+      - name: Load image versions
+        run: grep -E '^[A-Z][A-Z0-9_]*=' deploy/versions.env >> "$GITHUB_ENV"
+
+      - name: Tests
+        run: dotnet test --solution src/gateway/Gateway.slnx
+
+      - name: Image pin check
+        run: dotnet run --project tools/RepoChecks -- images
+
+      - name: Package pin check
+        run: dotnet run --project tools/RepoChecks -- packages
+
+      - name: Smoke start
+        shell: pwsh
+        run: ./scripts/dev.ps1 up -Profile infra,apps -Service gateway
+
+      - name: Smoke checks
+        run: |
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/health/ready)" = "200"
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/bff/backoffice/user)" = "401"
+          test "$(curl -s -o /dev/null -w '%{http_code}' -H 'X-Bff-App: backoffice' http://127.0.0.1:8080/api/identity/users)" = "401"
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/backoffice/)" = "502"
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/nothing-here)" = "404"
+
+      - name: Dev stack reset
+        if: always()
+        shell: pwsh
+        run: ./scripts/dev.ps1 reset
+
+      - name: Cleanup check
+        if: always()
+        shell: pwsh
+        run: ./scripts/check-test-cleanup.ps1 -Project inventory-and-order

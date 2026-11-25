@@ -5,14 +5,16 @@ param(
     [ValidateSet('up', 'down', 'reset', 'status')]
     [string]$Command,
 
-    [string[]]$Profile = @('infra')
+    [string[]]$Profile = @('infra'),
+
+    [string[]]$Service = @()
 )
 
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
 if (-not $Command) {
-    Write-Output 'Usage: ./scripts/dev.ps1 <up|down|reset|status> [-Profile <profile[]>]'
+    Write-Output 'Usage: ./scripts/dev.ps1 <up|down|reset|status> [-Profile <profile[]>] [-Service <service[]>]'
     exit 1
 }
 
@@ -30,7 +32,7 @@ $base = @('compose', '-f', $composeFile)
 
 $profiles = if ($Command -eq 'up') { $Profile -join ',' } else { '*' }
 $arguments = switch ($Command) {
-    'up' { $base + @('up', '--build', '--detach', '--wait', '--wait-timeout', '120') }
+    'up' { $base + @('up', '--build', '--detach', '--wait', '--wait-timeout', '120') + $Service }
     'down' { $base + @('down', '--remove-orphans') }
     'reset' { $base + @('down', '--volumes', '--remove-orphans') }
     'status' { $base + @('ps', '--all') }
