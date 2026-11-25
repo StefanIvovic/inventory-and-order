@@ -1,0 +1,45 @@
+services:
+  identity-db:
+    ports: !reset []
+    volumes: !reset []
+    tmpfs:
+      - /var/lib/postgresql
+
+  rabbitmq:
+    ports: !reset []
+    volumes: !reset []
+    tmpfs:
+      - /var/lib/rabbitmq
+
+  identity-api:
+    volumes: !override
+      - type: tmpfs
+        target: /keys
+        tmpfs:
+          mode: 01777
+
+  gateway:
+    ports: !reset []
+    volumes: !override
+      - type: tmpfs
+        target: /keys
+        tmpfs:
+          mode: 01777
+
+  playwright:
+    image: ${PLAYWRIGHT_IMAGE}
+    profiles:
+      - e2e
+    network_mode: "service:gateway"
+    init: true
+    ipc: host
+    working_dir: /e2e
+    env_file:
+      - dev.env
+    environment:
+      BASE_URL: http://localhost:8080
+      CI:
+    volumes:
+      - ../tests/e2e:/e2e
+      - /e2e/node_modules
+    command: ["sh", "-c", "npm ci --no-audit --no-fund && npx playwright test"]
