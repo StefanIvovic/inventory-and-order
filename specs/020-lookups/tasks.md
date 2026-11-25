@@ -132,8 +132,8 @@
 
 ## Phase 6: Polish
 
-- [ ] T018 Run `dev.ps1 up -Profile infra,apps` (never reset) and check quickstart section 3: the existing dev users migrate and sign in, the values come back, and a reload gives 304
-- [ ] T019 Run `scripts/e2e.ps1`: all specs pass, and the cleanup check finds nothing named `e2e-test`
+- [X] T018 Run `dev.ps1 up -Profile infra,apps` (never reset) and check quickstart section 3: the existing dev users migrate and sign in, the values come back, and a reload gives 304
+- [X] T019 Run `scripts/e2e.ps1`: all specs pass, and the cleanup check finds nothing named `e2e-test`
 - [ ] T020 Commit in chunks: docs, constitution, BuildingBlocks, Identity. **After the owner confirms**, push the branch and the tag `building-blocks/v0.4.0`, open the PR, and watch `building-blocks.yml`, `identity.yml`, `e2e.yml` and `deploy.yml`
 
 ## Dependencies & Execution Order
