@@ -52,6 +52,7 @@ public static class ClientRegistrar
                 Permissions.GrantTypes.AuthorizationCode,
                 Permissions.GrantTypes.RefreshToken,
                 Permissions.ResponseTypes.Code,
+                Permissions.Scopes.Email,
             },
             Requirements = { Requirements.Features.ProofKeyForCodeExchange },
         };

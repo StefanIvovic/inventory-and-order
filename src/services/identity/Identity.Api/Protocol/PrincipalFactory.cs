@@ -26,6 +26,11 @@ public sealed class PrincipalFactory(IOpenIddictScopeManager scopes)
             identity.SetClaim(AppClaimTypes.TenantId, user.TenantId);
         }
 
+        if (requestedScopes.Contains(Protocol.Scopes.Email) && !string.IsNullOrEmpty(user.Email))
+        {
+            identity.SetClaim(Claims.Email, user.Email);
+        }
+
         identity.SetClaim(SecurityStampClaim, user.SecurityStamp);
         identity.SetScopes(requestedScopes);
 
@@ -39,7 +44,8 @@ public sealed class PrincipalFactory(IOpenIddictScopeManager scopes)
         identity.SetDestinations(claim => claim.Type switch
         {
             Claims.Subject => [Destinations.AccessToken, Destinations.IdentityToken],
-            AppClaimTypes.UserType or AppClaimTypes.TenantId => [Destinations.AccessToken],
+            AppClaimTypes.UserType or AppClaimTypes.TenantId => [Destinations.AccessToken, Destinations.IdentityToken],
+            Claims.Email => [Destinations.IdentityToken],
             _ => [],
         });
 

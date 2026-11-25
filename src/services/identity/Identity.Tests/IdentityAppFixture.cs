@@ -58,18 +58,21 @@ public sealed class IdentityApp : WebApplicationFactory<Program>
 
     private readonly Dictionary<string, string?> settings;
     private readonly bool testSigningKey;
+    private readonly Action<IServiceCollection>? testServices;
 
-    private IdentityApp(Dictionary<string, string?> settings, bool testSigningKey)
+    private IdentityApp(Dictionary<string, string?> settings, bool testSigningKey, Action<IServiceCollection>? testServices)
     {
         this.settings = settings;
         this.testSigningKey = testSigningKey;
+        this.testServices = testServices;
     }
 
     public static async Task<IdentityApp> StartAsync(
         ContainersFixture containers,
         string? connectionString = null,
         IReadOnlyDictionary<string, string?>? overrides = null,
-        bool testSigningKey = true)
+        bool testSigningKey = true,
+        Action<IServiceCollection>? testServices = null)
     {
         ArgumentNullException.ThrowIfNull(containers);
         var database = connectionString ?? await containers.Postgres.CreateDatabaseAsync(TestContext.Current.CancellationToken);
@@ -79,7 +82,7 @@ public sealed class IdentityApp : WebApplicationFactory<Program>
             values[key] = value;
         }
 
-        var app = new IdentityApp(values, testSigningKey);
+        var app = new IdentityApp(values, testSigningKey, testServices);
         _ = app.Server;
         return app;
     }
@@ -203,6 +206,11 @@ public sealed class IdentityApp : WebApplicationFactory<Program>
         }
 
         builder.ConfigureLogging(logging => logging.ClearProviders());
+        if (testServices is not null)
+        {
+            builder.ConfigureTestServices(testServices);
+        }
+
         if (testSigningKey)
         {
             builder.ConfigureTestServices(services =>

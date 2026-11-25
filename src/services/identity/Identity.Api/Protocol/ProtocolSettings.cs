@@ -16,6 +16,8 @@ public sealed class ProtocolSettings
 
     public DemoTenantSettings DemoTenant { get; set; } = new();
 
+    public ForwardedHeadersSettings ForwardedHeaders { get; set; } = new();
+
     public static ProtocolSettings Read(IConfiguration configuration)
     {
         ArgumentNullException.ThrowIfNull(configuration);
@@ -24,6 +26,8 @@ public sealed class ProtocolSettings
         {
             throw new InvalidOperationException("Identity:Issuer must be an absolute URI.");
         }
+
+        settings.ForwardedHeaders.Validate();
 
         return settings;
     }
@@ -78,4 +82,34 @@ public sealed class DemoTenantSettings
     public bool IsConfigured =>
         !string.IsNullOrWhiteSpace(Slug) && !string.IsNullOrWhiteSpace(Name)
         && !string.IsNullOrWhiteSpace(AdminEmail) && !string.IsNullOrWhiteSpace(AdminPassword);
+}
+
+public sealed class ForwardedHeadersSettings
+{
+    public List<string> KnownNetworks { get; set; } = [];
+
+    public List<string> AllowedHosts { get; set; } = [];
+
+    public bool IsEnabled => KnownNetworks.Count > 0;
+
+    public IEnumerable<System.Net.IPNetwork> Networks() => KnownNetworks.Select(System.Net.IPNetwork.Parse);
+
+    public IEnumerable<string> HostPatterns() =>
+        AllowedHosts.Where(host => !string.IsNullOrWhiteSpace(host)).Select(host => new Microsoft.AspNetCore.Http.HostString(host.Trim()).Host);
+
+    public void Validate()
+    {
+        foreach (var network in KnownNetworks)
+        {
+            if (!System.Net.IPNetwork.TryParse(network, out _))
+            {
+                throw new InvalidOperationException($"Identity:ForwardedHeaders:KnownNetworks contains '{network}', which is not a CIDR range.");
+            }
+        }
+
+        if (IsEnabled && AllowedHosts.TrueForAll(string.IsNullOrWhiteSpace))
+        {
+            throw new InvalidOperationException("Identity:ForwardedHeaders:AllowedHosts is required when known networks are set.");
+        }
+    }
 }

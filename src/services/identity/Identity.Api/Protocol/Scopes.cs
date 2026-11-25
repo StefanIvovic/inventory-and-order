@@ -4,6 +4,8 @@ namespace Identity.Api.Protocol;
 
 public static class Scopes
 {
+    public const string Email = "email";
+
     public static IReadOnlyList<string> Api { get; } = ["identity", "product", "inventory", "order", "payment"];
 
     public static async Task RegisterAsync(IOpenIddictScopeManager manager, CancellationToken cancellationToken)
