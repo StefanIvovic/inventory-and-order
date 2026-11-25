@@ -107,12 +107,13 @@ Built so far: Identity. The gateway, the two SPAs, and the Product, Inventory, O
 ./scripts/dev.ps1 up -Profile infra,apps
 ```
 
-The first command builds the shared packages Identity depends on into the local feed (`artifacts/packages`). The second builds the images and starts RabbitMQ, the Identity database, Identity and the gateway, then waits until they are healthy. Only the gateway publishes an application port.
+The first command builds the shared packages Identity depends on into the local feed (`artifacts/packages`). The second builds the images and starts RabbitMQ, the Identity database, Identity, the gateway and the backoffice app, then waits until they are healthy. Only the gateway publishes an application port.
 
 ### Use
 
 | What | Where |
 |---|---|
+| Backoffice | http://localhost:8080/backoffice/ |
 | Backoffice sign-in (through the gateway) | http://localhost:8080/bff/backoffice/login |
 | Storefront sign-in for the demo shop | http://localhost:8080/bff/shop/demo/login |
 | Signed-in user | http://localhost:8080/bff/backoffice/user |
@@ -129,13 +130,29 @@ Accounts and passwords for development are in `deploy/dev.env`: the platform adm
 ./scripts/dev.ps1 reset   # stop and delete data
 ```
 
+### Work on the backoffice with live reload
+
+```powershell
+./scripts/dev.ps1 up -Profile infra,apps -WebDev
+./scripts/dev.ps1 reset -WebDev
+```
+
+`-WebDev` runs the Angular dev server in a container with the source mounted, and points the gateway at it. Keep using http://localhost:8080/backoffice/; changes show up within a few seconds.
+
 ### Tests
 
 ```powershell
 dotnet test src/building-blocks/BuildingBlocks.slnx
 dotnet test src/services/identity/Identity.slnx
+dotnet test --solution src/gateway/Gateway.slnx
+./scripts/e2e.ps1
 ```
 
-Tests start their own throwaway containers and never touch the dev stack. Docker must be running.
+Tests start their own throwaway containers and never touch the dev stack. Docker must be running. `scripts/e2e.ps1` runs the browser tests against a full copy of the system in the compose project `e2e-test`, then always removes it. Backoffice unit tests run in the Node image:
+
+```powershell
+$node = (Select-String -Path deploy/versions.env -Pattern '^NODE_IMAGE=(.+)$').Matches[0].Groups[1].Value
+docker run --rm -v "${PWD}/src/web/backoffice:/app" -w /app $node sh -c "npm ci && npx ng test --no-watch"
+```
 
 More about the dev stack, ports and settings: [deploy/README.md](deploy/README.md).

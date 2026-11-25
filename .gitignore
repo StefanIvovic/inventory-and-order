@@ -488,3 +488,9 @@ artifacts/*
 !artifacts/packages/
 artifacts/packages/*
 !artifacts/packages/.gitkeep
+
+.angular/
+src/web/*/dist/
+tests/e2e/test-results/
+tests/e2e/playwright-report/
+.playwright-mcp/

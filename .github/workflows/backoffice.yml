@@ -1,0 +1,74 @@
+name: backoffice
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'src/web/backoffice/**'
+      - '.github/workflows/backoffice.yml'
+  push:
+    branches:
+      - master
+    paths:
+      - 'src/web/backoffice/**'
+      - '.github/workflows/backoffice.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - uses: actions/setup-dotnet@v6.1.0
+        with:
+          global-json-file: global.json
+
+      - name: Load image versions
+        run: grep -E '^[A-Z][A-Z0-9_]*=' deploy/versions.env >> "$GITHUB_ENV"
+
+      - name: Lint, unit tests and build
+        run: |
+          docker run --rm -e CI=true -v "$PWD/src/web/backoffice:/app" -w /app "$NODE_IMAGE" sh -c \
+            "npm ci --no-audit --no-fund && npx ng lint && npx ng test --no-watch --no-progress && npx ng build"
+
+      - name: Image pin check
+        run: dotnet run --project tools/RepoChecks -- images
+
+      - name: Smoke start
+        shell: pwsh
+        run: ./scripts/dev.ps1 up -Profile infra,apps -Service backoffice-spa
+
+      - name: Smoke checks
+        run: |
+          set -x
+          c=inventory-and-order-backoffice-spa-1
+          headers() { docker exec "$c" sh -c "wget -S -O /dev/null http://localhost:8080$1 2>&1"; }
+          body() { docker exec "$c" sh -c "wget -qO- http://localhost:8080$1"; }
+          test "$(docker exec "$c" id -u)" != "0"
+          health=$(headers /health)
+          root=$(headers /backoffice/)
+          deep=$(headers /backoffice/deep/link)
+          page=$(body /backoffice/deep/link)
+          main=$(docker exec "$c" sh -c "ls /usr/share/nginx/html/backoffice | grep '^main-'")
+          asset=$(headers "/backoffice/$main")
+          grep -q "HTTP/1.1 200" <<<"$health"
+          grep -q "Cache-Control: no-cache" <<<"$root"
+          grep -q "Cache-Control: no-cache" <<<"$deep"
+          grep -q '<base href="/backoffice/"' <<<"$page"
+          grep -q "Cache-Control: public, max-age=31536000, immutable" <<<"$asset"
+          grep -q "Content-Security-Policy: default-src 'self'" <<<"$root"
+          grep -q "X-Content-Type-Options: nosniff" <<<"$root"
+          ! grep -q "onload=" <<<"$page"
+
+      - name: Dev stack reset
+        if: always()
+        shell: pwsh
+        run: ./scripts/dev.ps1 reset
+
+      - name: Cleanup check
+        if: always()
+        shell: pwsh
+        run: ./scripts/check-test-cleanup.ps1 -Project inventory-and-order
