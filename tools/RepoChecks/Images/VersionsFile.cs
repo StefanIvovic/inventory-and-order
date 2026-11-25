@@ -8,7 +8,7 @@ public sealed partial class VersionsFile
 {
     private static readonly HashSet<string> PatchRequired = new(StringComparer.Ordinal)
     {
-        "sdk", "aspnet", "runtime", "runtime-deps", "rabbitmq",
+        "sdk", "aspnet", "runtime", "runtime-deps", "rabbitmq", "node", "nginx-unprivileged", "playwright",
     };
 
     private VersionsFile(string path, IReadOnlyDictionary<string, VersionEntry> entries, IReadOnlyList<Finding> findings)
@@ -121,6 +121,6 @@ public sealed partial class VersionsFile
     [GeneratedRegex(@"^(?<key>[A-Z][A-Z0-9_]*_IMAGE)=(?<value>[^\s#'""=$]+)$")]
     private static partial Regex LinePattern();
 
-    [GeneratedRegex(@"^\d+\.\d+(?<patch>\.\d+)?(-[a-z0-9.]+)*$")]
+    [GeneratedRegex(@"^v?\d+\.\d+(?<patch>\.\d+)?(-[a-z0-9.]+)*$")]
     private static partial Regex TagPattern();
 }

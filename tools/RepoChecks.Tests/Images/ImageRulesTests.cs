@@ -62,6 +62,29 @@ public sealed class ImageRulesTests
         AssertFinding(repo, "IP002", "deploy/versions.env");
     }
 
+    [Theory]
+    [InlineData("mcr.microsoft.com/playwright", "v1.65")]
+    [InlineData("mcr.microsoft.com/playwright", "v1.65-noble")]
+    [InlineData("mcr.microsoft.com/playwright", "vnext")]
+    [InlineData("nginxinc/nginx-unprivileged", "1.30-alpine3.24")]
+    [InlineData("node", "26-alpine3.24")]
+    public void FloatingVPrefixedOrWebTagIsIP002(string repository, string tag)
+    {
+        using var repo = WithValidBaseline();
+        AppendVersions(repo, $"EXTRA_IMAGE={Image(repository, tag)}");
+
+        AssertFinding(repo, "IP002", "deploy/versions.env");
+    }
+
+    [Fact]
+    public void VPrefixedExactReleaseIsAccepted()
+    {
+        using var repo = WithValidBaseline();
+        AppendVersions(repo, "PLAYWRIGHT_IMAGE=" + Image("mcr.microsoft.com/playwright", "v1.65.1-noble"));
+
+        Assert.DoesNotContain(repo.Run(), f => f.RuleId == "IP002");
+    }
+
     [Fact]
     public void UntaggedImageIsIP002()
     {
