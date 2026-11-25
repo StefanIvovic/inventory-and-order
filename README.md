@@ -113,7 +113,7 @@ The first command builds the shared packages Identity depends on into the local 
 
 | What | Where |
 |---|---|
-| Backoffice | http://localhost:8080/backoffice/ |
+| Backoffice | http://localhost:8080/backoffice/ (the platform admin manages tenants under Tenants) |
 | Storefront of the demo shop | http://localhost:8080/shop/demo/ |
 | Backoffice sign-in (through the gateway) | http://localhost:8080/bff/backoffice/login |
 | Storefront sign-in for the demo shop | http://localhost:8080/bff/shop/demo/login |

@@ -1,7 +1,14 @@
+import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout';
 import { HttpClient } from '@angular/common/http';
+import { of } from 'rxjs';
 import { TestBed } from '@angular/core/testing';
 import { SessionHarness, loadAs, setUpSession, staffUser } from '../session/testing/session-harness';
+import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 import { Shell } from './shell';
+
+@Component({ template: '' })
+class Blank {}
 
 describe('Shell', () => {
   let harness: SessionHarness;
@@ -67,5 +74,69 @@ describe('Shell', () => {
 
     expect(answer).toEqual(['ok']);
     expect(element.querySelector('[role="status"]')).toBeNull();
+  });
+
+  function navigationEntries(element: HTMLElement): string[] {
+    return Array.from(element.querySelectorAll('mat-nav-list a')).map((link) => link.textContent?.trim() ?? '');
+  }
+
+  it('shows Home and Tenants to the platform admin', async () => {
+    const element = await render({ ...staffUser, userType: 'platform', tenantId: null });
+
+    expect(navigationEntries(element)).toEqual(['Home', 'Tenants']);
+  });
+
+  it('shows only Home to staff', async () => {
+    const element = await render();
+
+    expect(navigationEntries(element)).toEqual(['Home']);
+  });
+
+  it('marks the active entry', async () => {
+    await loadAs(harness, { ...staffUser, userType: 'platform', tenantId: null });
+    const router = TestBed.inject(Router);
+    router.resetConfig([
+      { path: '', component: Blank },
+      { path: 'tenants', component: Blank },
+    ]);
+    const fixture = TestBed.createComponent(Shell);
+    await router.navigateByUrl('/tenants');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const active = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('mat-nav-list a.active-entry'));
+    expect(active.map((link) => link.textContent?.trim())).toEqual(['Tenants']);
+  });
+
+  it('collapses behind a menu button on narrow windows', async () => {
+    TestBed.resetTestingModule();
+    TestBed.overrideProvider(BreakpointObserver, {
+      useValue: { observe: () => of<BreakpointState>({ matches: true, breakpoints: {} }) },
+    });
+    harness = setUpSession();
+    await loadAs(harness, staffUser);
+    const fixture = TestBed.createComponent(Shell);
+    fixture.detectChanges();
+    const element = fixture.nativeElement as HTMLElement;
+
+    const sidenav = element.querySelector('mat-sidenav');
+    expect(sidenav?.classList.contains('mat-drawer-over')).toBe(true);
+    const menu = element.querySelector<HTMLButtonElement>('[aria-label="Menu"]');
+    expect(menu).not.toBeNull();
+    expect(sidenav?.classList.contains('mat-drawer-opened')).toBe(false);
+
+    menu?.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(sidenav?.classList.contains('mat-drawer-opened')).toBe(true);
+  });
+
+  it('has no menu button on wide windows', async () => {
+    const element = await render();
+
+    expect(element.querySelector('[aria-label="Menu"]')).toBeNull();
+    expect(element.querySelector('mat-sidenav')?.classList.contains('mat-drawer-opened')).toBe(true);
   });
 });
