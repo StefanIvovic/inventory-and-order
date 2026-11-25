@@ -103,12 +103,15 @@ Rationale: pinned versions let each service upgrade its dependencies on its own 
   instance of the service. Handlers MUST NOT call `IPermissionCache` directly. Same-service
   broadcast listeners MUST NOT use the durable inbox, because instances share one database.
 - By default, a route requires an authenticated user with a tenant. Platform-only routes are an
-  explicit, reviewed category open only to `user_type=platform` with no tenant. Routes that need no
-  authentication are an explicit, reviewed allow-list. A token whose identity is malformed (for
+  explicit, reviewed category open only to `user_type=platform` with no tenant. Signed-in routes are
+  an explicit, reviewed category open to any valid signed-in user (any user type, with or without a
+  tenant), for non-sensitive reference data such as lookups, with no permission check. Routes that
+  need no authentication are an explicit, reviewed allow-list. A token whose identity is malformed (for
   example a platform user with a tenant) is rejected with 401.
 - Every service MUST have a test that discovers all routes, calls each as a user with no roles (a
   tenant user for tenant routes, a platform user for platform routes), and expects 403 (allow-list
-  excepted). A route that is missing its permission check MUST fail CI. The gateway has no
+  excepted). Signed-in routes are instead called without a token and MUST answer 401. A route that
+  is missing its permission check MUST fail CI. The gateway has no
   permission checks, so instead it MUST have a route-table test proving that every `/api/**` route
   requires a session and that every other route is on its reviewed list.
 - Query responses MUST include boolean action flags (`canCreate`, `canEdit`, `canCancel`, ...) at
@@ -180,6 +183,8 @@ lines (e.g. `Co-Authored-By`, session links, "Generated with" footers).
 | User awareness | Identity publishes `TenantCreated`, `UserRegistered` and `UserDisabled`. Services keep a local user table and grant their admin role to a new tenant's first admin |
 | Messaging | Wolverine with RabbitMQ transport, explicit routing per integration event, durable inbox and outbox. MassTransit and MediatR are not used |
 | Persistence | EF Core with PostgreSQL in every service. Marten is not used |
+| Lookups | A fixed set of choices that is stored in a database or exposed by an API MUST come from the owning service's own lookup tables (`lookup_types`: id, code, name; `lookup_values`: id, code, name, lookup_type_id), not from enums or unchecked text. Enums used only inside code are allowed. Codes are permanent and are what APIs, tokens and messages carry; ids link rows inside the service. Lookups are global per service unless a feature needs tenant-specific values. Clients address a list by its type code. Shared lookup machinery lives in `BuildingBlocks.Lookups`; the lists belong to each service |
+| Seed data | Each service defines in code, with fixed ids, the lookup data it needs to function, and seeds it on every start after migrations and before serving. Seeding adds missing rows and restores names, never deletes, and is safe to repeat and to run concurrently. The service refuses to start if a defined value is missing. Demo data is not lookup data |
 | Sync vs async | Events by default. Consumers keep local read models (e.g. Order keeps product prices) |
 | Wolverine code generation | Runtime generation (`TypeLoadMode.Dynamic`, `WolverineFx.RuntimeCompilation` in Debug only) in development and tests. Pre-generated, committed code (`TypeLoadMode.Static`) in production images, with a CI guard that regenerates and fails on any diff, and a CI smoke start in Static mode. This applies to every service project from its creation, first in feature 011 (identity-service-skeleton) |
 | Background work | Wolverine scheduled and timeout messages. Hangfire is not used |
@@ -208,8 +213,8 @@ implemented as Wolverine middleware.
   (unit, integration, end-to-end), 7 Deployment (CI/CD, later Kubernetes).
 - A plan MUST include a Constitution Check that confirms compliance with every principle, or
   documents and justifies any deviation in its complexity tracking.
-- Merge gates: build, unit tests, integration tests, the no-roles 403 route test (the route-table
-  test for the gateway), the test
+- Merge gates: build, unit tests, integration tests, the no-roles 403 route test (with its 401
+  check for signed-in routes; the route-table test for the gateway), the test
   cleanup check and the image-pin check all pass for every affected service.
 - Every feature ships as its own branch (`NNN-short-name`) and its own pull request. Phases are
   split into small, independently reviewable features that each leave the system working.
@@ -226,4 +231,4 @@ MUST verify compliance with it.
 - Any deviation from a principle MUST be justified in the feature plan's complexity tracking and
   approved by the project owner before implementation.
 
-**Version**: 1.5.0 | **Ratified**: 2026-11-23 | **Last Amended**: 2026-11-25
+**Version**: 1.6.0 | **Ratified**: 2026-11-23 | **Last Amended**: 2026-11-25
