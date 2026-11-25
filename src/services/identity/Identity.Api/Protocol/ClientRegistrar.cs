@@ -5,7 +5,7 @@ namespace Identity.Api.Protocol;
 
 public static class ClientRegistrar
 {
-    public static IReadOnlyList<string> GatewayClients { get; } = ["backoffice-bff", "storefront-bff"];
+    public static IReadOnlyList<string> GatewayClients { get; } = [ClientPolicies.Backoffice, ClientPolicies.Storefront];
 
     public static async Task RegisterAsync(IOpenIddictApplicationManager manager, ProtocolSettings settings, CancellationToken cancellationToken)
     {

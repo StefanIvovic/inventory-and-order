@@ -49,6 +49,9 @@ public sealed class IdentityApp : WebApplicationFactory<Program>
     public const string ClientSecret = "backoffice-test-secret";
     public const string RedirectUri = "https://gateway.test/bff/backoffice/signin-oidc";
     public const string PostLogoutRedirectUri = "https://gateway.test/backoffice/";
+    public const string StorefrontClient = "storefront-bff";
+    public const string StorefrontSecret = "storefront-test-secret";
+    public const string StorefrontRedirectUri = "https://gateway.test/bff/storefront/signin-oidc";
     public const string AdminEmail = "admin@platform.test";
     public const string AdminPassword = "Admin#Pass1";
     public const string TenantAdminPassword = "Tenant#Pass1";
@@ -91,8 +94,8 @@ public sealed class IdentityApp : WebApplicationFactory<Program>
         ["Identity:Clients:backoffice-bff:Secret"] = ClientSecret,
         ["Identity:Clients:backoffice-bff:RedirectUri"] = RedirectUri,
         ["Identity:Clients:backoffice-bff:PostLogoutRedirectUri"] = PostLogoutRedirectUri,
-        ["Identity:Clients:storefront-bff:Secret"] = "storefront-test-secret",
-        ["Identity:Clients:storefront-bff:RedirectUri"] = "https://gateway.test/bff/storefront/signin-oidc",
+        ["Identity:Clients:storefront-bff:Secret"] = StorefrontSecret,
+        ["Identity:Clients:storefront-bff:RedirectUri"] = StorefrontRedirectUri,
         ["Identity:Clients:storefront-bff:PostLogoutRedirectUri"] = "https://gateway.test/shop/",
         ["Identity:PlatformAdmin:Email"] = AdminEmail,
         ["Identity:PlatformAdmin:Password"] = AdminPassword,
@@ -169,7 +172,7 @@ public sealed class IdentityApp : WebApplicationFactory<Program>
     {
         await using var scope = Services.CreateAsyncScope();
         var users = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
-        var user = await users.FindByEmailAsync(email);
+        var user = await users.FindByNameAsync(email);
         Assert.NotNull(user);
         return user;
     }

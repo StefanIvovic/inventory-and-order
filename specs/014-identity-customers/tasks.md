@@ -19,10 +19,10 @@ description: "Task list for feature 014 Identity Customers"
 
 ## Phase 1: Foundational
 
-- [ ] T001 `Users/AppUser.cs`: customers get user name `<tenantId>:<email>` (data-model.md `AppUser.UserName`); `Program.cs`: `RequireUniqueEmail = false`, `AllowedUserNameCharacters = null` (research.md R2). Switch tests that use `FindByEmailAsync` to `FindByNameAsync`. Existing suite green, including the 013 duplicate-email tests, which now detect duplicates through the user name
-- [ ] T002 `Persistence/IdentityDbContext.cs`: `ux_identity_users_customer_email` (data-model.md `AppUser.NormalizedEmail`); migration `Customers`, which also widens `UserName` and `NormalizedUserName` to 320 (data-model.md `AppUser.UserName`); `UniqueViolationMapper` maps it to `email-taken` (research.md R4)
-- [ ] T003 [P] `Protocol/ClientPolicies.cs` per data-model.md client policies, and `Protocol/SignInTarget.cs` that reads client and tenant from a local authorization return URL (research.md R1, R2), with unit tests in `Identity.Tests/Protocol/SignInTargetTests.cs`
-- [ ] T004 Test support: `AuthorizeRequest` gains `Tenant`; `IdentityApp` gains storefront client constants and a `RegisterAsync` page helper in `Identity.Tests/Flow/CodeFlow.cs`
+- [X] T001 `Users/AppUser.cs`: customers get user name `<tenantId>:<email>` (data-model.md `AppUser.UserName`); `Program.cs`: `RequireUniqueEmail = false`, `AllowedUserNameCharacters = string.Empty` (research.md R2). Switch tests that use `FindByEmailAsync` to `FindByNameAsync`. Existing suite green, including the 013 duplicate-email tests, which now detect duplicates through the user name
+- [X] T002 `Persistence/IdentityDbContext.cs`: `ux_identity_users_customer_email` (data-model.md `AppUser.NormalizedEmail`); migration `Customers`, which also widens `UserName` and `NormalizedUserName` to 320 (data-model.md `AppUser.UserName`); `UniqueViolationMapper` maps it to `email-taken` (research.md R4)
+- [X] T003 [P] `Protocol/ClientPolicies.cs` per data-model.md client policies, and `Protocol/SignInTarget.cs` that reads client and tenant from a local authorization return URL (research.md R1, R2), with unit tests in `Identity.Tests/Protocol/SignInTargetTests.cs`
+- [X] T004 Test support: `AuthorizeRequest` gains `Tenant`; `IdentityApp` gains storefront client constants and a `RegisterAsync` page helper in `Identity.Tests/Flow/CodeFlow.cs`
 
 ---
 

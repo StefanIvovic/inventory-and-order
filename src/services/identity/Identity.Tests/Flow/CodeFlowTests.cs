@@ -52,7 +52,7 @@ public sealed class CodeFlowTests(ContainersFixture containers)
         using var browser = app.CreateBrowser();
         await CodeFlow.AuthorizeAsync(browser, IdentityApp.AdminEmail, IdentityApp.AdminPassword);
         await app.WithUsersAsync(async users =>
-            await users.UpdateSecurityStampAsync((await users.FindByEmailAsync(IdentityApp.AdminEmail))!));
+            await users.UpdateSecurityStampAsync((await users.FindByNameAsync(IdentityApp.AdminEmail))!));
 
         var again = await browser.GetAsync(CodeFlow.AuthorizeUrl(new AuthorizeRequest(), CodeFlow.NewPkce().Challenge), TestContext.Current.CancellationToken);
 

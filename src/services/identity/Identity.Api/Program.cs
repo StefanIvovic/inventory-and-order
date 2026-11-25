@@ -52,7 +52,8 @@ builder.Services
         options.Lockout.MaxFailedAccessAttempts = 5;
         options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(10);
         options.Lockout.AllowedForNewUsers = true;
-        options.User.RequireUniqueEmail = true;
+        options.User.RequireUniqueEmail = false;
+        options.User.AllowedUserNameCharacters = string.Empty;
     })
     .AddUserStore<Microsoft.AspNetCore.Identity.EntityFrameworkCore.UserOnlyStore<AppUser, IdentityDbContext, Guid>>()
     .AddSignInManager<AppSignInManager>();

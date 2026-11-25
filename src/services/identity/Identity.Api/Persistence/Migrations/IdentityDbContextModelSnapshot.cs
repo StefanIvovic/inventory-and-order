@@ -136,8 +136,8 @@ namespace Identity.Api.Persistence.Migrations
                         .HasColumnType("character varying(256)");
 
                     b.Property<string>("NormalizedUserName")
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+                        .HasMaxLength(320)
+                        .HasColumnType("character varying(320)");
 
                     b.Property<string>("PasswordHash")
                         .HasColumnType("text");
@@ -159,8 +159,8 @@ namespace Identity.Api.Persistence.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<string>("UserName")
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+                        .HasMaxLength(320)
+                        .HasColumnType("character varying(320)");
 
                     b.Property<string>("UserType")
                         .IsRequired()
@@ -176,6 +176,11 @@ namespace Identity.Api.Persistence.Migrations
 
                     b.HasIndex("NormalizedUserName")
                         .IsUnique();
+
+                    b.HasIndex("TenantId", "NormalizedEmail")
+                        .IsUnique()
+                        .HasDatabaseName("ux_identity_users_customer_email")
+                        .HasFilter("\"UserType\" = 'customer'");
 
                     b.ToTable("identity_users", null, t =>
                         {

@@ -17,7 +17,7 @@
 - `IdentityOptions.User.RequireUniqueEmail` becomes `false`: the default validator calls `FindByEmailAsync`, which throws once two accounts share an email. Uniqueness is guaranteed instead by:
   - the user-name unique index (staff email globally; customer email per tenant through the prefix), reported by `UserManager` as `DuplicateUserName` → `email-taken`, and
   - the two partial email indexes in the database (R4).
-- `AllowedUserNameCharacters` must allow `:`; the default set includes neither `:` nor every email character, so it is set to `null` (any character), and the email validator keeps the format check.
+- `AllowedUserNameCharacters` must allow `:`; the default set includes neither `:` nor every email character, so it is set to an empty string (no character check), and the email validator keeps the format check.
 - Tests that call `FindByEmailAsync` switch to `FindByNameAsync`.
 - **Alternatives considered**: a custom user store with tenant-aware lookups (more code, same result).
 
