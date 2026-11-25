@@ -54,12 +54,10 @@ jobs:
           page=$(body /backoffice/deep/link)
           main=$(docker exec "$c" sh -c "ls /usr/share/nginx/html/backoffice | grep '^main-'")
           asset=$(headers "/backoffice/$main")
-          head -c 600 <<<"$page"
-          echo
           grep -q "HTTP/1.1 200" <<<"$health"
           grep -q "Cache-Control: no-cache" <<<"$root"
           grep -q "Cache-Control: no-cache" <<<"$deep"
-          grep -q '<base href="/backoffice/">' <<<"$page"
+          grep -q '<base href="/backoffice/"' <<<"$page"
           grep -q "Cache-Control: public, max-age=31536000, immutable" <<<"$asset"
           grep -q "Content-Security-Policy: default-src 'self'" <<<"$root"
           grep -q "X-Content-Type-Options: nosniff" <<<"$root"
