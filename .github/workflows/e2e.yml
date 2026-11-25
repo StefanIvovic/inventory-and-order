@@ -1,0 +1,67 @@
+name: e2e
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'src/web/**'
+      - 'src/gateway/**'
+      - 'src/services/identity/**'
+      - 'tests/e2e/**'
+      - 'deploy/**'
+      - 'scripts/e2e.ps1'
+      - 'scripts/check-test-cleanup.ps1'
+      - '.github/workflows/e2e.yml'
+  push:
+    branches:
+      - master
+    paths:
+      - 'src/web/**'
+      - 'src/gateway/**'
+      - 'src/services/identity/**'
+      - 'tests/e2e/**'
+      - 'deploy/**'
+      - 'scripts/e2e.ps1'
+      - 'scripts/check-test-cleanup.ps1'
+      - '.github/workflows/e2e.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@v6.1.0
+        with:
+          global-json-file: global.json
+
+      - name: End-to-end tests
+        shell: pwsh
+        env:
+          CI: 'true'
+        run: ./scripts/e2e.ps1
+
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: e2e-test-results
+          path: |
+            tests/e2e/test-results
+            tests/e2e/playwright-report
+          retention-days: 7
+
+      - name: Tear down the end-to-end stack
+        if: always()
+        run: |
+          COMPOSE_PROFILES='*' docker compose -p e2e-test -f deploy/compose.yaml -f tests/e2e/compose.e2e.yaml --env-file deploy/versions.env down -v --remove-orphans
+
+      - name: Cleanup check
+        if: always()
+        shell: pwsh
+        run: ./scripts/check-test-cleanup.ps1 -Project e2e-test

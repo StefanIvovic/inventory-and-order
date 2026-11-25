@@ -123,6 +123,9 @@ Assert-That ($addresses.Count -gt 3 -and @($addresses | Where-Object { -not $_.S
 $published = @(docker ps --filter "label=com.docker.compose.project=$Project" --format '{{.Names}} {{.Ports}}' | Where-Object { $_ -match '->8080/tcp' })
 Assert-That ($published.Count -eq 1 -and $published[0] -match 'gateway') "only the gateway publishes an application port ($($published -join ', '))"
 
+$spa = Invoke-Request 'GET' '/backoffice/orders'
+Assert-That ($spa.Status -eq 200 -and $spa.Body -match '<base href="/backoffice/"') 'the backoffice app is served through the gateway'
+
 $landed = Invoke-Flow '/bff/backoffice/login' '/backoffice/' @{ Email = $settings['DEMO_ADMIN_EMAIL']; Password = $settings['DEMO_ADMIN_PASSWORD'] }
 Assert-That ($landed.Uri.AbsolutePath -eq '/backoffice/' -and $landed.Uri.Query -eq '') "backoffice sign-in lands on /backoffice/ ($($landed.Uri.PathAndQuery))"
 Assert-That ($script:jar.Contains('bff-backoffice')) "the browser holds the backoffice session cookie ($($script:jar.Keys -join ', '))"
