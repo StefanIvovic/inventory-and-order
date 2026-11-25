@@ -26,7 +26,7 @@ public sealed class SignOutTests
         Assert.DoesNotContain("__Host-Http-bff-backoffice", browser.CookieNames());
 
         using var client = app.CreateClient(new Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactoryClientOptions { AllowAutoRedirect = false, HandleCookies = false, BaseAddress = app.Origin });
-        using var request = new HttpRequestMessage(HttpMethod.Get, "/bff/backoffice/user");
+        using var request = new HttpRequestMessage(HttpMethod.Get, new Uri("/bff/backoffice/user", UriKind.Relative));
         request.Headers.Add("Cookie", old);
         using var response = await client.SendAsync(request, TestContext.Current.CancellationToken);
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);

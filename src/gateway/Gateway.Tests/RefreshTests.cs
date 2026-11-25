@@ -91,7 +91,7 @@ public sealed class RefreshTests
         app.Clock.Advance(TimeSpan.FromHours(7));
 
         using var client = app.CreateClient(new Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactoryClientOptions { AllowAutoRedirect = false, HandleCookies = false, BaseAddress = app.Origin });
-        using var request = new HttpRequestMessage(HttpMethod.Get, "/bff/backoffice/user");
+        using var request = new HttpRequestMessage(HttpMethod.Get, new Uri("/bff/backoffice/user", UriKind.Relative));
         request.Headers.Add("Cookie", stale);
         using var response = await client.SendAsync(request, TestContext.Current.CancellationToken);
 
@@ -111,7 +111,7 @@ public sealed class RefreshTests
 
         Assert.Equal(HttpStatusCode.OK, (await browser.GetAsync("/bff/backoffice/user")).Status);
         using var client = app.CreateClient(new Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactoryClientOptions { AllowAutoRedirect = false, HandleCookies = false, BaseAddress = app.Origin });
-        using var request = new HttpRequestMessage(HttpMethod.Get, "/bff/backoffice/user");
+        using var request = new HttpRequestMessage(HttpMethod.Get, new Uri("/bff/backoffice/user", UriKind.Relative));
         request.Headers.Add("Cookie", original);
         using var expired = await client.SendAsync(request, TestContext.Current.CancellationToken);
         Assert.Equal(HttpStatusCode.Unauthorized, expired.StatusCode);
@@ -172,7 +172,7 @@ public sealed class RefreshTests
     private static async Task<HttpResponseMessage> RawCallAsync(GatewayApp app, string cookie)
     {
         using var client = app.CreateClient(new Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactoryClientOptions { AllowAutoRedirect = false, HandleCookies = false, BaseAddress = app.Origin });
-        using var request = new HttpRequestMessage(HttpMethod.Get, "/api/identity/x");
+        using var request = new HttpRequestMessage(HttpMethod.Get, new Uri("/api/identity/x", UriKind.Relative));
         request.Headers.Add("Cookie", cookie);
         request.Headers.Add("X-Bff-App", "backoffice");
         var response = await client.SendAsync(request, TestContext.Current.CancellationToken);

@@ -26,6 +26,7 @@ public sealed partial class Browser(HttpClient gateway, Uri origin) : IDisposabl
     public async Task<BrowserResponse> SendAsync(HttpRequestMessage request, Action<HttpRequestMessage>? configure = null)
     {
         ArgumentNullException.ThrowIfNull(request);
+        request.RequestUri = Resolve(request.RequestUri?.OriginalString ?? "/");
         configure?.Invoke(request);
         var cookie = Cookies.GetCookieHeader(request.RequestUri!);
         if (cookie.Length > 0)
@@ -86,7 +87,10 @@ public sealed partial class Browser(HttpClient gateway, Uri origin) : IDisposabl
 
     public void Dispose() => gateway.Dispose();
 
-    private Uri Resolve(string pathOrUrl) => Uri.TryCreate(pathOrUrl, UriKind.Absolute, out var absolute) ? absolute : new Uri(origin, pathOrUrl);
+    private Uri Resolve(string pathOrUrl) =>
+        Uri.TryCreate(pathOrUrl, UriKind.Absolute, out var absolute) && (absolute.Scheme == Uri.UriSchemeHttp || absolute.Scheme == Uri.UriSchemeHttps)
+            ? absolute
+            : new Uri(origin, pathOrUrl);
 
     [GeneratedRegex("<form method=\"post\" action=\"(?<action>[^\"]+)\">(?<inputs>.*?)</form>", RegexOptions.Singleline)]
     private static partial Regex FormRegex();
