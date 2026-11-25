@@ -42,6 +42,14 @@ Identity issues tokens for the issuer `IDENTITY_ISSUER` (the gateway origin, `ht
 
 The platform admin is created on first start from `PLATFORM_ADMIN_EMAIL` and `PLATFORM_ADMIN_PASSWORD`. Sign in through the gateway at http://localhost:8080/bff/backoffice/login. HTTPS is not required in dev (`IDENTITY_REQUIRE_HTTPS=false`). Production keeps the default, which requires HTTPS.
 
+## Backoffice and live reload
+
+The backoffice app (`src/web/backoffice`) is served by nginx as `backoffice-spa` on port 8080 inside the compose network, and the gateway serves it at http://localhost:8080/backoffice/. `./scripts/dev.ps1 up -Profile infra,apps -WebDev` adds `compose.web-dev.yaml`, which runs the Angular dev server (`backoffice-dev`) and points the gateway at it. Use the same `-WebDev` with `down` and `reset`.
+
+## End-to-end tests
+
+`./scripts/e2e.ps1` starts a copy of the stack in the compose project `e2e-test` with `tests/e2e/compose.e2e.yaml`: no published ports, `tmpfs` instead of volumes. It runs Playwright in the gateway's network namespace, so the browser uses `http://localhost:8080` exactly as in development. It always ends with `down -v --remove-orphans` and the cleanup check, so it can run while the dev stack is up.
+
 ## Adding a service
 
 A service keeps its API and database in its own `src/services/<name>/compose.yaml`, with the database port bound as `127.0.0.1:${<NAME>_DB_PORT}:5432`. Plug it in with one entry in `compose.yaml`:
