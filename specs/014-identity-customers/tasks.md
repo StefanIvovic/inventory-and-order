@@ -42,9 +42,9 @@ description: "Task list for feature 014 Identity Customers"
 
 ## Phase 4: User Story 1 - Registration (P1)
 
-- [ ] T009 [US1] Tests first in `Identity.Tests/Flow/RegistrationTests.cs`: the full storefront flow (authorize → login → register → code → token with `user_type=customer` and the tenant, one `UserRegistered`); field errors (data-model.md `RegisterCustomer.Email`, `RegisterCustomer.Password`, `RegisterCustomer.ConfirmPassword`); duplicate in the same tenant ("already exists", nothing created); same email in another tenant and as staff succeeds; concurrent duplicates create one account; unknown and missing tenant show no form; direct registration lands on the signed-in page; antiforgery required. See them fail
-- [ ] T010 [US1] `Features/RegisterCustomer/`: command, `CommandValidator`, handler with `HandlerUserManager` and `UserRegistered` with the envelope tenant (research.md R3, data-model.md `RegisterCustomer.TenantId`)
-- [ ] T011 [US1] `Pages/Account/Register.cshtml(.cs)`: form, tenant name, errors, "already exists" with sign-in link, sign-in and local redirect (contracts/protocol.md)
+- [X] T009 [US1] Tests first in `Identity.Tests/Flow/RegistrationTests.cs`: the full storefront flow (authorize → login → register → code → token with `user_type=customer` and the tenant, one `UserRegistered`); field errors (data-model.md `RegisterCustomer.Email`, `RegisterCustomer.Password`, `RegisterCustomer.ConfirmPassword`); duplicate in the same tenant ("already exists", nothing created); same email in another tenant and as staff succeeds; concurrent duplicates create one account; unknown and missing tenant show no form; direct registration lands on the signed-in page; antiforgery required. See them fail
+- [X] T010 [US1] `Features/RegisterCustomer/`: command, `CommandValidator`, handler with `HandlerUserManager` and `UserRegistered` with the envelope tenant (research.md R3, data-model.md `RegisterCustomer.TenantId`)
+- [X] T011 [US1] `Pages/Account/Register.cshtml(.cs)`: form, tenant name, errors, "already exists" with sign-in link, sign-in and local redirect (contracts/protocol.md)
 
 ---
 

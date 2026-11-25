@@ -1,0 +1,48 @@
+@page "/account/register"
+@model Identity.Api.Pages.Account.RegisterModel
+@{
+    ViewData["Title"] = "Create an account";
+}
+<h1>Create an account</h1>
+@if (Model.TenantName is null)
+{
+    <p class="error" role="alert">@Model.Message</p>
+}
+else
+{
+    <p class="tenant">@Model.TenantName</p>
+    @if (Model.Message is not null)
+    {
+        <p class="error" role="alert">@Model.Message <a href="@Model.LoginUrl">Sign in instead.</a></p>
+    }
+    <form method="post">
+        <input type="hidden" asp-for="ReturnUrl">
+        <input type="hidden" name="tenant" value="@Model.TenantSlug">
+        <label class="field">
+            <span>Email</span>
+            <input asp-for="Email" type="email" autocomplete="email" required autofocus>
+            @if (Model.ErrorFor("email") is { } emailError)
+            {
+                <small class="field-error" data-error="email">@emailError</small>
+            }
+        </label>
+        <label class="field">
+            <span>Password</span>
+            <input asp-for="Password" type="password" autocomplete="new-password" required>
+            @if (Model.ErrorFor("password") is { } passwordError)
+            {
+                <small class="field-error" data-error="password">@passwordError</small>
+            }
+        </label>
+        <label class="field">
+            <span>Confirm password</span>
+            <input asp-for="ConfirmPassword" type="password" autocomplete="new-password" required>
+            @if (Model.ErrorFor("confirmPassword") is { } confirmError)
+            {
+                <small class="field-error" data-error="confirmPassword">@confirmError</small>
+            }
+        </label>
+        <button type="submit">Create account</button>
+    </form>
+    <p class="alternate"><a href="@Model.LoginUrl">I already have an account</a></p>
+}
