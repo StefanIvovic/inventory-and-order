@@ -6,15 +6,15 @@ using System.Collections.Generic;
 
 namespace Internal.Generated.WolverineHandlers
 {
-    // START: GetRolesHandler720402372
+    // START: DisableUserHandler1121474889
     [global::System.CodeDom.Compiler.GeneratedCode("JasperFx", "1.0.0")]
-    public sealed class GetRolesHandler720402372 : Wolverine.Runtime.Handlers.MessageHandler
+    public sealed class DisableUserHandler1121474889 : Wolverine.Runtime.Handlers.MessageHandler
     {
         private readonly Microsoft.AspNetCore.Http.IHttpContextAccessor _httpContextAccessor;
         private readonly Microsoft.Extensions.DependencyInjection.IServiceScopeFactory _serviceScopeFactory;
         private readonly System.Collections.Generic.IEnumerable<Wolverine.EntityFrameworkCore.IDomainEventScraper> _domainEventScraperIEnumerable;
 
-        public GetRolesHandler720402372(Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor, Microsoft.Extensions.DependencyInjection.IServiceScopeFactory serviceScopeFactory, System.Collections.Generic.IEnumerable<Wolverine.EntityFrameworkCore.IDomainEventScraper> domainEventScraperIEnumerable)
+        public DisableUserHandler1121474889(Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor, Microsoft.Extensions.DependencyInjection.IServiceScopeFactory serviceScopeFactory, System.Collections.Generic.IEnumerable<Wolverine.EntityFrameworkCore.IDomainEventScraper> domainEventScraperIEnumerable)
         {
             _httpContextAccessor = httpContextAccessor;
             _serviceScopeFactory = serviceScopeFactory;
@@ -26,13 +26,15 @@ namespace Internal.Generated.WolverineHandlers
             await using var serviceScope = _serviceScopeFactory.CreateAsyncScope();
             Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<Wolverine.Runtime.ScopedMessageContextHolder>(serviceScope.ServiceProvider).Context = context;
             // This service has been marked as requiring service location independent of Wolverine's ability to use constructor injection of everything else
+            var handlerUserManager = Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<Identity.Api.Users.HandlerUserManager>(serviceScope.ServiceProvider);
+            // This service has been marked as requiring service location independent of Wolverine's ability to use constructor injection of everything else
             var requestContext = Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<BuildingBlocks.Core.Handlers.IRequestContext>(serviceScope.ServiceProvider);
             // This service has been marked as requiring service location independent of Wolverine's ability to use constructor injection of everything else
             var tenantContext = Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<BuildingBlocks.Core.Tenancy.ITenantContext>(serviceScope.ServiceProvider);
             // This service has been marked as requiring service location independent of Wolverine's ability to use constructor injection of everything else
             var identityDbContext = Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<Identity.Api.Persistence.IdentityDbContext>(serviceScope.ServiceProvider);
             // The actual message body
-            var getRoles = (Identity.Api.Roles.GetRoles)context.Envelope.Message;
+            var disableUser = (Identity.Api.Features.DisableUser.DisableUser)context.Envelope.Message;
 
             
             // Enroll the DbContext & IMessagingContext in the outgoing Wolverine outbox transaction
@@ -47,12 +49,12 @@ namespace Internal.Generated.WolverineHandlers
             try
             {
                 BuildingBlocks.Messaging.TenantContextMiddleware.Before(context.Envelope, tenantContext, _httpContextAccessor);
-                Wolverine.Runtime.WolverineTracing.MessageActivity(context.Envelope)?.SetTag("message.handler", "Identity.Api.Roles.GetRolesHandler");
-                Wolverine.Runtime.WolverineTracing.MessageActivity(context.Envelope)?.SetTag("handler.type", "Identity.Api.Roles.GetRolesHandler");
-                var getRolesHandler = new Identity.Api.Roles.GetRolesHandler(requestContext, identityDbContext);
+                Wolverine.Runtime.WolverineTracing.MessageActivity(context.Envelope)?.SetTag("message.handler", "Identity.Api.Features.DisableUser.DisableUserHandler");
+                Wolverine.Runtime.WolverineTracing.MessageActivity(context.Envelope)?.SetTag("handler.type", "Identity.Api.Features.DisableUser.DisableUserHandler");
+                var disableUserHandler = new Identity.Api.Features.DisableUser.DisableUserHandler(requestContext, identityDbContext, handlerUserManager);
                 
                 // The actual message execution
-                var outgoing1 = await getRolesHandler.Handle(getRoles, cancellation).ConfigureAwait(false);
+                var outgoing1 = await disableUserHandler.Handle(disableUser, cancellation).ConfigureAwait(false);
 
                 
                 // Outgoing, cascaded message
@@ -75,7 +77,7 @@ namespace Internal.Generated.WolverineHandlers
         }
     }
 
-    // END: GetRolesHandler720402372
+    // END: DisableUserHandler1121474889
     
     
 }

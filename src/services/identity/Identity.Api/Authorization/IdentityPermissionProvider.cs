@@ -12,16 +12,23 @@ public sealed class IdentityPermissionProvider(IdentityDbContext db) : IPermissi
     public async Task<IReadOnlySet<string>> GetPermissionsAsync(ICurrentUser user, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(user);
-        if (user.TenantId is not { } tenantId)
+
+        if (await db.Users.AnyAsync(u => u.Id == user.UserId && u.DisabledAt != null, cancellationToken))
         {
             return None;
         }
 
-        var roles = await db.RoleAssignments
-            .Where(a => a.TenantId == tenantId && a.UserId == user.UserId)
-            .Select(a => a.Role)
-            .ToListAsync(cancellationToken);
+        var roles = user.TenantId is { } tenantId
+            ? await db.RoleAssignments
+                .Where(a => a.TenantId == tenantId && a.UserId == user.UserId)
+                .Select(a => a.Role)
+                .ToListAsync(cancellationToken)
+            : await db.PlatformRoleAssignments
+                .Where(a => a.UserId == user.UserId)
+                .Select(a => a.Role)
+                .ToListAsync(cancellationToken);
 
-        return roles.SelectMany(IdentityRoles.PermissionsOf).ToHashSet(StringComparer.Ordinal);
+        var allowed = user.TenantId is null ? IdentityRoles.Platform : IdentityRoles.Tenant;
+        return roles.Where(allowed.ContainsKey).SelectMany(IdentityRoles.PermissionsOf).ToHashSet(StringComparer.Ordinal);
     }
 }

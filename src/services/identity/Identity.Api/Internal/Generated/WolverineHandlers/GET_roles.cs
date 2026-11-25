@@ -24,11 +24,11 @@ namespace Internal.Generated.WolverineHandlers
         public override async System.Threading.Tasks.Task Handle(Microsoft.AspNetCore.Http.HttpContext httpContext)
         {
             var messageContext = new Wolverine.Runtime.MessageContext(_wolverineRuntime);
-            Wolverine.Http.HttpHandler.RequestActivity(httpContext)?.SetTag("handler.type", "Identity.Api.Roles.RolesEndpoint").SetTag("http.route", "/roles").SetTag("http.request.method", "GET");
+            Wolverine.Http.HttpHandler.RequestActivity(httpContext)?.SetTag("handler.type", "Identity.Api.Features.ListRoles.RolesEndpoint").SetTag("http.route", "/roles").SetTag("http.request.method", "GET");
             Wolverine.Http.Runtime.RequestIdMiddleware.Apply(httpContext, messageContext);
             
             // The actual HTTP request handler execution
-            var rolesResponse_response = await Identity.Api.Roles.RolesEndpoint.Get(messageContext, httpContext.RequestAborted).ConfigureAwait(false);
+            var rolesResponse_response = await Identity.Api.Features.ListRoles.RolesEndpoint.Get(messageContext, httpContext.RequestAborted).ConfigureAwait(false);
 
             // Writing the response body to JSON because this was the first 'return variable' in the method signature
             await WriteJsonAsync(httpContext, rolesResponse_response, 404);

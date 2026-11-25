@@ -15,7 +15,18 @@ public sealed class NoRolesRouteTests(ContainersFixture containers)
         TestContext.Current.TestOutputHelper?.WriteLine(report.ToString());
 
         Assert.True(report.Failures.Count == 0, report.ToString());
-        Assert.Contains("GET /roles (Tenant)", report.Checked);
+        Assert.Equal(
+            [
+                "DELETE /users/{id:guid}/roles/{role} (Tenant)",
+                "GET /roles (Tenant)",
+                "GET /tenants (Platform)",
+                "GET /users (Tenant)",
+                "POST /tenants (Platform)",
+                "POST /users (Tenant)",
+                "POST /users/{id:guid}/disable (Tenant)",
+                "PUT /users/{id:guid}/roles/{role} (Tenant)",
+            ],
+            report.Checked.Order(StringComparer.Ordinal));
         Assert.Contains("GET /health/live", report.Skipped);
         Assert.Contains("GET /health/ready", report.Skipped);
     }

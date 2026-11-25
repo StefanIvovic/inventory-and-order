@@ -1,7 +1,7 @@
 using Wolverine;
 using Wolverine.Http;
 
-namespace Identity.Api.Roles;
+namespace Identity.Api.Features.ListRoles;
 
 public static class RolesEndpoint
 {

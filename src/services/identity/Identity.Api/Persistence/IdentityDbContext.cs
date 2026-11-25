@@ -1,6 +1,7 @@
 using BuildingBlocks.Core.Tenancy;
 using BuildingBlocks.EntityFrameworkCore;
 using Identity.Api.Authorization;
+using Identity.Api.Tenants;
 using Identity.Api.Users;
 using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
@@ -12,9 +13,16 @@ namespace Identity.Api.Persistence;
 public sealed class IdentityDbContext(DbContextOptions<IdentityDbContext> options, ITenantContext tenantContext)
     : TenantDbContext(options, tenantContext), IDataProtectionKeyContext
 {
+    public const string StaffEmailIndex = "ux_identity_users_staff_email";
+    public const string TenantSlugIndex = "ux_tenants_slug";
+    public const string UserNameIndex = "IX_identity_users_NormalizedUserName";
     private const int NameMaxLength = 256;
 
     public DbSet<RoleAssignment> RoleAssignments => Set<RoleAssignment>();
+
+    public DbSet<PlatformRoleAssignment> PlatformRoleAssignments => Set<PlatformRoleAssignment>();
+
+    public DbSet<Tenant> Tenants => Set<Tenant>();
 
     public DbSet<AppUser> Users => Set<AppUser>();
 
@@ -26,11 +34,31 @@ public sealed class IdentityDbContext(DbContextOptions<IdentityDbContext> option
 
         modelBuilder.Entity<RoleAssignment>(entity =>
         {
-            var roles = string.Join(", ", IdentityRoles.All.Keys.Order(StringComparer.Ordinal).Select(name => $"'{name}'"));
+            var roles = RoleList(IdentityRoles.Tenant.Keys);
             entity.ToTable("role_assignments", table => table.HasCheckConstraint("ck_role_assignments_role", $"\"Role\" IN ({roles})"));
             entity.HasKey(a => new { a.TenantId, a.UserId, a.Role });
             entity.Property(a => a.Role).IsRequired().HasMaxLength(RoleAssignment.RoleMaxLength);
             entity.Property(a => a.AssignedAt).IsRequired();
+        });
+
+        modelBuilder.Entity<PlatformRoleAssignment>(entity =>
+        {
+            entity.ToTable("platform_role_assignments", table => table.HasCheckConstraint(
+                "ck_platform_role_assignments_role", $"\"Role\" IN ({RoleList(IdentityRoles.Platform.Keys)})"));
+            entity.HasKey(a => new { a.UserId, a.Role });
+            entity.Property(a => a.Role).IsRequired().HasMaxLength(RoleAssignment.RoleMaxLength);
+            entity.Property(a => a.AssignedAt).IsRequired();
+        });
+
+        modelBuilder.Entity<Tenant>(entity =>
+        {
+            entity.ToTable("tenants", table => table.HasCheckConstraint("ck_tenants_slug", $"\"Slug\" ~ '{Tenant.SlugPattern}'"));
+            entity.HasKey(t => t.Id);
+            entity.Property(t => t.Id).HasMaxLength(Tenant.IdLength);
+            entity.Property(t => t.Slug).IsRequired().HasMaxLength(Tenant.SlugMaxLength);
+            entity.HasIndex(t => t.Slug).IsUnique().HasDatabaseName(TenantSlugIndex);
+            entity.Property(t => t.Name).IsRequired().HasMaxLength(Tenant.NameMaxLength);
+            entity.Property(t => t.CreatedAt).IsRequired();
         });
 
         ConfigureUsers(modelBuilder);
@@ -54,7 +82,9 @@ public sealed class IdentityDbContext(DbContextOptions<IdentityDbContext> option
                 $"(\"UserType\" = '{UserTypes.Platform}' AND \"TenantId\" IS NULL) OR (\"UserType\" IN ('{UserTypes.Staff}', '{UserTypes.Customer}') AND \"TenantId\" IS NOT NULL)"));
             user.HasKey(u => u.Id);
             user.HasIndex(u => u.NormalizedUserName).IsUnique();
-            user.HasIndex(u => u.NormalizedEmail).IsUnique();
+            user.HasIndex(u => u.NormalizedEmail).IsUnique().HasDatabaseName(StaffEmailIndex).HasFilter($"\"UserType\" <> '{UserTypes.Customer}'");
+            user.Property(u => u.CreatedAt).IsRequired();
+            user.Property(u => u.DisabledAt);
             user.Property(u => u.ConcurrencyStamp).IsConcurrencyToken();
             user.Property(u => u.UserName).HasMaxLength(NameMaxLength);
             user.Property(u => u.NormalizedUserName).HasMaxLength(NameMaxLength);
@@ -85,4 +115,7 @@ public sealed class IdentityDbContext(DbContextOptions<IdentityDbContext> option
             token.HasKey(t => new { t.UserId, t.LoginProvider, t.Name });
         });
     }
+
+    private static string RoleList(IEnumerable<string> roles) =>
+        string.Join(", ", roles.Order(StringComparer.Ordinal).Select(name => $"'{name}'"));
 }

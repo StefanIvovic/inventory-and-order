@@ -51,9 +51,9 @@ public static class ConnectEndpoints
             return Results.Challenge(new AuthenticationProperties { RedirectUri = returnUrl }, [IdentityConstants.ApplicationScheme]);
         }
 
-        if (await users.IsLockedOutAsync(user))
+        if (user.IsDisabled || await users.IsLockedOutAsync(user))
         {
-            return Reject(Errors.AccessDenied, "The account is locked.");
+            return Reject(Errors.AccessDenied, "The account cannot sign in.");
         }
 
         var principal = await principals.CreateAsync(user, request.GetScopes(), cancellationToken);
@@ -82,6 +82,7 @@ public static class ConnectEndpoints
         var user = subject is null ? null : await users.FindByIdAsync(subject);
         if (stored is null
             || user is null
+            || user.IsDisabled
             || await users.IsLockedOutAsync(user)
             || !string.Equals(stored.GetClaim(PrincipalFactory.SecurityStampClaim), user.SecurityStamp, StringComparison.Ordinal))
         {

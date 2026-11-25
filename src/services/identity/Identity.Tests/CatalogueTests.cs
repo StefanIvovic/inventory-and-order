@@ -22,6 +22,6 @@ public sealed partial class CatalogueTests
         Assert.All(names, name => Assert.Matches(NamePattern(), name));
     }
 
-    [GeneratedRegex("^[a-z]+(\\.[a-z]+)+$")]
+    [GeneratedRegex("^[a-z]+(-[a-z]+)*(\\.[a-z]+(-[a-z]+)*)+$")]
     private static partial Regex NamePattern();
 }

@@ -150,6 +150,7 @@ public sealed class TestApp : IAsyncDisposable
         app.UseBuildingBlocks();
         app.MapPostToWolverine<CreateThing, ThingCreated>("/things");
         app.MapPostToWolverine<ManualThing, ThingCreated>("/manual");
+        app.MapPostToWolverine<GuardedThing, ThingCreated>("/guarded");
         await app.StartAsync();
         return new TestApp(app, logs);
     }
