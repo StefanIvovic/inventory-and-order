@@ -15,6 +15,10 @@
     <Project Path="src/building-blocks/BuildingBlocks.Analyzers/BuildingBlocks.Analyzers.csproj" />
     <Project Path="src/building-blocks/BuildingBlocks.Analyzers.Tests/BuildingBlocks.Analyzers.Tests.csproj" />
   </Folder>
+  <Folder Name="/gateway/">
+    <Project Path="src/gateway/Gateway.Api/Gateway.Api.csproj" />
+    <Project Path="src/gateway/Gateway.Tests/Gateway.Tests.csproj" />
+  </Folder>
   <Folder Name="/services/identity/">
     <Project Path="src/services/identity/Identity.Api/Identity.Api.csproj" />
     <Project Path="src/services/identity/Identity.Contracts/Identity.Contracts.csproj" />

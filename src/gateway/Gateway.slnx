@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Gateway.Api/Gateway.Api.csproj" />
+  <Folder Name="/tests/">
+    <Project Path="Gateway.Tests/Gateway.Tests.csproj" />
+  </Folder>
+</Solution>
