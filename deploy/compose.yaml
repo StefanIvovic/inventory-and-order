@@ -13,3 +13,7 @@ include:
     env_file:
       - versions.env
       - dev.env
+  - path: ../src/web/backoffice/compose.yaml
+    env_file:
+      - versions.env
+      - dev.env
