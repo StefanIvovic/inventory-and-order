@@ -22,6 +22,7 @@ internal sealed class RouteCategoryRequirement(RouteCategory category)
     {
         RouteCategory.Platform => user.UserType == UserType.Platform && user.TenantId is null,
         RouteCategory.Tenant => user.UserType != UserType.Platform && user.TenantId is not null,
+        RouteCategory.SignedIn => true,
         _ => false,
     };
 }

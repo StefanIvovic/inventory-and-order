@@ -49,6 +49,7 @@ public static class AuthenticationExtensions
         services.AddAuthorizationBuilder()
             .AddPolicy(AuthorizationPolicies.Tenant, tenant)
             .AddPolicy(AuthorizationPolicies.Platform, Policy(authenticationScheme, RouteCategory.Platform))
+            .AddPolicy(AuthorizationPolicies.SignedIn, Policy(authenticationScheme, RouteCategory.SignedIn))
             .SetDefaultPolicy(tenant)
             .SetFallbackPolicy(tenant);
 
@@ -72,6 +73,14 @@ public static class AuthenticationExtensions
         ArgumentNullException.ThrowIfNull(builder);
 
         return builder.WithMetadata(new PlatformOnlyAttribute());
+    }
+
+    public static TBuilder RequireSignedIn<TBuilder>(this TBuilder builder)
+        where TBuilder : IEndpointConventionBuilder
+    {
+        ArgumentNullException.ThrowIfNull(builder);
+
+        return builder.WithMetadata(new SignedInAttribute());
     }
 
     private static AuthorizationPolicy Policy(string authenticationScheme, RouteCategory category) =>

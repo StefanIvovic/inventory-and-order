@@ -8,28 +8,28 @@
 
 ## Phase 1: Setup
 
-- [ ] T001 Amend `.specify/memory/constitution.md` to v1.6.0 with `/speckit-constitution`, following research.md R8:
+- [X] T001 Amend `.specify/memory/constitution.md` to v1.6.0 with `/speckit-constitution`, following research.md R8:
   - the lookup rule as an Architecture Constraints row
   - the seeding rule
   - the `SignedIn` category in principle VI, with its 401 route check
 
   Commit on its own.
-- [ ] T002 Create `src/building-blocks/BuildingBlocks.Lookups/` and `BuildingBlocks.Lookups.Tests/`:
+- [X] T002 Create `src/building-blocks/BuildingBlocks.Lookups/` and `BuildingBlocks.Lookups.Tests/`:
   - references to AspNetCore, EntityFrameworkCore and Validation, plus the analyzers, like the sibling packages
   - add both to `BuildingBlocks.slnx` and `Directory.Packages.props`
   - check that `scripts/pack.ps1` and `building-blocks.yml` pick the new project up
 
 ## Phase 2: Foundational (BuildingBlocks 0.4.0; blocks all stories)
 
-- [ ] T003 [P] `SignedIn` route category in `BuildingBlocks.AspNetCore/Authentication/`, per research.md R5: `RouteCategory.SignedIn`, the `[SignedIn]` attribute, `.RequireSignedIn()` and the `signed-in` policy.
+- [X] T003 [P] `SignedIn` route category in `BuildingBlocks.AspNetCore/Authentication/`, per research.md R5: `RouteCategory.SignedIn`, the `[SignedIn]` attribute, `.RequireSignedIn()` and the `signed-in` policy.
 
   Tests first, in `BuildingBlocks.AspNetCore.Tests/Authentication/`:
   - staff, customer and platform get 200
   - anonymous gets 401
   - a malformed identity gets 401
   - combining it with the allow-list or with platform-only fails at startup
-- [ ] T004 [P] `NoRolesRouteCheck` and `RouteCheckReport` in `BuildingBlocks.Testing/Routes/`: `SignedIn` routes are called without a token and must answer 401, and they are reported in a new `SignedIn` list. Tests first, in `BuildingBlocks.Testing.Tests/NoRolesRouteCheckTests.cs`: a `SignedIn` route answering 200 anonymously fails the check, and one answering 401 is listed
-- [ ] T005 Entities `LookupType` and `LookupValue`, and `ModelBuilder.ApplyLookups()`, following data-model.md:
+- [X] T004 [P] `NoRolesRouteCheck` and `RouteCheckReport` in `BuildingBlocks.Testing/Routes/`: `SignedIn` routes are called without a token and must answer 401, and they are reported in a new `SignedIn` list. Tests first, in `BuildingBlocks.Testing.Tests/NoRolesRouteCheckTests.cs`: a `SignedIn` route answering 200 anonymously fails the check, and one answering 401 is listed
+- [X] T005 Entities `LookupType` and `LookupValue`, and `ModelBuilder.ApplyLookups()`, following data-model.md:
   - `LookupType.Id`, `.Code` and `.Name`
   - `LookupValue.Id`, `.Code`, `.Name` and `.LookupTypeId`
   - the R2 table names, constraints and `ix_lookup_values_type_name`
@@ -42,7 +42,7 @@
   - a duplicate code within a type is refused
   - a name over 200 characters is refused (data-model.md `LookupType.Name`, `LookupValue.Name`)
   - the model creates the constraints on a test DbContext
-- [ ] T006 `LookupSeeder<TDbContext>` and `LookupSeedException`, per research.md R3. Tests first, on Testcontainers with a test DbContext and one database per test:
+- [X] T006 `LookupSeeder<TDbContext>` and `LookupSeedException`, per research.md R3. Tests first, on Testcontainers with a test DbContext and one database per test:
   - an empty database gets every defined row
   - a changed name is corrected and keeps its id
   - an extra row is left alone
@@ -50,7 +50,7 @@
   - two concurrent runs both succeed with one row each
   - a hand-made row holding a defined code under another id makes seeding fail
   - a defined value still missing afterwards throws
-- [ ] T007 `LookupReader`, `LookupValueQuery`, `LookupCursor`, `LookupValuePage` and `LookupValueQueryValidator`, per research.md R4 and data-model.md:
+- [X] T007 `LookupReader`, `LookupValueQuery`, `LookupCursor`, `LookupValuePage` and `LookupValueQueryValidator`, per research.md R4 and data-model.md:
   - `ListLookupValues.typeCode`, `.q`, `.ids`, `.codes`, `.size` and `.after`
   - `LookupValuePage.items` and `.nextCursor`
 
@@ -63,7 +63,7 @@
   - an unknown type gives `lookup-type-not-found`
   - an empty result is an empty page
   - one database command per page
-- [ ] T008 [P] `UseLookupCaching()` and `.WithLookupCaching()` in `LookupCaching.cs`, per research.md R6. Tests first:
+- [X] T008 [P] `UseLookupCaching()` and `.WithLookupCaching()` in `LookupCaching.cs`, per research.md R6. Tests first:
   - the ETag is stable for the same body and changes when the body changes
   - a matching `If-None-Match` gives 304 with no body, and `*` matches
   - `Cache-Control: private, max-age=300` and `Vary` are set

@@ -35,6 +35,16 @@ public sealed class DomainErrorTests
         Assert.Equal("The requested order was not found.", exception.Message);
     }
 
+    [Fact]
+    public void NotFoundExceptionCanCarryASpecificCode()
+    {
+        var exception = new NotFoundException("lookup type", "lookup-type-not-found");
+
+        Assert.Equal("lookup-type-not-found", exception.Code);
+        Assert.Equal("The requested lookup type was not found.", exception.Message);
+        Assert.ThrowsAny<ArgumentException>(() => new NotFoundException("order", " "));
+    }
+
     [Theory]
     [InlineData(null)]
     [InlineData("")]
