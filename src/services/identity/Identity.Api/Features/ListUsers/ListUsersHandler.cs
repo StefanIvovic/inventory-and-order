@@ -15,9 +15,9 @@ public sealed class ListUsersHandler(IRequestContext context, IdentityDbContext 
 
         var tenantId = Tenant.TenantId;
         var users = await Db.Users
-            .Where(u => u.TenantId == tenantId && u.UserType == UserTypes.Staff)
+            .Where(u => u.TenantId == tenantId && u.UserTypeId == UserTypes.StaffValue.Id)
             .OrderBy(u => u.NormalizedEmail)
-            .Select(u => new { u.Id, u.Email, u.UserType, u.DisabledAt, u.CreatedAt })
+            .Select(u => new { u.Id, u.Email, u.UserTypeId, u.DisabledAt, u.CreatedAt })
             .ToListAsync(cancellationToken);
         var roles = (await Db.RoleAssignments.Select(a => new { a.UserId, a.Role }).ToListAsync(cancellationToken))
             .ToLookup(a => a.UserId, a => a.Role);
@@ -27,7 +27,7 @@ public sealed class ListUsersHandler(IRequestContext context, IdentityDbContext 
         var items = users.Select(u => new UserItem(
                 u.Id,
                 u.Email!,
-                u.UserType,
+                UserTypes.CodeOf(u.UserTypeId),
                 u.DisabledAt is not null,
                 roles[u.Id].Order(StringComparer.Ordinal).ToList(),
                 u.CreatedAt,

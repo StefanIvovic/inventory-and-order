@@ -8,7 +8,9 @@ public sealed class AppUser : IdentityUser<Guid>
     {
     }
 
-    public string UserType { get; private set; } = string.Empty;
+    public Guid UserTypeId { get; private set; }
+
+    public string UserType => UserTypes.CodeOf(UserTypeId);
 
     public string? TenantId { get; private set; }
 
@@ -24,7 +26,7 @@ public sealed class AppUser : IdentityUser<Guid>
         UserName = email,
         Email = email,
         EmailConfirmed = true,
-        UserType = UserTypes.Platform,
+        UserTypeId = UserTypes.PlatformValue.Id,
         CreatedAt = createdAt,
     };
 
@@ -42,7 +44,7 @@ public sealed class AppUser : IdentityUser<Guid>
             UserName = userType == UserTypes.Customer ? CustomerUserName(tenantId, email) : email,
             Email = email,
             EmailConfirmed = true,
-            UserType = userType,
+            UserTypeId = UserTypes.IdOf(userType),
             TenantId = tenantId,
             CreatedAt = createdAt,
         };

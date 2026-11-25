@@ -1,5 +1,6 @@
 using BuildingBlocks.AspNetCore;
 using BuildingBlocks.AspNetCore.Authentication;
+using BuildingBlocks.Lookups;
 using BuildingBlocks.Messaging;
 using BuildingBlocks.Validation;
 using Identity.Contracts;
@@ -164,6 +165,7 @@ if (protocol.ForwardedHeaders.IsEnabled)
 
 app.UseStaticFiles();
 app.UseBuildingBlocksAuthentication();
+app.UseLookupCaching();
 app.MapHealthChecks("/health/live", new HealthCheckOptions { Predicate = _ => false }).AllowAnonymous();
 app.MapHealthChecks("/health/ready", new HealthCheckOptions { Predicate = check => check.Tags.Contains(ReadinessCheck.Tag) }).AllowAnonymous();
 app.MapConnectEndpoints();

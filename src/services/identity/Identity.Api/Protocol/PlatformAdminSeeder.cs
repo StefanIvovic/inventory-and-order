@@ -20,7 +20,7 @@ public static class PlatformAdminSeeder
         ArgumentNullException.ThrowIfNull(settings);
         ArgumentNullException.ThrowIfNull(clock);
 
-        if (await users.Users.AnyAsync(u => u.UserType == UserTypes.Platform, cancellationToken))
+        if (await users.Users.AnyAsync(u => u.UserTypeId == UserTypes.PlatformValue.Id, cancellationToken))
         {
             return;
         }

@@ -1,3 +1,5 @@
+using BuildingBlocks.Lookups;
+using Identity.Api.Lookups;
 using Identity.Api.Protocol;
 using Identity.Api.Users;
 using Microsoft.AspNetCore.Identity;
@@ -29,6 +31,7 @@ public sealed partial class StartupTasks(
         var services = scope.ServiceProvider;
 
         await MigrateAsync(services.GetRequiredService<IdentityDbContext>(), cancellationToken);
+        await LookupSeeder.SeedAsync(services.GetRequiredService<IdentityDbContext>(), IdentityLookups.Catalog, cancellationToken);
         await Scopes.RegisterAsync(services.GetRequiredService<IOpenIddictScopeManager>(), cancellationToken);
         await ClientRegistrar.RegisterAsync(services.GetRequiredService<IOpenIddictApplicationManager>(), settings, cancellationToken);
         await PlatformAdminSeeder.SeedAsync(

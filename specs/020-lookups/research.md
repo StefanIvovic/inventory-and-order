@@ -116,12 +116,12 @@ The tables use the owner's columns, with Identity's naming convention: snake_cas
 
 All ids are fixed GUIDs. `UserTypes` becomes a set of `LookupValueDefinition` values. A constant `Code` stays only where C# needs a constant, such as switch patterns and attributes.
 
-**Mapping**
+**Mapping** (as built)
 
-- `AppUser.UserType` stays a `string` code in C#, so the domain and the tokens are unchanged.
-- It is mapped to the column `UserTypeId uuid not null`, with an EF value converter from code to id through the catalog.
-- LINQ such as `u.UserType == UserTypes.Staff.Code` then translates to `"UserTypeId" = '<staff id>'`, so the queries, the `ClientPolicies` and the seeders keep their shape.
-- A code the catalog doesn't know throws in the converter. In practice `AppUser.ForTenant` refuses it first.
+- `AppUser.UserTypeId` (Guid) is the mapped column `UserTypeId`, with the FK in the EF model.
+- `AppUser.UserType` stays the code string, computed from the id through the catalog and ignored by EF, so the domain, the tokens, `ClientPolicies` and `UserRegistered` are unchanged.
+- Queries compare ids (`u.UserTypeId == UserTypes.StaffValue.Id`).
+- Rejected: a value converter on the code string. EF refuses an FK from a string property to the Guid key of `lookup_values`, and an FK kept only in raw migration SQL would leave the model out of step.
 
 **Database rules**
 

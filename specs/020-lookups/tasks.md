@@ -79,9 +79,9 @@
 
 **Independent Test**: the migration test, plus the full existing Identity suite.
 
-- [ ] T010 [US3] Pin BuildingBlocks 0.4.0 and add `BuildingBlocks.Lookups` in `src/services/identity/Directory.Packages.props` and `Identity.Api.csproj`. Run `restore-feed.ps1 -Service identity`. The build and the existing suite stay green
-- [ ] T011 [US3] Add `Identity.Api/Lookups/IdentityLookups.cs`, the catalog from data-model.md (Identity catalog) with fixed GUIDs. `Users/UserTypes.cs` becomes `LookupValueDefinition`s with `Code` constants, and its callers are updated (`AppUser`, `ClientPolicies`, the handlers, the seeders, the tests). Test: `IdentityLookups.Catalog.Validate()` passes
-- [ ] T012 [US3] Write the migration test first, `Identity.Tests/Lookups/UserTypeMigrationTests.cs`:
+- [X] T010 [US3] Pin BuildingBlocks 0.4.0 and add `BuildingBlocks.Lookups` in `src/services/identity/Directory.Packages.props` and `Identity.Api.csproj`. Run `restore-feed.ps1 -Service identity`. The build and the existing suite stay green
+- [X] T011 [US3] Add `Identity.Api/Lookups/IdentityLookups.cs`, the catalog from data-model.md (Identity catalog) with fixed GUIDs. `Users/UserTypes.cs` becomes `LookupValueDefinition`s with `Code` constants, and its callers are updated (`AppUser`, `ClientPolicies`, the handlers, the seeders, the tests). Test: `IdentityLookups.Catalog.Validate()` passes
+- [X] T012 [US3] Write the migration test first, `Identity.Tests/Lookups/UserTypeMigrationTests.cs`:
   1. migrate to the migration before `UserTypeLookup`
   2. insert a platform user, staff and a customer with raw SQL
   3. migrate to the latest
@@ -89,7 +89,7 @@
   Then assert every type code and every other column unchanged. Also assert that the database refuses a `UserTypeId` holding a `staff-status` id, and a random id.
 
   See it fail.
-- [ ] T013 [US3] Change `IdentityDbContext` for data-model.md "AppUser change" (`AppUser.UserTypeId`: uuid, not null, references `LookupValue.Id`), per research.md R7:
+- [X] T013 [US3] Change `IdentityDbContext` for data-model.md "AppUser change" (`AppUser.UserTypeId`: uuid, not null, references `LookupValue.Id`), per research.md R7:
   - `ApplyLookups()`
   - map `AppUser.UserType` to `UserTypeId` with the code-to-id value converter
   - FK `fk_identity_users_user_type`
@@ -104,7 +104,7 @@
 
 **Independent Test**: start Identity on an empty, a changed and an already-seeded database.
 
-- [ ] T014 [US2] Write the tests first in `Identity.Tests/Lookups/LookupSeedingTests.cs`:
+- [X] T014 [US2] Write the tests first in `Identity.Tests/Lookups/LookupSeedingTests.cs`:
   - a fresh start has both types and their five values, with the catalog ids
   - after a name is edited by hand, the restart restores it
   - a second start changes nothing
@@ -118,7 +118,7 @@
 
 **Independent Test**: the endpoint tests for the three user types and an anonymous caller.
 
-- [ ] T015 [US1] Write the tests first in `Identity.Tests/Lookups/LookupValuesEndpointTests.cs`, per contracts/lookups-api.md:
+- [X] T015 [US1] Write the tests first in `Identity.Tests/Lookups/LookupValuesEndpointTests.cs`, per contracts/lookups-api.md:
   - staff, customer and platform tokens each read `user-type` (3 values, sorted by name) and `staff-status` (2 values)
   - anonymous gets 401
   - `nope` gets 404 `lookup-type-not-found`
@@ -127,8 +127,8 @@
   - the second request with the ETag gets 304 and no body
 
   See them fail.
-- [ ] T016 [US1] Add `Identity.Api/Features/Lookups/`: the `ListLookupValues` query, handler (it calls `LookupReader`), validator registration and endpoint `[WolverineGet("/lookups/{typeCode}/values")]` with `[SignedIn]` and `.WithLookupCaching()`. Add `UseLookupCaching()` in `Program.cs`. T015 green
-- [ ] T017 [US1] The no-roles route test in Identity passes, and its report lists the lookup route under `SignedIn`. Regenerate the Wolverine code with `scripts/codegen.ps1 -Service identity`, and `-Check` passes
+- [X] T016 [US1] Add `Identity.Api/Features/Lookups/`: the `ListLookupValues` query, handler (it calls `LookupReader`), validator registration and endpoint `[WolverineGet("/lookups/{typeCode}/values")]` with `[SignedIn]` and `.WithLookupCaching()`. Add `UseLookupCaching()` in `Program.cs`. T015 green
+- [X] T017 [US1] The no-roles route test in Identity passes, and its report lists the lookup route under `SignedIn`. Regenerate the Wolverine code with `scripts/codegen.ps1 -Service identity`, and `-Check` passes
 
 ## Phase 6: Polish
 

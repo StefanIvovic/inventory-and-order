@@ -1,5 +1,6 @@
 using BuildingBlocks.Core.Tenancy;
 using BuildingBlocks.EntityFrameworkCore;
+using BuildingBlocks.Lookups;
 using Identity.Api.Authorization;
 using Identity.Api.Tenants;
 using Identity.Api.Users;
@@ -17,6 +18,8 @@ public sealed class IdentityDbContext(DbContextOptions<IdentityDbContext> option
     public const string TenantSlugIndex = "ux_tenants_slug";
     public const string UserNameIndex = "IX_identity_users_NormalizedUserName";
     public const string CustomerEmailIndex = "ux_identity_users_customer_email";
+    public const string UserTypeColumn = "UserTypeId";
+    public const string UserTypeForeignKey = "fk_identity_users_user_type";
     private const int NameMaxLength = 256;
     private const int UserNameMaxLength = 320;
 
@@ -63,6 +66,7 @@ public sealed class IdentityDbContext(DbContextOptions<IdentityDbContext> option
             entity.Property(t => t.CreatedAt).IsRequired();
         });
 
+        modelBuilder.ApplyLookups();
         ConfigureUsers(modelBuilder);
         modelBuilder.Entity<DataProtectionKey>().ToTable("data_protection_keys");
 
@@ -81,19 +85,22 @@ public sealed class IdentityDbContext(DbContextOptions<IdentityDbContext> option
         {
             user.ToTable("identity_users", table => table.HasCheckConstraint(
                 "ck_identity_users_type_tenant",
-                $"(\"UserType\" = '{UserTypes.Platform}' AND \"TenantId\" IS NULL) OR (\"UserType\" IN ('{UserTypes.Staff}', '{UserTypes.Customer}') AND \"TenantId\" IS NOT NULL)"));
+                $"(\"UserTypeId\" = '{UserTypes.PlatformValue.Id}' AND \"TenantId\" IS NULL) OR (\"UserTypeId\" IN ('{UserTypes.StaffValue.Id}', '{UserTypes.CustomerValue.Id}') AND \"TenantId\" IS NOT NULL)"));
             user.HasKey(u => u.Id);
             user.HasIndex(u => u.NormalizedUserName).IsUnique();
-            user.HasIndex(u => u.NormalizedEmail).IsUnique().HasDatabaseName(StaffEmailIndex).HasFilter($"\"UserType\" <> '{UserTypes.Customer}'");
+            user.HasIndex(u => u.NormalizedEmail).IsUnique().HasDatabaseName(StaffEmailIndex).HasFilter($"\"UserTypeId\" <> '{UserTypes.CustomerValue.Id}'");
             user.Property(u => u.CreatedAt).IsRequired();
             user.Property(u => u.DisabledAt);
             user.Property(u => u.ConcurrencyStamp).IsConcurrencyToken();
             user.Property(u => u.UserName).HasMaxLength(UserNameMaxLength);
             user.Property(u => u.NormalizedUserName).HasMaxLength(UserNameMaxLength);
-            user.HasIndex(u => new { u.TenantId, u.NormalizedEmail }).IsUnique().HasDatabaseName(CustomerEmailIndex).HasFilter($"\"UserType\" = '{UserTypes.Customer}'");
+            user.HasIndex(u => new { u.TenantId, u.NormalizedEmail }).IsUnique().HasDatabaseName(CustomerEmailIndex).HasFilter($"\"UserTypeId\" = '{UserTypes.CustomerValue.Id}'");
             user.Property(u => u.Email).HasMaxLength(NameMaxLength);
             user.Property(u => u.NormalizedEmail).HasMaxLength(NameMaxLength);
-            user.Property(u => u.UserType).IsRequired().HasMaxLength(20);
+            user.Ignore(u => u.UserType);
+            user.Property(u => u.UserTypeId).HasColumnName(UserTypeColumn).IsRequired();
+            user.HasOne<LookupValue>().WithMany().HasForeignKey(u => u.UserTypeId)
+                .HasConstraintName(UserTypeForeignKey).OnDelete(DeleteBehavior.Restrict);
             user.Property(u => u.TenantId).HasMaxLength(TenantFilter.TenantIdMaxLength);
             user.HasMany<IdentityUserClaim<Guid>>().WithOne().HasForeignKey(c => c.UserId).IsRequired();
             user.HasMany<IdentityUserLogin<Guid>>().WithOne().HasForeignKey(l => l.UserId).IsRequired();

@@ -2,6 +2,7 @@
   <ItemGroup>
     <PackageReference Include="BuildingBlocks.AspNetCore" />
     <PackageReference Include="BuildingBlocks.EntityFrameworkCore" />
+    <PackageReference Include="BuildingBlocks.Lookups" />
     <PackageReference Include="BuildingBlocks.Messaging" />
     <PackageReference Include="BuildingBlocks.Validation" />
     <PackageReference Include="WolverineFx.Http" />

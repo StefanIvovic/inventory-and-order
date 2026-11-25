@@ -84,7 +84,7 @@ public sealed class CreateTenantTests(ContainersFixture containers)
         }
 
         Assert.Equal(1, await CountAsync(app, db => db.Tenants.CountAsync(TestContext.Current.CancellationToken)));
-        Assert.Equal(1, await CountAsync(app, db => db.Users.CountAsync(u => u.UserType == "staff", TestContext.Current.CancellationToken)));
+        Assert.Equal(1, await CountAsync(app, db => db.Users.CountAsync(u => u.UserTypeId == Identity.Api.Users.UserTypes.StaffValue.Id, TestContext.Current.CancellationToken)));
     }
 
     [Fact]

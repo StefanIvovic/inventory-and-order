@@ -22,6 +22,66 @@ namespace Identity.Api.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("BuildingBlocks.Lookups.LookupType", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique()
+                        .HasDatabaseName("ux_lookup_types_code");
+
+                    b.ToTable("lookup_types", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_lookup_types_code", "\"Code\" ~ '^[a-z0-9]+(-[a-z0-9]+)*$'");
+                        });
+                });
+
+            modelBuilder.Entity("BuildingBlocks.Lookups.LookupValue", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<Guid>("LookupTypeId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LookupTypeId", "Code")
+                        .IsUnique()
+                        .HasDatabaseName("ux_lookup_values_type_code");
+
+                    b.HasIndex("LookupTypeId", "Name", "Id")
+                        .HasDatabaseName("ix_lookup_values_type_name");
+
+                    b.ToTable("lookup_values", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_lookup_values_code", "\"Code\" ~ '^[a-z0-9]+(-[a-z0-9]+)*$'");
+                        });
+                });
+
             modelBuilder.Entity("Identity.Api.Persistence.PlatformRoleAssignment", b =>
                 {
                     b.Property<Guid>("UserId")
@@ -162,29 +222,30 @@ namespace Identity.Api.Persistence.Migrations
                         .HasMaxLength(320)
                         .HasColumnType("character varying(320)");
 
-                    b.Property<string>("UserType")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
+                    b.Property<Guid>("UserTypeId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("UserTypeId");
 
                     b.HasKey("Id");
 
                     b.HasIndex("NormalizedEmail")
                         .IsUnique()
                         .HasDatabaseName("ux_identity_users_staff_email")
-                        .HasFilter("\"UserType\" <> 'customer'");
+                        .HasFilter("\"UserTypeId\" <> 'd5f29ef5-6ab3-4fe7-bcf9-eb778b259dd5'");
 
                     b.HasIndex("NormalizedUserName")
                         .IsUnique();
 
+                    b.HasIndex("UserTypeId");
+
                     b.HasIndex("TenantId", "NormalizedEmail")
                         .IsUnique()
                         .HasDatabaseName("ux_identity_users_customer_email")
-                        .HasFilter("\"UserType\" = 'customer'");
+                        .HasFilter("\"UserTypeId\" = 'd5f29ef5-6ab3-4fe7-bcf9-eb778b259dd5'");
 
                     b.ToTable("identity_users", null, t =>
                         {
-                            t.HasCheckConstraint("ck_identity_users_type_tenant", "(\"UserType\" = 'platform' AND \"TenantId\" IS NULL) OR (\"UserType\" IN ('staff', 'customer') AND \"TenantId\" IS NOT NULL)");
+                            t.HasCheckConstraint("ck_identity_users_type_tenant", "(\"UserTypeId\" = 'd02f19f1-99bf-4f89-afdc-9eaa9e4317fb' AND \"TenantId\" IS NULL) OR (\"UserTypeId\" IN ('0d78e82f-0268-4c57-8926-4f31edfe1b61', 'd5f29ef5-6ab3-4fe7-bcf9-eb778b259dd5') AND \"TenantId\" IS NOT NULL)");
                         });
                 });
 
@@ -477,6 +538,25 @@ namespace Identity.Api.Persistence.Migrations
                     b.HasIndex("ApplicationId", "Status", "Subject", "Type");
 
                     b.ToTable("openiddict_tokens", (string)null);
+                });
+
+            modelBuilder.Entity("BuildingBlocks.Lookups.LookupValue", b =>
+                {
+                    b.HasOne("BuildingBlocks.Lookups.LookupType", null)
+                        .WithMany()
+                        .HasForeignKey("LookupTypeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Identity.Api.Users.AppUser", b =>
+                {
+                    b.HasOne("BuildingBlocks.Lookups.LookupValue", null)
+                        .WithMany()
+                        .HasForeignKey("UserTypeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_identity_users_user_type");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
