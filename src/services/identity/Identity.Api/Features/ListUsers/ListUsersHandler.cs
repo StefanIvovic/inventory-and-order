@@ -1,6 +1,7 @@
 using BuildingBlocks.Core.Handlers;
 using Identity.Api.Authorization;
 using Identity.Api.Persistence;
+using Identity.Api.Users;
 using Microsoft.EntityFrameworkCore;
 
 namespace Identity.Api.Features.ListUsers;
@@ -14,7 +15,7 @@ public sealed class ListUsersHandler(IRequestContext context, IdentityDbContext 
 
         var tenantId = Tenant.TenantId;
         var users = await Db.Users
-            .Where(u => u.TenantId == tenantId)
+            .Where(u => u.TenantId == tenantId && u.UserType == UserTypes.Staff)
             .OrderBy(u => u.NormalizedEmail)
             .Select(u => new { u.Id, u.Email, u.UserType, u.DisabledAt, u.CreatedAt })
             .ToListAsync(cancellationToken);

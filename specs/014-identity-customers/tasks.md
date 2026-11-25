@@ -50,8 +50,8 @@ description: "Task list for feature 014 Identity Customers"
 
 ## Phase 5: User Story 4 - Customers stay out of staff management (P2)
 
-- [ ] T012 [US4] Tests first in `Identity.Tests/Users/CustomerSeparationTests.cs`: the user list shows staff only; disable and role routes return 404 for a customer id; a customer token gets 403 on every Identity route; `OwnTokenTests` asserts `/account/register` is allow-listed. See them fail
-- [ ] T013 [US4] `Users/TenantUsers.cs` and `Features/ListUsers/ListUsersHandler.cs` filter staff; `IdentityPermissionProvider` returns none for customers (research.md R5)
+- [X] T012 [US4] Tests first in `Identity.Tests/Users/CustomerSeparationTests.cs`: the user list shows staff only; disable and role routes return 404 for a customer id; a customer token gets 403 on every Identity route; `OwnTokenTests` asserts `/account/register` is allow-listed. See them fail
+- [X] T013 [US4] `Users/TenantUsers.cs` and `Features/ListUsers/ListUsersHandler.cs` filter staff; `IdentityPermissionProvider` returns none for customers (research.md R5)
 
 ---
 

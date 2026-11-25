@@ -12,6 +12,10 @@ public sealed class IdentityPermissionProvider(IdentityDbContext db) : IPermissi
     public async Task<IReadOnlySet<string>> GetPermissionsAsync(ICurrentUser user, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(user);
+        if (user.UserType == UserType.Customer)
+        {
+            return None;
+        }
 
         if (await db.Users.AnyAsync(u => u.Id == user.UserId && u.DisabledAt != null, cancellationToken))
         {

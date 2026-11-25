@@ -9,7 +9,7 @@ namespace Internal.Generated.WolverineHandlers
     {
         public override System.Type[] HandlerTypes()
         {
-            return new System.Type[] { typeof(BuildingBlocks.Messaging.PermissionAssignmentsChangedHandler), typeof(Identity.Api.Features.AssignRole.AssignRoleHandler), typeof(Identity.Api.Features.AssignRole.UnassignRoleHandler), typeof(Identity.Api.Features.CreateStaffUser.CreateStaffUserHandler), typeof(Identity.Api.Features.CreateTenant.CreateTenantHandler), typeof(Identity.Api.Features.DisableUser.DisableUserHandler), typeof(Identity.Api.Features.ListRoles.GetRolesHandler), typeof(Identity.Api.Features.ListTenants.ListTenantsHandler), typeof(Identity.Api.Features.ListUsers.ListUsersHandler) };
+            return new System.Type[] { typeof(BuildingBlocks.Messaging.PermissionAssignmentsChangedHandler), typeof(Identity.Api.Features.AssignRole.AssignRoleHandler), typeof(Identity.Api.Features.AssignRole.UnassignRoleHandler), typeof(Identity.Api.Features.CreateStaffUser.CreateStaffUserHandler), typeof(Identity.Api.Features.CreateTenant.CreateTenantHandler), typeof(Identity.Api.Features.DisableUser.DisableUserHandler), typeof(Identity.Api.Features.ListRoles.GetRolesHandler), typeof(Identity.Api.Features.ListTenants.ListTenantsHandler), typeof(Identity.Api.Features.ListUsers.ListUsersHandler), typeof(Identity.Api.Features.RegisterCustomer.RegisterCustomerHandler) };
         }
 
         public override System.Type[] MessageTypes()
@@ -36,6 +36,7 @@ namespace Internal.Generated.WolverineHandlers
         [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All, typeof(global::Internal.Generated.WolverineHandlers.ListTenantsHandler2039965751))]
         [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All, typeof(global::Internal.Generated.WolverineHandlers.ListUsersHandler1234828937))]
         [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All, typeof(global::Internal.Generated.WolverineHandlers.PermissionAssignmentsChangedHandler1254324437))]
+        [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All, typeof(global::Internal.Generated.WolverineHandlers.RegisterCustomerHandler1639749063))]
         [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All, typeof(global::Internal.Generated.WolverineHandlers.UnassignRoleHandler2094663650))]
         [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All, typeof(global::BuildingBlocks.Messaging.PermissionAssignmentsChangedHandler))]
         [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All, typeof(global::Identity.Api.Features.AssignRole.AssignRoleHandler))]
@@ -46,6 +47,7 @@ namespace Internal.Generated.WolverineHandlers
         [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All, typeof(global::Identity.Api.Features.ListRoles.GetRolesHandler))]
         [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All, typeof(global::Identity.Api.Features.ListTenants.ListTenantsHandler))]
         [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All, typeof(global::Identity.Api.Features.ListUsers.ListUsersHandler))]
+        [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All, typeof(global::Identity.Api.Features.RegisterCustomer.RegisterCustomerHandler))]
         [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All, typeof(global::BuildingBlocks.Messaging.PermissionAssignmentsChanged))]
         [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All, typeof(global::Identity.Api.Features.AssignRole.AssignRole))]
         [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All, typeof(global::Identity.Api.Features.AssignRole.UnassignRole))]
@@ -55,6 +57,7 @@ namespace Internal.Generated.WolverineHandlers
         [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All, typeof(global::Identity.Api.Features.ListRoles.GetRoles))]
         [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All, typeof(global::Identity.Api.Features.ListTenants.ListTenants))]
         [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All, typeof(global::Identity.Api.Features.ListUsers.ListUsers))]
+        [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All, typeof(global::Identity.Api.Features.RegisterCustomer.RegisterCustomer))]
         public static void Pin()
         {
             // Intentionally empty. The [DynamicDependency] attributes above are the payload: they root the generated types for Native AOT, and [ModuleInitializer] guarantees this method is itself an ILC root.

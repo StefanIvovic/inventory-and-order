@@ -32,6 +32,7 @@ public sealed class OwnTokenTests(ContainersFixture containers)
         Assert.Contains(report.Skipped, r => r.Contains("/connect/authorize", StringComparison.Ordinal));
         Assert.Contains(report.Skipped, r => r.Contains("/connect/token", StringComparison.Ordinal));
         Assert.Contains(report.Skipped, r => r.Contains("account/login", StringComparison.Ordinal));
+        Assert.Contains(report.Skipped, r => r.Contains("account/register", StringComparison.Ordinal));
         Assert.Contains(report.Skipped, r => r.Contains("connect/endsession", StringComparison.Ordinal));
     }
 }
