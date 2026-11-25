@@ -11,7 +11,7 @@ Expected: all green, including the storefront flow, client policies and the rout
 ./scripts/restore-feed.ps1 -Service identity
 ./scripts/dev.ps1 up -Profile infra,apps
 ```
-Open http://127.0.0.1:5101/account/register?tenant=demo, register `shopper@mail.test`. Expected: the "signed in" page. Open http://127.0.0.1:5101/account/register?tenant=nope. Expected: "This shop does not exist."
+Open http://localhost:8080/account/register?tenant=demo (through the gateway since 015), register `shopper@mail.test`. Expected: the "signed in" page. Open http://localhost:8080/account/register?tenant=nope. Expected: "This shop does not exist."
 
 ## 3. Clean up
 ```powershell

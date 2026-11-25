@@ -107,14 +107,16 @@ Built so far: Identity. The gateway, the two SPAs, and the Product, Inventory, O
 ./scripts/dev.ps1 up -Profile infra,apps
 ```
 
-The first command builds the shared packages Identity depends on into the local feed (`artifacts/packages`). The second builds the images and starts RabbitMQ, the Identity database and Identity, then waits until they are healthy.
+The first command builds the shared packages Identity depends on into the local feed (`artifacts/packages`). The second builds the images and starts RabbitMQ, the Identity database, Identity and the gateway, then waits until they are healthy. Only the gateway publishes an application port.
 
 ### Use
 
 | What | Where |
 |---|---|
-| Identity sign-in | http://127.0.0.1:5101/account/login |
-| Identity discovery document | http://127.0.0.1:5101/.well-known/openid-configuration |
+| Backoffice sign-in (through the gateway) | http://localhost:8080/bff/backoffice/login |
+| Storefront sign-in for the demo shop | http://localhost:8080/bff/shop/demo/login |
+| Signed-in user | http://localhost:8080/bff/backoffice/user |
+| Identity discovery document | http://localhost:8080/.well-known/openid-configuration |
 | RabbitMQ management | http://127.0.0.1:15672 |
 | Identity database | `127.0.0.1:5401` |
 
