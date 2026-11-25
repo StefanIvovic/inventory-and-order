@@ -17,3 +17,7 @@ include:
     env_file:
       - versions.env
       - dev.env
+  - path: ../src/web/storefront/compose.yaml
+    env_file:
+      - versions.env
+      - dev.env

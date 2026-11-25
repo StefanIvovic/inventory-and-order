@@ -107,13 +107,14 @@ Built so far: Identity. The gateway, the two SPAs, and the Product, Inventory, O
 ./scripts/dev.ps1 up -Profile infra,apps
 ```
 
-The first command builds the shared packages Identity depends on into the local feed (`artifacts/packages`). The second builds the images and starts RabbitMQ, the Identity database, Identity, the gateway and the backoffice app, then waits until they are healthy. Only the gateway publishes an application port.
+The first command builds the shared packages Identity depends on into the local feed (`artifacts/packages`). The second builds the images and starts RabbitMQ, the Identity database, Identity, the gateway and the backoffice app, then waits until they are healthy, together with the backoffice and storefront apps. Only the gateway publishes an application port.
 
 ### Use
 
 | What | Where |
 |---|---|
 | Backoffice | http://localhost:8080/backoffice/ |
+| Storefront of the demo shop | http://localhost:8080/shop/demo/ |
 | Backoffice sign-in (through the gateway) | http://localhost:8080/bff/backoffice/login |
 | Storefront sign-in for the demo shop | http://localhost:8080/bff/shop/demo/login |
 | Signed-in user | http://localhost:8080/bff/backoffice/user |
@@ -130,14 +131,14 @@ Accounts and passwords for development are in `deploy/dev.env`: the platform adm
 ./scripts/dev.ps1 reset   # stop and delete data
 ```
 
-### Work on the backoffice with live reload
+### Work on the web apps with live reload
 
 ```powershell
 ./scripts/dev.ps1 up -Profile infra,apps -WebDev
 ./scripts/dev.ps1 reset -WebDev
 ```
 
-`-WebDev` runs the Angular dev server in a container with the source mounted, and points the gateway at it. Keep using http://localhost:8080/backoffice/; changes show up within a few seconds.
+`-WebDev` runs the Angular dev servers for the backoffice and the storefront in containers with the source mounted, and points the gateway at them. Keep using http://localhost:8080/backoffice/ and http://localhost:8080/shop/demo/; changes show up within a few seconds.
 
 ### Tests
 

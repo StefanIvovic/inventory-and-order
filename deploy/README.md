@@ -42,9 +42,9 @@ Identity issues tokens for the issuer `IDENTITY_ISSUER` (the gateway origin, `ht
 
 The platform admin is created on first start from `PLATFORM_ADMIN_EMAIL` and `PLATFORM_ADMIN_PASSWORD`. Sign in through the gateway at http://localhost:8080/bff/backoffice/login. HTTPS is not required in dev (`IDENTITY_REQUIRE_HTTPS=false`). Production keeps the default, which requires HTTPS.
 
-## Backoffice and live reload
+## Web apps and live reload
 
-The backoffice app (`src/web/backoffice`) is served by nginx as `backoffice-spa` on port 8080 inside the compose network, and the gateway serves it at http://localhost:8080/backoffice/. `./scripts/dev.ps1 up -Profile infra,apps -WebDev` adds `compose.web-dev.yaml`, which runs the Angular dev server (`backoffice-dev`) and points the gateway at it. Use the same `-WebDev` with `down` and `reset`.
+The backoffice (`src/web/backoffice`) and the storefront (`src/web/storefront`) are served by nginx as `backoffice-spa` and `storefront-spa` on port 8080 inside the compose network. The gateway serves them at http://localhost:8080/backoffice/ and http://localhost:8080/shop/<slug>/. `./scripts/dev.ps1 up -Profile infra,apps -WebDev` adds `compose.web-dev.yaml`, which runs both Angular dev servers (`backoffice-dev`, `storefront-dev`) and points the gateway at them. Use the same `-WebDev` with `down` and `reset`.
 
 ## End-to-end tests
 

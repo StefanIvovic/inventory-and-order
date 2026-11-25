@@ -18,6 +18,26 @@ services:
       retries: 60
       start_period: 30s
 
+  storefront-dev:
+    image: ${NODE_IMAGE}
+    profiles:
+      - apps
+    working_dir: /app
+    command: ["sh", "-c", "npm ci --no-audit --no-fund && npx ng serve --host 0.0.0.0 --port 4200 --serve-path /shop/ --allowed-hosts storefront-dev --poll 1000"]
+    environment:
+      NG_CLI_ANALYTICS: "false"
+    volumes:
+      - ../src/web/storefront:/app
+      - /app/node_modules
+      - /app/.angular
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:4200/shop/demo/ > /dev/null || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 60
+      start_period: 30s
+
   gateway:
     environment:
       ReverseProxy__Clusters__backoffice-spa__Destinations__main__Address: "http://backoffice-dev:4200"
+      ReverseProxy__Clusters__storefront-spa__Destinations__main__Address: "http://storefront-dev:4200"
