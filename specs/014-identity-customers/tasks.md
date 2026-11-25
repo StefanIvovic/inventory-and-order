@@ -28,15 +28,15 @@ description: "Task list for feature 014 Identity Customers"
 
 ## Phase 2: User Story 3 - Each client accepts only its kind of user (P1)
 
-- [ ] T005 [US3] Tests first in `Identity.Tests/Flow/ClientPolicyTests.cs`: storefront without tenant and with unknown tenant (error to the client, no login page); staff on storefront and customer on backoffice (generic error, no code); customer of another tenant (generic error); a mismatching login session is asked to sign in again; the tenant parameter is ignored on backoffice; a code redeemed or refreshed by the wrong client is refused. See them fail
-- [ ] T006 [US3] `Connect/ConnectEndpoints.cs`: tenant parameter, client policy at authorize, session match, policy re-check at the token endpoint (contracts/protocol.md)
+- [X] T005 [US3] Tests first in `Identity.Tests/Flow/ClientPolicyTests.cs`: storefront without tenant and with unknown tenant (error to the client, no login page); staff on storefront and customer on backoffice (generic error, no code); customer of another tenant (generic error); a mismatching login session is asked to sign in again; the tenant parameter is ignored on backoffice; a code redeemed or refreshed by the wrong client is refused. See them fail
+- [X] T006 [US3] `Connect/ConnectEndpoints.cs`: tenant parameter, client policy at authorize, session match, policy re-check at the token endpoint (contracts/protocol.md)
 
 ---
 
 ## Phase 3: User Story 2 - Customers sign in per tenant (P1)
 
-- [ ] T007 [US2] Tests first in `Identity.Tests/Flow/CustomerSignInTests.cs`: the same email as customers of two tenants and as staff signs in to exactly the requested account; lockout applies to customers. See them fail
-- [ ] T008 [US2] `Pages/Account/Login.cshtml(.cs)`: `SignInTarget` decides the user name; storefront heading shows the tenant name and a "Create an account" link (contracts/protocol.md)
+- [X] T007 [US2] Tests first in `Identity.Tests/Flow/CustomerSignInTests.cs`: the same email as customers of two tenants and as staff signs in to exactly the requested account; lockout applies to customers. See them fail
+- [X] T008 [US2] `Pages/Account/Login.cshtml(.cs)`: `SignInTarget` decides the user name; storefront heading shows the tenant name and a "Create an account" link (contracts/protocol.md)
 
 ---
 

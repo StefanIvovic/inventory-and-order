@@ -32,6 +32,7 @@ public static class ConnectEndpoints
         UserManager<AppUser> users,
         SignInManager<AppUser> signIn,
         PrincipalFactory principals,
+        IdentityDbContext db,
         CancellationToken cancellationToken)
     {
         var request = context.GetOpenIddictServerRequest()
@@ -42,8 +43,26 @@ public static class ConnectEndpoints
             return Reject(Errors.InvalidScope, "At least one API scope is required.");
         }
 
+        string? tenantId = null;
+        if (ClientPolicies.RequiresTenant(request.ClientId))
+        {
+            var slug = (string?)request.GetParameter(ClientPolicies.TenantParameter);
+            tenantId = string.IsNullOrWhiteSpace(slug)
+                ? null
+                : await db.Tenants.Where(t => t.Slug == slug).Select(t => t.Id).SingleOrDefaultAsync(cancellationToken);
+            if (tenantId is null)
+            {
+                return Reject(Errors.InvalidRequest, "A known tenant is required.");
+            }
+        }
+
         var session = await context.AuthenticateAsync(IdentityConstants.ApplicationScheme);
         var user = session.Succeeded ? await signIn.ValidateSecurityStampAsync(session.Principal) : null;
+        if (user is not null && (!ClientPolicies.Accepts(request.ClientId, user.UserType) || (tenantId is not null && user.TenantId != tenantId)))
+        {
+            user = null;
+        }
+
         if (user is null)
         {
             var parameters = context.Request.HasFormContentType ? context.Request.Form.ToList() : context.Request.Query.ToList();
@@ -83,6 +102,7 @@ public static class ConnectEndpoints
         if (stored is null
             || user is null
             || user.IsDisabled
+            || !ClientPolicies.Accepts(request.ClientId, user.UserType)
             || await users.IsLockedOutAsync(user)
             || !string.Equals(stored.GetClaim(PrincipalFactory.SecurityStampClaim), user.SecurityStamp, StringComparison.Ordinal))
         {
