@@ -5,6 +5,9 @@ on:
   pull_request:
     paths:
       - 'deploy/**'
+      - 'src/gateway/**'
+      - 'src/services/identity/**'
+      - 'scripts/smoke-signin.ps1'
       - 'scripts/dev.ps1'
       - 'scripts/check-test-cleanup.ps1'
       - 'tools/RepoChecks/**'
@@ -14,6 +17,9 @@ on:
       - master
     paths:
       - 'deploy/**'
+      - 'src/gateway/**'
+      - 'src/services/identity/**'
+      - 'scripts/smoke-signin.ps1'
       - 'scripts/dev.ps1'
       - 'scripts/check-test-cleanup.ps1'
       - 'tools/RepoChecks/**'
@@ -27,6 +33,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-dotnet@v6.1.0
         with:
@@ -51,9 +59,17 @@ jobs:
           docker volume create --label com.docker.compose.project=canary canary-data
           docker run -d --name canary --label com.docker.compose.project=canary -v canary-data:/data "$RABBITMQ_IMAGE" sleep 3600
 
+      - name: Restore package feed from tag
+        shell: pwsh
+        run: ./scripts/restore-feed.ps1 -Service identity
+
       - name: Dev stack up
         shell: pwsh
-        run: ./scripts/dev.ps1 up
+        run: ./scripts/dev.ps1 up -Profile infra,apps
+
+      - name: Sign-in smoke through the gateway
+        shell: pwsh
+        run: ./scripts/smoke-signin.ps1
 
       - name: Dev stack status
         shell: pwsh

@@ -1,0 +1,33 @@
+services:
+  gateway:
+    build:
+      context: .
+      args:
+        DOTNET_SDK_IMAGE: ${DOTNET_SDK_IMAGE}
+        DOTNET_ASPNET_IMAGE: ${DOTNET_ASPNET_IMAGE}
+    profiles:
+      - apps
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      Gateway__PublicOrigin: "${GATEWAY_ORIGIN}"
+      Gateway__Identity__InternalAddress: "http://identity-api:8080"
+      Gateway__Clients__backoffice-bff__Secret: "${BACKOFFICE_BFF_SECRET}"
+      Gateway__Clients__storefront-bff__Secret: "${STOREFRONT_BFF_SECRET}"
+      Gateway__Keys__Path: /keys
+      ReverseProxy__Clusters__identity__Destinations__main__Address: "http://identity-api:8080"
+      ReverseProxy__Clusters__backoffice-spa__Destinations__main__Address: "http://backoffice-spa:80"
+      ReverseProxy__Clusters__storefront-spa__Destinations__main__Address: "http://storefront-spa:80"
+    ports:
+      - "127.0.0.1:${GATEWAY_PORT}:8080"
+    volumes:
+      - gateway-keys:/keys
+    restart: on-failure
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/health/ready > /dev/null || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 24
+      start_period: 10s
+
+volumes:
+  gateway-keys:

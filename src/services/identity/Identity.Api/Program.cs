@@ -15,6 +15,7 @@ using JasperFx.CodeGeneration;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using OpenIddict.Validation.AspNetCore;
@@ -30,6 +31,19 @@ var rabbitMqUri = new Uri(builder.Configuration["RabbitMq:Uri"]
 var protocol = ProtocolSettings.Read(builder.Configuration);
 
 builder.Services.AddSingleton(protocol);
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
+    options.ForwardLimit = 1;
+    options.KnownProxies.Clear();
+    options.KnownIPNetworks.Clear();
+    foreach (var network in protocol.ForwardedHeaders.Networks())
+    {
+        options.KnownIPNetworks.Add(network);
+    }
+
+    options.AllowedHosts = protocol.ForwardedHeaders.HostPatterns().ToList();
+});
 builder.Services.AddBuildingBlocks();
 builder.Services.AddBuildingBlocksPermissions<IdentityPermissionProvider>();
 builder.Services.AddDbContextWithWolverineIntegration<IdentityDbContext>(options =>
@@ -92,7 +106,7 @@ builder.Services.AddOpenIddict()
             .SetRefreshTokenLifetime(TimeSpan.FromHours(12))
             .SetRefreshTokenReuseLeeway(null)
             .DisableAccessTokenEncryption()
-            .RegisterScopes(["openid", "offline_access", .. Scopes.Api]);
+            .RegisterScopes(["openid", "offline_access", Scopes.Email, .. Scopes.Api]);
         server.Configure(options => options.CodeChallengeMethods.Remove(OpenIddict.Abstractions.OpenIddictConstants.CodeChallengeMethods.Plain));
         SigningKeys.Configure(server, protocol.Keys, builder.Environment);
 
@@ -143,6 +157,11 @@ builder.Host.UseWolverine(options =>
 builder.Services.AddHostedService<StartupCompletion>();
 
 var app = builder.Build();
+if (protocol.ForwardedHeaders.IsEnabled)
+{
+    app.UseForwardedHeaders();
+}
+
 app.UseStaticFiles();
 app.UseBuildingBlocksAuthentication();
 app.MapHealthChecks("/health/live", new HealthCheckOptions { Predicate = _ => false }).AllowAnonymous();

@@ -53,12 +53,13 @@ jobs:
 
       - name: Smoke start in Static mode
         shell: pwsh
-        run: ./scripts/dev.ps1 up -Profile infra,apps
+        run: ./scripts/dev.ps1 up -Profile infra,apps -Service identity-api
 
       - name: Smoke checks
         run: |
-          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:5101/health/ready)" = "200"
-          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:5101/roles)" = "401"
+          docker exec inventory-and-order-identity-api-1 wget -q -O /dev/null http://localhost:8080/health/ready
+          docker exec inventory-and-order-identity-api-1 wget -S -O /dev/null http://localhost:8080/roles 2>&1 | grep -q "HTTP/1.1 401"
+          test -z "$(docker port inventory-and-order-identity-api-1)"
           docker logs inventory-and-order-identity-api-1 2>&1 | grep -q "code generation mode is Static"
 
       - name: Dev stack reset

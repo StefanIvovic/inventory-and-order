@@ -32,15 +32,15 @@ The compose project is `inventory-and-order`. Plain `docker compose -f deploy/co
 | Shipping database | `SHIPPING_DB_PORT` | 5406 |
 | Notification database | `NOTIFICATION_DB_PORT` | 5407 |
 | Reporting database | `REPORTING_DB_PORT` | 5408 |
-| Identity API (temporary, until the gateway in feature 014) | `IDENTITY_API_PORT` | 5101 |
+| Gateway (the only application port) | `GATEWAY_PORT` | 8080 |
 
 RabbitMQ management UI: http://127.0.0.1:15672, user `dev`, password `dev-only-not-a-secret`.
 
 ## Identity sign-in in development
 
-Identity issues tokens for the issuer `IDENTITY_ISSUER` (the future gateway origin, `http://localhost:8080/`). Its signing and encryption certificates are created on first start in the `identity-keys` volume, so tokens survive restarts. `dev.ps1 reset` removes them.
+Identity issues tokens for the issuer `IDENTITY_ISSUER` (the gateway origin, `http://localhost:8080/`). Identity publishes no port; it is reached through the gateway, and it trusts forwarded headers only from the private container networks (`IDENTITY_FORWARDED_NETWORK_*`) and only for the host `GATEWAY_HOST`. Its signing and encryption certificates are created on first start in the `identity-keys` volume, so tokens survive restarts. `dev.ps1 reset` removes them.
 
-The platform admin is created on first start from `PLATFORM_ADMIN_EMAIL` and `PLATFORM_ADMIN_PASSWORD`. Sign in by hand at http://127.0.0.1:5101/account/login. HTTPS is not required in dev (`IDENTITY_REQUIRE_HTTPS=false`). Production keeps the default, which requires HTTPS.
+The platform admin is created on first start from `PLATFORM_ADMIN_EMAIL` and `PLATFORM_ADMIN_PASSWORD`. Sign in through the gateway at http://localhost:8080/bff/backoffice/login. HTTPS is not required in dev (`IDENTITY_REQUIRE_HTTPS=false`). Production keeps the default, which requires HTTPS.
 
 ## Adding a service
 

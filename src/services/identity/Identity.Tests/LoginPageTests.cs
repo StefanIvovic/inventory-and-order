@@ -9,6 +9,23 @@ public sealed class LoginPageTests(ContainersFixture containers)
     private const string LoginUrl = "/account/login";
 
     [Fact]
+    public async Task StylesheetIsServedUnderTheAccountPath()
+    {
+        await using var app = await IdentityApp.StartAsync(containers);
+        await app.WaitUntilMigratedAsync();
+        using var browser = app.CreateBrowser();
+
+        var page = await browser.GetStringAsync(LoginUrl, TestContext.Current.CancellationToken);
+        var stylesheet = await browser.GetAsync("/account/css/identity.css", TestContext.Current.CancellationToken);
+        var old = await browser.GetAsync("/css/identity.css", TestContext.Current.CancellationToken);
+
+        Assert.Contains("href=\"/account/css/identity.css\"", page, StringComparison.Ordinal);
+        Assert.Equal(HttpStatusCode.OK, stylesheet.StatusCode);
+        Assert.Equal("text/css", stylesheet.Content.Headers.ContentType?.MediaType);
+        Assert.NotEqual(HttpStatusCode.OK, old.StatusCode);
+    }
+
+    [Fact]
     public async Task UnknownEmailAndWrongPasswordLookTheSame()
     {
         await using var app = await IdentityApp.StartAsync(containers);

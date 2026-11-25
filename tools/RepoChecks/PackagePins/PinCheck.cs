@@ -6,17 +6,16 @@ namespace RepoChecks.PackagePins;
 public static class PinCheck
 {
     public const string ServicesFolder = "src/services";
+    public const string GatewayFolder = "src/gateway";
 
     public static IReadOnlyList<Finding> Run(string root)
     {
         var services = Path.Combine(root, "src", "services");
-        if (!Directory.Exists(services))
-        {
-            return [];
-        }
+        var folders = Directory.Exists(services) ? Directory.EnumerateDirectories(services).ToList() : [];
+        folders.Add(Path.Combine(root, "src", "gateway"));
 
         var findings = new List<Finding>();
-        foreach (var props in Directory.EnumerateDirectories(services)
+        foreach (var props in folders
                      .Select(folder => Path.Combine(folder, "Directory.Packages.props"))
                      .Where(File.Exists)
                      .Order(StringComparer.Ordinal))
