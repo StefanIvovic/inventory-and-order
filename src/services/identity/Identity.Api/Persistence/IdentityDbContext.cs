@@ -18,9 +18,12 @@ public sealed class IdentityDbContext(DbContextOptions<IdentityDbContext> option
     public const string TenantSlugIndex = "ux_tenants_slug";
     public const string UserNameIndex = "IX_identity_users_NormalizedUserName";
     public const string CustomerEmailIndex = "ux_identity_users_customer_email";
+    public const string StaffListIndex = "ix_identity_users_staff_list";
+    public const string RoleUsersIndex = "ix_role_assignments_role_user";
     public const string UserTypeColumn = "UserTypeId";
     public const string UserTypeForeignKey = "fk_identity_users_user_type";
     private const int NameMaxLength = 256;
+    private const string ByteOrderCollation = "C";
     private const int UserNameMaxLength = 320;
 
     public DbSet<RoleAssignment> RoleAssignments => Set<RoleAssignment>();
@@ -44,6 +47,7 @@ public sealed class IdentityDbContext(DbContextOptions<IdentityDbContext> option
             entity.HasKey(a => new { a.TenantId, a.UserId, a.Role });
             entity.Property(a => a.Role).IsRequired().HasMaxLength(RoleAssignment.RoleMaxLength);
             entity.Property(a => a.AssignedAt).IsRequired();
+            entity.HasIndex(a => new { a.TenantId, a.Role, a.UserId }).HasDatabaseName(RoleUsersIndex);
         });
 
         modelBuilder.Entity<PlatformRoleAssignment>(entity =>
@@ -96,7 +100,11 @@ public sealed class IdentityDbContext(DbContextOptions<IdentityDbContext> option
             user.Property(u => u.NormalizedUserName).HasMaxLength(UserNameMaxLength);
             user.HasIndex(u => new { u.TenantId, u.NormalizedEmail }).IsUnique().HasDatabaseName(CustomerEmailIndex).HasFilter($"\"UserTypeId\" = '{UserTypes.CustomerValue.Id}'");
             user.Property(u => u.Email).HasMaxLength(NameMaxLength);
-            user.Property(u => u.NormalizedEmail).HasMaxLength(NameMaxLength);
+            user.Property(u => u.NormalizedEmail).HasMaxLength(NameMaxLength).UseCollation(ByteOrderCollation);
+            user.HasIndex(u => new { u.TenantId, u.NormalizedEmail, u.Id })
+                .HasDatabaseName(StaffListIndex)
+                .HasFilter($"\"UserTypeId\" = '{UserTypes.StaffValue.Id}'")
+                .IncludeProperties(u => new { u.Email, u.DisabledAt, u.CreatedAt });
             user.Ignore(u => u.UserType);
             user.Property(u => u.UserTypeId).HasColumnName(UserTypeColumn).IsRequired();
             user.HasOne<LookupValue>().WithMany().HasForeignKey(u => u.UserTypeId)

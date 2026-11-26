@@ -122,6 +122,9 @@ namespace Identity.Api.Persistence.Migrations
 
                     b.HasIndex("TenantId");
 
+                    b.HasIndex("TenantId", "Role", "UserId")
+                        .HasDatabaseName("ix_role_assignments_role_user");
+
                     b.ToTable("role_assignments", null, t =>
                         {
                             t.HasCheckConstraint("ck_role_assignments_role", "\"Role\" IN ('identity.administrator', 'identity.viewer')");
@@ -193,7 +196,8 @@ namespace Identity.Api.Persistence.Migrations
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("character varying(256)")
+                        .UseCollation("C");
 
                     b.Property<string>("NormalizedUserName")
                         .HasMaxLength(320)
@@ -242,6 +246,12 @@ namespace Identity.Api.Persistence.Migrations
                         .IsUnique()
                         .HasDatabaseName("ux_identity_users_customer_email")
                         .HasFilter("\"UserTypeId\" = 'd5f29ef5-6ab3-4fe7-bcf9-eb778b259dd5'");
+
+                    b.HasIndex("TenantId", "NormalizedEmail", "Id")
+                        .HasDatabaseName("ix_identity_users_staff_list")
+                        .HasFilter("\"UserTypeId\" = '0d78e82f-0268-4c57-8926-4f31edfe1b61'");
+
+                    NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("TenantId", "NormalizedEmail", "Id"), new[] { "Email", "DisabledAt", "CreatedAt" });
 
                     b.ToTable("identity_users", null, t =>
                         {

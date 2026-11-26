@@ -23,6 +23,9 @@ namespace Internal.Generated.WolverineHandlers
 
         public override async System.Threading.Tasks.Task HandleAsync(Wolverine.Runtime.MessageContext context, System.Threading.CancellationToken cancellation)
         {
+            var listUsersValidator = new Identity.Api.Features.ListUsers.ListUsersValidator();
+            System.Collections.Generic.IEnumerable<BuildingBlocks.Validation.CommandValidator<Identity.Api.Features.ListUsers.ListUsers>> commandValidatorOfListUsersIEnumerable = new BuildingBlocks.Validation.CommandValidator<Identity.Api.Features.ListUsers.ListUsers>[]{listUsersValidator};
+            var commandValidationOfListUsers = new BuildingBlocks.Validation.CommandValidation<Identity.Api.Features.ListUsers.ListUsers>(commandValidatorOfListUsersIEnumerable);
             await using var serviceScope = _serviceScopeFactory.CreateAsyncScope();
             Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<Wolverine.Runtime.ScopedMessageContextHolder>(serviceScope.ServiceProvider).Context = context;
             // This service has been marked as requiring service location independent of Wolverine's ability to use constructor injection of everything else
@@ -49,7 +52,7 @@ namespace Internal.Generated.WolverineHandlers
                 BuildingBlocks.Messaging.TenantContextMiddleware.Before(context.Envelope, tenantContext, _httpContextAccessor);
                 Wolverine.Runtime.WolverineTracing.MessageActivity(context.Envelope)?.SetTag("message.handler", "Identity.Api.Features.ListUsers.ListUsersHandler");
                 Wolverine.Runtime.WolverineTracing.MessageActivity(context.Envelope)?.SetTag("handler.type", "Identity.Api.Features.ListUsers.ListUsersHandler");
-                var listUsersHandler = new Identity.Api.Features.ListUsers.ListUsersHandler(requestContext, identityDbContext);
+                var listUsersHandler = new Identity.Api.Features.ListUsers.ListUsersHandler(requestContext, identityDbContext, commandValidationOfListUsers);
                 
                 // The actual message execution
                 var outgoing1 = await listUsersHandler.Handle(listUsers, cancellation).ConfigureAwait(false);

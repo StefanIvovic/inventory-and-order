@@ -25,7 +25,7 @@ description: "Task list for feature 019 Backoffice Staff"
 
 ## Phase 0: Identity staff list paging (FR-011 to FR-016)
 
-- [ ] T101 Write the tests first in `src/services/identity/Identity.Tests/Users/StaffListPagingTests.cs` (Testcontainers):
+- [X] T101 Write the tests first in `src/services/identity/Identity.Tests/Users/StaffListPagingTests.cs` (Testcontainers):
   - default size 25, sorted by email then id
   - `nextCursor` walks all pages without gaps or repeats, and the last page has none
   - each filter (`q` prefix case-insensitive, `status`, `role`) and their combination
@@ -36,14 +36,14 @@ description: "Task list for feature 019 Backoffice Staff"
   - other tenants' staff and customers never appear
 
   See them fail
-- [ ] T102 `Features/ListUsers/`: query record with filters, cursor encoding, validator and handler per research.md R9 (data-model.md Staff list request and StaffList `nextCursor`, `total`), and the endpoint with query parameters. Roles are projected in the same query. T101 green
-- [ ] T103 Write the plan and cost tests first in `StaffListPagingTests`:
+- [X] T102 `Features/ListUsers/`: query record with filters, cursor encoding, validator and handler per research.md R9 (data-model.md Staff list request and StaffList `nextCursor`, `total`), and the endpoint with query parameters. Roles are projected in the same query. T101 green
+- [X] T103 Write the plan and cost tests first in `StaffListPagingTests`:
   - seed 50,000 staff with a bulk insert
   - `EXPLAIN` a deep page and each filter: an index scan on `ix_identity_users_staff_list` and no `Seq Scan`
   - an EF command interceptor counts exactly 1 command per page with a warm permission set
 
   See them fail, then add the indexes and the migration `StaffListIndexes` per R9 (raw SQL if the builder can't set the collation)
-- [ ] T104 Regenerate the Wolverine code with `scripts/codegen.ps1 -Service identity` and check it with `-Check`. The full Identity suite, including the no-roles route test, stays green
+- [X] T104 Regenerate the Wolverine code with `scripts/codegen.ps1 -Service identity` and check it with `-Check`. The full Identity suite, including the no-roles route test, stays green
 
 ---
 
