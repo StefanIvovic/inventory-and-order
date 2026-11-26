@@ -30,4 +30,29 @@ describe('LookupsApi', () => {
 
     expect(await answer).toEqual(items);
   });
+
+  it('asks for a page with search, ids, codes and cursor', async () => {
+    const answer = firstValueFrom(api.page('a b', { q: ' sta ', ids: ['1', '2'], codes: ['x'], size: 50, after: 'c1' }));
+
+    const request = http.expectOne((candidate) => candidate.url === '/api/identity/lookups/a%20b/values');
+    const params = request.request.params;
+    expect(params.get('q')).toBe('sta');
+    expect(params.getAll('ids')).toEqual(['1', '2']);
+    expect(params.getAll('codes')).toEqual(['x']);
+    expect(params.get('size')).toBe('50');
+    expect(params.get('after')).toBe('c1');
+    request.flush({ items: [], nextCursor: 'c2' });
+
+    expect(await answer).toEqual({ items: [], nextCursor: 'c2' });
+  });
+
+  it('leaves out an empty search and uses another service when asked', async () => {
+    const answer = firstValueFrom(api.page('unit', { q: '  ', size: 50 }, '/api/inventory'));
+
+    const request = http.expectOne((candidate) => candidate.url === '/api/inventory/lookups/unit/values');
+    expect(request.request.params.keys()).toEqual(['size']);
+    request.flush({ items: [], nextCursor: null });
+
+    await answer;
+  });
 });

@@ -32,6 +32,7 @@ test('the platform admin creates a tenant whose first admin can then sign in', a
 
   await page.getByRole('button', { name: 'Create tenant' }).click();
   const dialog = page.locator('mat-dialog-container');
+  await expect(dialog.getByLabel('Identifier')).toBeFocused();
   await dialog.getByLabel('Identifier').fill(slug);
   await dialog.getByLabel('Name').fill(`${slug} Ltd`);
   await dialog.getByLabel('First admin email').fill(adminEmail);
