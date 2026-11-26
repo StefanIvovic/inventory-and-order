@@ -17,8 +17,8 @@
 | loaded, nothing matches | "No users match these filters." with "Clear filters" |
 
 **Filter bar**:
-- "Search email" (text, applied 300 ms after typing stops)
-- "Status": All, then the `staff-status` lookup values by name
+- "Search email" (text, applied on Enter or its search button; changed in 021)
+- "Status": the 021 lookup select over `staff-status`, with "All" as the empty choice
 - "Role": Any, then the roles from `/roles` by display name
 
 **Paging bar**:

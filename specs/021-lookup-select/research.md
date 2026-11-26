@@ -70,3 +70,15 @@ Read on 2026-11-26 from the installed packages: Angular 22.3 Signal Forms (`@ang
 - **Approach**: jsdom has no layout, so tests dispatch a `scroll` event on the panel. With zero sizes, the "near the end" check passes.
 - **Signal Forms**: a small host component with `form()` checks the value binding, the required error and disabled.
 - **Overlay**: options are read from the panel that `aria-controls` points to (019 lesson).
+
+## R10. Findings during implementation (2026-11-26)
+
+- **The panel needs an option to open.** Material shows the autocomplete panel, and emits `opened`, only when it has at least one option. Without one, the field could never open and load. A "loading" option now shows until the first page arrives.
+- **Enter after a keyboard pick.** Material picks the highlighted option on Enter without marking the event handled, so the field's own Enter handler then searched too. The field now skips the search for the key press that picked an option.
+- **Backspace.** Material's chip input needs two presses (focus the chip, then remove it). As the spec asks, one Backspace on an empty input removes the last chip.
+- **Errors.** `mat-error` depends on Material's error state, which isn't reliable for a custom control. The form's messages show as an error-styled hint once the field is touched, and the outline still turns red through an error state matcher.
+- **Clicking × or a chip's remove button** focuses the field, which opens the options and loads the first page. This is expected, and the tests cover it.
+- **Tests open the panel through `MatAutocompleteTrigger.openPanel()`.** jsdom doesn't open the panel on focus. The real-browser behaviour is checked in the e2e staff test: open, type, Enter to search, pick Disabled.
+- **The e2e flake was not caused by 021.** Playwright could fill a dialog before Material's autofocus moved focus back to the first field, so the password landed in the Email field. The tests now wait for that focus (staff and tenants). The suite then passed 8 runs in a row.
+- **Bundle.** Initial raw size 646.0 → 654.9 kB, transfer 143.80 → 144.99 kB. Overlay and accessibility code shared with the shell's menu moved into the initial chunk. The component itself is in the lazy Users chunk.
+

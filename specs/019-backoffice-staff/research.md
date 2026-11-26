@@ -137,7 +137,7 @@ The endpoint signature changes, so the Wolverine generated code is regenerated w
 - **Previous**: pops the stack and shows the cached page, or requests it again.
 - **Next**: shows the prefetched page.
 - **Prefetch**: after each page is shown, the next page is fetched in the background when `nextCursor` exists.
-- **Filter changes**: any change clears the stack and the cache and requests the first page with `includeTotal=true`. The email search waits 300 ms after typing stops.
+- **Filter changes**: any change clears the stack and the cache and requests the first page with `includeTotal=true`. The email search runs on Enter or its search button only (changed in 021, owner decision 2026-11-26).
 - **Bad cursor**: a 422 `invalid-cursor` restarts at the first page.
 - **Range label**: computed from the page index and the size, for example "26–50 of 1,234 users". Without a total, it shows just the range.
 - **Filter options** (constitution v1.6.0, no hard-coded choices):
