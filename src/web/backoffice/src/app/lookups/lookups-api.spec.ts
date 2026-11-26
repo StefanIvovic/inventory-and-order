@@ -2,6 +2,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { firstValueFrom } from 'rxjs';
+import { BACKGROUND } from '../loading/loading.interceptor';
 import { LookupsApi } from './lookups-api';
 
 describe('LookupsApi', () => {
@@ -54,5 +55,21 @@ describe('LookupsApi', () => {
     request.flush({ items: [], nextCursor: null });
 
     await answer;
+  });
+
+  it('marks values and pages as background only when asked', () => {
+    api.values('staff-status').subscribe();
+    api.values('user-type', { background: true }).subscribe();
+    api.page('staff-status', { size: 50 }).subscribe();
+    api.page('user-type', { size: 50 }, undefined, { background: true }).subscribe();
+
+    const requests = http.match(() => true);
+    expect(requests.map((request) => [request.request.url, request.request.context.get(BACKGROUND)])).toEqual([
+      [LookupsApi.valuesUrl('staff-status'), false],
+      [LookupsApi.valuesUrl('user-type'), true],
+      [LookupsApi.valuesUrl('staff-status'), false],
+      [LookupsApi.valuesUrl('user-type'), true],
+    ]);
+    requests.forEach((request) => request.flush({ items: [], nextCursor: null }));
   });
 });

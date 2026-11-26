@@ -1,6 +1,7 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
 import { Observable, Subject, catchError, firstValueFrom, map, of } from 'rxjs';
+import { background } from '../loading/loading.interceptor';
 import { BROWSER_LOCATION } from './browser-location';
 
 export interface SessionUser {
@@ -39,7 +40,7 @@ export class SessionService {
     const signInError = this.takeSignInError();
     this.current.set({ kind: 'loading' });
     const next = await firstValueFrom(
-      this.http.get<SessionUser>(SessionService.userUrl).pipe(
+      this.http.get<SessionUser>(SessionService.userUrl, { context: background() }).pipe(
         map((user): SessionState => ({ kind: 'signed-in', user })),
         catchError((error: unknown) =>
           of<SessionState>(

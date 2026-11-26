@@ -4,6 +4,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { of } from 'rxjs';
 import { LookupsApi } from '../lookups/lookups-api';
+import { BACKGROUND } from '../loading/loading.interceptor';
 import { RolesApi } from '../roles/roles-api';
 import { tenantRoles } from '../roles/testing/tenant-roles';
 import { SessionHarness, loadAs, setUpSession, staffUser } from '../session/testing/session-harness';
@@ -259,6 +260,28 @@ describe('UsersPage', () => {
     expect(view.button('Previous')?.disabled).toBe(true);
   });
 
+  it('loads only the prefetch in the background', async () => {
+    await loadAs(harness, staffUser);
+    const view = render();
+    const first = flushStart(list([user('a@demo.test')], { total: 3, nextCursor: 'c2' }));
+    expect(first.request.context.get(BACKGROUND)).toBe(false);
+    const prefetch = listRequest();
+    expect(prefetch.request.context.get(BACKGROUND)).toBe(true);
+    prefetch.flush({}, { status: 500, statusText: 'Error' });
+    view.detect();
+
+    view.button('Next')?.click();
+    const next = listRequest();
+    expect(next.request.context.get(BACKGROUND)).toBe(false);
+    next.flush(list([user('b@demo.test')]));
+    view.detect();
+
+    await view.choose('role', 'Viewer');
+    const filtered = listRequest();
+    expect(filtered.request.context.get(BACKGROUND)).toBe(false);
+    filtered.flush(list([], { total: 0 }));
+  });
+
   it('asks for a page that is not cached yet and disables Next on the last page', async () => {
     await loadAs(harness, staffUser);
     const view = render();
@@ -274,6 +297,28 @@ describe('UsersPage', () => {
 
     expect(view.rows().map((row) => row[0])).toEqual(['b@demo.test']);
     expect(view.button('Next')?.disabled).toBe(true);
+  });
+
+  it('shows no bar of its own while a page or a filter change loads, and keeps Previous and Next disabled', async () => {
+    await loadAs(harness, staffUser);
+    const view = render();
+    flushStart(list([user('a@demo.test')], { total: 2, nextCursor: 'c2' }));
+    listRequest().flush({}, { status: 500, statusText: 'Error' });
+    view.detect();
+
+    view.button('Next')?.click();
+    view.detect();
+    expect(view.element.querySelector('mat-progress-bar')).toBeNull();
+    expect(view.button('Next')?.disabled).toBe(true);
+    expect(view.button('Previous')?.disabled).toBe(true);
+    listRequest().flush(list([user('b@demo.test')]));
+    view.detect();
+    expect(view.button('Previous')?.disabled).toBe(false);
+
+    await view.choose('role', 'Viewer');
+    view.detect();
+    expect(view.element.querySelector('mat-progress-bar')).toBeNull();
+    listRequest().flush(list([user('a@demo.test')], { total: 1 }));
   });
 
   it('restarts at the first page with the total when the size, status or role changes', async () => {

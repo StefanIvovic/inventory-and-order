@@ -90,9 +90,6 @@ type PageState = { kind: 'not-available' } | { kind: 'loading' } | { kind: 'no-a
             </mat-select>
           </mat-form-field>
         </div>
-        @if (fetching()) {
-          <mat-progress-bar mode="indeterminate" aria-label="Loading users" />
-        }
         @if (items().length === 0) {
           <p>No users match these filters.</p>
           <button mat-button type="button" (click)="clearFilters()">Clear filters</button>
@@ -418,7 +415,7 @@ export class UsersPage {
     }
 
     const key = this.key(after);
-    this.api.list(this.request(after, false)).subscribe({
+    this.api.list(this.request(after, false), { background: true }).subscribe({
       next: (list) => this.cache.set(key, list),
       error: () => undefined,
     });

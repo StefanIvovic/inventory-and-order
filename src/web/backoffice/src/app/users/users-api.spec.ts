@@ -2,6 +2,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { firstValueFrom } from 'rxjs';
+import { BACKGROUND } from '../loading/loading.interceptor';
 import { StaffList, UsersApi } from './users-api';
 
 describe('UsersApi', () => {
@@ -82,5 +83,17 @@ describe('UsersApi', () => {
     expect(remove.request.method).toBe('DELETE');
     remove.flush(null, { status: 204, statusText: 'No Content' });
     await removed;
+  });
+
+  it('marks the list as background only when asked', () => {
+    const request = { q: '', status: null, role: null, size: 25, after: null, includeTotal: false };
+    api.list(request).subscribe();
+    api.list({ ...request, after: 'c2' }, { background: true }).subscribe();
+
+    const [plain, quiet] = http.match((candidate) => candidate.url === UsersApi.url);
+    expect(plain.request.context.get(BACKGROUND)).toBe(false);
+    expect(quiet.request.context.get(BACKGROUND)).toBe(true);
+    plain.flush(empty);
+    quiet.flush(empty);
   });
 });
