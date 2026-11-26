@@ -50,9 +50,9 @@ description: "Task list for feature 019 Backoffice Staff"
 ## Phase 1: Foundational
 
 - [X] T001 Identity `GET /roles` display names per research.md R2 and data-model.md (Role `displayName`, `permissions`): a display name next to each entry of `IdentityRoles` and `IdentityPermissions`, sorted by display name. Tests first in `src/services/identity/Identity.Tests/RolesTests.cs`: every tenant role and permission has a display name, the answer shape, and the sort order. Regenerate Wolverine code if the endpoint changes
-- [ ] T002 [P] `users/users-api.ts` (list with filters, `size`, `after` and `includeTotal` as query parameters; create, disable, assign, remove) `roles/roles-api.ts` (list) and `lookups/lookups-api.ts` (values of one type by code), with the data-model.md types (Staff list request, StaffItem, StaffList, NewStaffUser, Role). Tests first in `users/users-api.spec.ts` and `roles/roles-api.spec.ts`: method, URL, query string (empty filters omitted), body, and role names encoded in the path
-- [ ] T003 [P] `confirm-dialog.ts`: title, text and confirm label as dialog data; returns `true` on confirm. Tests first in `confirm-dialog.spec.ts`
-- [ ] T004 `shell/shell.ts`: staff entries Home, Users and Roles (FR-001). Update the 018 navigation tests in `shell/shell.spec.ts` first. Lazy routes `users` and `roles` in `app.routes.ts`
+- [X] T002 [P] `users/users-api.ts` (list with filters, `size`, `after` and `includeTotal` as query parameters; create, disable, assign, remove) `roles/roles-api.ts` (list) and `lookups/lookups-api.ts` (values of one type by code), with the data-model.md types (Staff list request, StaffItem, StaffList, NewStaffUser, Role). Tests first in `users/users-api.spec.ts` and `roles/roles-api.spec.ts`: method, URL, query string (empty filters omitted), body, and role names encoded in the path
+- [X] T003 [P] `confirm-dialog.ts`: title, text and confirm label as dialog data; returns `true` on confirm. Tests first in `confirm-dialog.spec.ts`
+- [X] T004 `shell/shell.ts`: staff entries Home, Users and Roles (FR-001). Update the 018 navigation tests in `shell/shell.spec.ts` first. Lazy routes `users` and `roles` in `app.routes.ts`
 
 ---
 
@@ -60,7 +60,7 @@ description: "Task list for feature 019 Backoffice Staff"
 
 **Independent Test**: spec.md US1.
 
-- [ ] T005 [US1] Write the tests first in `users/users-page.spec.ts`:
+- [X] T005 [US1] Write the tests first in `users/users-page.spec.ts`:
   - the platform admin gets the not-available text and no request
   - loading
   - loaded, sorted by email, with the role display names from `/roles`, "No roles", the status lookup names and the date
@@ -80,7 +80,7 @@ description: "Task list for feature 019 Backoffice Staff"
     - 422 `invalid-cursor` restarts at the first page
 
   See them fail
-- [ ] T006 [US1] `users/users-page.ts` per contracts/ui.md (Users page) and data-model.md (StaffItem fields and flags, StaffList `actions.canCreate`). T005 green
+- [X] T006 [US1] `users/users-page.ts` per contracts/ui.md (Users page) and data-model.md (StaffItem fields and flags, StaffList `actions.canCreate`). T005 green
 
 ---
 
@@ -88,7 +88,7 @@ description: "Task list for feature 019 Backoffice Staff"
 
 **Independent Test**: spec.md US2.
 
-- [ ] T007 [US2] Write the tests first in `users/add-staff-dialog.spec.ts`, mirroring 018's dialog tests with the contracts/ui.md messages:
+- [X] T007 [US2] Write the tests first in `users/add-staff-dialog.spec.ts`, mirroring 018's dialog tests with the contracts/ui.md messages:
   - the checks before sending
   - the trimmed email
   - success closes with the email
@@ -99,7 +99,7 @@ description: "Task list for feature 019 Backoffice Staff"
   - the retry line
 
   See them fail
-- [ ] T008 [US2] `users/add-staff-dialog.ts` (Signal Forms, research.md R5, data-model.md NewStaffUser). The page opens it, reloads on success and shows "Staff user <email> added." Add a page test. T007 green
+- [X] T008 [US2] `users/add-staff-dialog.ts` (Signal Forms, research.md R5, data-model.md NewStaffUser). The page opens it, reloads on success and shows "Staff user <email> added." Add a page test. T007 green
 
 ---
 
@@ -107,7 +107,7 @@ description: "Task list for feature 019 Backoffice Staff"
 
 **Independent Test**: spec.md US3.
 
-- [ ] T009 [US3] Write the tests first in `users/roles-dialog.spec.ts`:
+- [X] T009 [US3] Write the tests first in `users/roles-dialog.spec.ts`:
   - one switch per role given by the page, in order, with its display name, reflecting the current roles
   - on sends `PUT` and off sends `DELETE` to the encoded role URL
   - a switch is disabled while saving
@@ -116,7 +116,7 @@ description: "Task list for feature 019 Backoffice Staff"
   - while a retry is needed (503 `identity-unavailable`), the dialog shows "Sign-in service is unavailable." with "Try again", and the waiting switch's request is re-sent
 
   See them fail
-- [ ] T010 [US3] `users/roles-dialog.ts` per research.md R3 and contracts/ui.md (Roles dialog). The page opens it from "Roles" and reloads when it returns `true`; add a page test. T009 green
+- [X] T010 [US3] `users/roles-dialog.ts` per research.md R3 and contracts/ui.md (Roles dialog). The page opens it from "Roles" and reloads when it returns `true`; add a page test. T009 green
 
 ---
 
@@ -124,7 +124,7 @@ description: "Task list for feature 019 Backoffice Staff"
 
 **Independent Test**: spec.md US4.
 
-- [ ] T011 [US4] Write the tests first in `users/users-page.spec.ts`:
+- [X] T011 [US4] Write the tests first in `users/users-page.spec.ts`:
   - "Disable" opens the confirmation with the email
   - cancelling sends nothing
   - confirming posts, reloads and shows "<email> disabled."
@@ -138,7 +138,7 @@ description: "Task list for feature 019 Backoffice Staff"
 
 **Independent Test**: spec.md US5.
 
-- [ ] T012 [US5] Write the tests first in `roles/roles-page.spec.ts`:
+- [X] T012 [US5] Write the tests first in `roles/roles-page.spec.ts`:
   - not-available for the platform admin
   - loading
   - loaded, with role and permission display names from the answer
