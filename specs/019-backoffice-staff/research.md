@@ -85,7 +85,7 @@ The same Signal Forms pattern as 018's tenant dialog:
 - **Role display names come from `/roles`.** `IdentityRoles.DisplayNames` and `IdentityPermissions.DisplayNames` sit next to the definitions; a test checks every role and permission has one.
 - **Shell user-type name from the lookup.** The shell's hard-coded "Staff" and "Platform administrator" were removed; the name comes from the `user-type` lookup and is hidden if it cannot be loaded.
 - **Bundle.** Initial raw size grew from 623.3 kB to 646.0 kB, but the transfer size only from 143.65 kB to 143.80 kB: the bundler merged a shared chunk into `main`. The new pages are lazy.
-- **Open item for BuildingBlocks.** `LookupReader` (020) uses the same OR keyset condition, so deep lookup pages scan. Lookup lists are short today; the fix is the same rewrite, in a BuildingBlocks 0.4.1.
+- **Lookup paging fixed in BuildingBlocks 0.4.1 (T017).** `LookupReader` (020) had the same OR keyset condition and also matched the type with a join, so a deep page of 20,000 values was a sequential scan plus sort. It now takes the type id from a scalar subquery and uses the range condition, so `ix_lookup_values_type_name` serves the page; a test checks a deep page costs no more than twice the first.
 
 ## R9. Staff list paging and filters (Identity)
 
