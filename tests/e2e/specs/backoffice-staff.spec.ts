@@ -23,7 +23,8 @@ async function signOut(page: Page): Promise<void> {
 async function openUsers(page: Page, search: string): Promise<void> {
   await page.getByRole('link', { name: 'Users', exact: true }).click();
   await expect(page).toHaveURL(/\/backoffice\/users$/);
-  await page.getByLabel('Search email').fill(search);
+  await page.getByRole('searchbox', { name: 'Search email' }).fill(search);
+  await page.getByRole('searchbox', { name: 'Search email' }).press('Enter');
   await expect(page.locator('tr[mat-row]')).toHaveCount(1);
 }
 
@@ -36,6 +37,7 @@ test('an administrator adds a staff user, gives a role, and disables them', asyn
   await page.getByRole('link', { name: 'Users', exact: true }).click();
   await page.getByRole('button', { name: 'Add staff user' }).click();
   const add = page.locator('mat-dialog-container');
+  await expect(add.getByLabel('Email')).toBeFocused();
   await add.getByLabel('Email').fill(clerkEmail);
   await add.getByLabel('First password').fill(clerkPassword);
   await add.getByRole('button', { name: 'Add', exact: true }).click();
@@ -73,6 +75,17 @@ test('an administrator adds a staff user, gives a role, and disables them', asyn
   await confirm.getByRole('button', { name: 'Disable' }).click();
   await expect(page.locator('mat-snack-bar-container')).toContainText(`${clerkEmail} disabled.`);
   await expect(page.locator('tr[mat-row]')).toContainText('Disabled');
+  const status = page.getByRole('combobox', { name: 'Status' });
+  await status.click();
+  await expect(page.getByRole('option', { name: 'Active' })).toBeVisible();
+  await status.fill('dis');
+  await expect(page.getByRole('option', { name: 'Active' })).toBeVisible();
+  await status.press('Enter');
+  await expect(page.getByRole('option', { name: 'Active' })).toHaveCount(0);
+  await page.getByRole('option', { name: 'Disabled', exact: true }).click();
+  await expect(status).toHaveValue('Disabled');
+  await expect(page.locator('tr[mat-row]')).toHaveCount(1);
+  await expect(page.locator('tr[mat-row]')).toContainText(clerkEmail);
 
   await signOut(page);
   await page.getByRole('button', { name: 'Sign in' }).click();

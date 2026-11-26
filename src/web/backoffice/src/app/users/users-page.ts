@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -10,6 +10,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
 import { forkJoin } from 'rxjs';
 import { ConfirmData, ConfirmDialog } from '../confirm-dialog';
+import { LookupSelect, LookupSelectValue } from '../lookups/lookup-select';
 import { LookupValue, LookupsApi } from '../lookups/lookups-api';
 import { problemOf } from '../problems';
 import { Role, RolesApi } from '../roles/roles-api';
@@ -18,7 +19,6 @@ import { AddStaffDialog } from './add-staff-dialog';
 import { RolesDialog, RolesDialogData } from './roles-dialog';
 import { StaffFilters, StaffItem, StaffList, UsersApi } from './users-api';
 
-export const searchDelay = 300;
 export const pageSizes = [10, 25, 50];
 const defaultSize = 25;
 const statusList = 'staff-status';
@@ -38,6 +38,7 @@ type PageState = { kind: 'not-available' } | { kind: 'loading' } | { kind: 'no-a
     MatInputModule,
     MatSelectModule,
     DatePipe,
+    LookupSelect,
   ],
   template: `
     @switch (state().kind) {
@@ -64,17 +65,21 @@ type PageState = { kind: 'not-available' } | { kind: 'loading' } | { kind: 'no-a
         <div class="filters">
           <mat-form-field>
             <mat-label>Search email</mat-label>
-            <input matInput type="search" data-filter="q" [value]="searchText()" (input)="search($event)" />
+            <input matInput type="search" data-filter="q" [value]="searchText()" (input)="typeSearch($event)" (keydown.enter)="applySearch()" />
+            <button matIconButton matSuffix type="button" aria-label="Search email" (click)="applySearch()">
+              <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                <path fill="currentColor" d="M15.5 14h-.8l-.3-.3A6.5 6.5 0 1 0 14 15.5l.3.3v.8l5 5 1.5-1.5-5-5Zm-6 0A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14Z" />
+              </svg>
+            </button>
           </mat-form-field>
-          <mat-form-field>
-            <mat-label>Status</mat-label>
-            <mat-select data-filter="status" [value]="filters().status" (selectionChange)="filter({ status: $event.value })">
-              <mat-option [value]="null">All</mat-option>
-              @for (status of statuses(); track status.code) {
-                <mat-option [value]="status.code">{{ status.name }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
+          <app-lookup-select
+            data-filter="status"
+            typeCode="staff-status"
+            label="Status"
+            emptyLabel="All"
+            [value]="filters().status"
+            (valueChange)="filter({ status: single($event) })"
+          />
           <mat-form-field>
             <mat-label>Role</mat-label>
             <mat-select data-filter="role" [value]="filters().role" (selectionChange)="filter({ role: $event.value })">
@@ -189,7 +194,6 @@ export class UsersPage {
 
   private cursors: (string | null)[] = [null];
   private readonly cache = new Map<string, StaffList>();
-  private searchTimer: ReturnType<typeof setTimeout> | undefined;
   private generation = 0;
 
   protected readonly items = computed(() => this.page()?.items ?? []);
@@ -207,7 +211,6 @@ export class UsersPage {
   });
 
   constructor() {
-    inject(DestroyRef).onDestroy(() => clearTimeout(this.searchTimer));
     const state = this.session.state();
     if (state.kind === 'signed-in' && state.user.userType !== 'platform') {
       this.start();
@@ -255,11 +258,16 @@ export class UsersPage {
     return this.statuses().find((status) => status.code === code)?.name ?? '';
   }
 
-  protected search(event: Event): void {
-    const text = (event.target as HTMLInputElement).value;
-    this.searchText.set(text);
-    clearTimeout(this.searchTimer);
-    this.searchTimer = setTimeout(() => this.filter({ q: text }), searchDelay);
+  protected typeSearch(event: Event): void {
+    this.searchText.set((event.target as HTMLInputElement).value);
+  }
+
+  protected applySearch(): void {
+    this.filter({ q: this.searchText().trim() });
+  }
+
+  protected single(value: LookupSelectValue): string | null {
+    return typeof value === 'string' ? value : null;
   }
 
   protected filter(change: Partial<StaffFilters>): void {
@@ -268,7 +276,6 @@ export class UsersPage {
   }
 
   protected clearFilters(): void {
-    clearTimeout(this.searchTimer);
     this.searchText.set('');
     this.filters.set(noFilters);
     this.restart();

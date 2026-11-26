@@ -8,7 +8,9 @@ import { RolesApi } from '../roles/roles-api';
 import { tenantRoles } from '../roles/testing/tenant-roles';
 import { SessionHarness, loadAs, setUpSession, staffUser } from '../session/testing/session-harness';
 import { StaffItem, StaffList, UsersApi } from './users-api';
-import { UsersPage, searchDelay } from './users-page';
+import { By } from '@angular/platform-browser';
+import { MatAutocompleteTrigger } from '@angular/material/autocomplete';
+import { UsersPage } from './users-page';
 
 const platformAdmin = { ...staffUser, userType: 'platform' as const, tenantId: null };
 const statuses = [
@@ -75,7 +77,28 @@ describe('UsersPage', () => {
       await fixture.whenStable();
       return texts;
     };
-    return { element, detect, button, rows, range, choose, options };
+    const status = async (items: unknown[], pick?: string) => {
+      fixture.debugElement.query(By.directive(MatAutocompleteTrigger)).injector.get(MatAutocompleteTrigger).openPanel();
+      detect();
+      await fixture.whenStable();
+      harness.http
+        .expectOne((request) => request.url === LookupsApi.valuesUrl('staff-status') && request.params.get('size') === '50')
+        .flush({ items, nextCursor: null });
+      detect();
+      await fixture.whenStable();
+      detect();
+      const input = element.querySelector<HTMLInputElement>('app-lookup-select input')!;
+      const panel = document.getElementById(input.getAttribute('aria-controls') ?? '');
+      const found = Array.from(panel?.querySelectorAll<HTMLElement>('mat-option') ?? []);
+      if (pick) {
+        found.find((option) => option.textContent?.trim() === pick)?.click();
+        detect();
+        await fixture.whenStable();
+      }
+
+      return found.map((option) => option.textContent?.trim());
+    };
+    return { element, detect, button, rows, range, choose, options, status };
   }
 
   function listRequest(): TestRequest {
@@ -206,7 +229,7 @@ describe('UsersPage', () => {
     });
     view.detect();
 
-    expect(await view.options('status')).toEqual(['All', 'Paused']);
+    expect(await view.status([{ id: 'x', code: 'paused', name: 'Paused' }])).toEqual(['All', 'Paused']);
     expect(await view.options('role')).toEqual(['Any', 'Auditor']);
   });
 
@@ -262,7 +285,7 @@ describe('UsersPage', () => {
     await view.choose('size', '10');
     expect(params(listRequest())).toEqual({ size: '10', includeTotal: 'true' });
 
-    await view.choose('status', 'Switched off');
+    await view.status(statuses, 'Switched off');
     expect(params(listRequest())).toEqual({ size: '10', status: 'disabled', includeTotal: 'true' });
 
     await view.choose('role', 'Viewer');
@@ -276,24 +299,25 @@ describe('UsersPage', () => {
     expect(params(listRequest())).toEqual({ size: '10', includeTotal: 'true' });
   });
 
-  it('searches 300 ms after typing stops', async () => {
-    vi.useFakeTimers();
+  it('searches the email only on Enter or the search button, never while typing', async () => {
     await loadAs(harness, staffUser);
     const view = render();
     flushStart(list([user('a@demo.test')], { total: 1 }));
     view.detect();
     const input = view.element.querySelector<HTMLInputElement>('input[data-filter="q"]')!;
 
-    input.value = 'an';
+    input.value = ' ann ';
     input.dispatchEvent(new Event('input'));
-    vi.advanceTimersByTime(searchDelay - 1);
-    input.value = 'ann';
-    input.dispatchEvent(new Event('input'));
-    vi.advanceTimersByTime(searchDelay - 1);
+    await new Promise((resolve) => setTimeout(resolve, 400));
     harness.http.expectNone((request) => request.url === UsersApi.url);
 
-    vi.advanceTimersByTime(1);
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
     expect(params(listRequest())).toEqual({ size: '25', q: 'ann', includeTotal: 'true' });
+
+    input.value = '';
+    input.dispatchEvent(new Event('input'));
+    view.element.querySelector<HTMLButtonElement>('button[aria-label="Search email"]')!.click();
+    expect(params(listRequest())).toEqual({ size: '25', includeTotal: 'true' });
   });
 
   it('restarts at the first page when the page token is refused', async () => {
