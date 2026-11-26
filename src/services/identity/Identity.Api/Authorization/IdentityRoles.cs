@@ -22,6 +22,14 @@ public static class IdentityRoles
     public static IReadOnlyDictionary<string, IReadOnlyList<string>> All { get; } =
         Tenant.Concat(Platform).ToDictionary(role => role.Key, role => role.Value, StringComparer.Ordinal);
 
+    public static IReadOnlyDictionary<string, string> DisplayNames { get; } =
+        new Dictionary<string, string>(StringComparer.Ordinal)
+        {
+            [Administrator] = "Administrator",
+            [Viewer] = "Viewer",
+            [PlatformAdministrator] = "Platform administrator",
+        };
+
     public static IEnumerable<string> PermissionsOf(string role) =>
         All.TryGetValue(role, out var permissions) ? permissions : [];
 }

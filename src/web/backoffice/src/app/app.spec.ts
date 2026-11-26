@@ -1,3 +1,4 @@
+import { LookupsApi } from './lookups/lookups-api';
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
@@ -12,6 +13,12 @@ describe('App', () => {
   });
 
   afterEach(() => harness.http.verify());
+
+  function flushUserTypes(): void {
+    harness.http
+      .expectOne((request) => request.url === LookupsApi.valuesUrl('user-type'))
+      .flush({ items: [{ id: 's', code: 'staff', name: 'Staff' }], nextCursor: null });
+  }
 
   function render(): HTMLElement {
     const fixture = TestBed.createComponent(App);
@@ -44,6 +51,8 @@ describe('App', () => {
     const fixture = TestBed.createComponent(App);
     await loadAs(harness, staffUser);
     fixture.detectChanges();
+    flushUserTypes();
+    fixture.detectChanges();
     const element = fixture.nativeElement as HTMLElement;
 
     expect(element.querySelector('mat-toolbar')?.textContent).toContain('admin@demo.local');
@@ -67,6 +76,7 @@ describe('App', () => {
     const fixture = TestBed.createComponent(App);
     await loadAs(harness, staffUser);
     fixture.detectChanges();
+    flushUserTypes();
     const dialogs = TestBed.inject(MatDialog);
     const closeAll = vi.spyOn(dialogs, 'closeAll');
     const opened = dialogs.open(OpenDialog);

@@ -12,8 +12,13 @@ public sealed class GetRolesHandler(IRequestContext context, IdentityDbContext d
         await Permissions.EnsureAsync(IdentityPermissions.RolesView, cancellationToken);
 
         var roles = IdentityRoles.Tenant
-            .OrderBy(role => role.Key, StringComparer.Ordinal)
-            .Select(role => new RoleDto(role.Key, role.Value.Order(StringComparer.Ordinal).ToList()))
+            .Select(role => new RoleDto(
+                role.Key,
+                IdentityRoles.DisplayNames[role.Key],
+                [.. role.Value
+                    .Select(permission => new PermissionDto(permission, IdentityPermissions.DisplayNames[permission]))
+                    .OrderBy(permission => permission.DisplayName, StringComparer.Ordinal)]))
+            .OrderBy(role => role.DisplayName, StringComparer.Ordinal)
             .ToList();
 
         return new RolesResponse(roles, await Permissions.HasAsync(IdentityPermissions.RolesAssign, cancellationToken));

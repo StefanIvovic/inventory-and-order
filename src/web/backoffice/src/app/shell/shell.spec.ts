@@ -5,7 +5,23 @@ import { TestBed } from '@angular/core/testing';
 import { SessionHarness, loadAs, setUpSession, staffUser } from '../session/testing/session-harness';
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { LookupsApi } from '../lookups/lookups-api';
 import { Shell } from './shell';
+
+const userTypes = [
+  { id: 'c', code: 'customer', name: 'Customer' },
+  { id: 'p', code: 'platform', name: 'Platform administrator' },
+  { id: 's', code: 'staff', name: 'Staff' },
+];
+
+function flushUserTypes(harness: SessionHarness, status = 200): void {
+  const request = harness.http.expectOne((candidate) => candidate.url === LookupsApi.valuesUrl('user-type'));
+  if (status === 200) {
+    request.flush({ items: userTypes, nextCursor: null });
+  } else {
+    request.flush({}, { status, statusText: 'Error' });
+  }
+}
 
 @Component({ template: '' })
 class Blank {}
@@ -23,6 +39,8 @@ describe('Shell', () => {
     await loadAs(harness, user);
     const fixture = TestBed.createComponent(Shell);
     fixture.detectChanges();
+    flushUserTypes(harness);
+    fixture.detectChanges();
     return fixture.nativeElement as HTMLElement;
   }
 
@@ -31,6 +49,18 @@ describe('Shell', () => {
 
     expect(element.textContent).toContain('admin@demo.local');
     expect(element.textContent).toContain('Staff');
+  });
+
+  it('takes the user type name from the user-type list and shows none when the list fails', async () => {
+    await loadAs(harness, staffUser);
+    const fixture = TestBed.createComponent(Shell);
+    fixture.detectChanges();
+    flushUserTypes(harness, 500);
+    fixture.detectChanges();
+    const element = fixture.nativeElement as HTMLElement;
+
+    expect(element.querySelector('.role')).toBeNull();
+    expect(element.textContent).not.toContain('staff');
   });
 
   it('shows Platform administrator for the platform admin', async () => {
@@ -65,6 +95,8 @@ describe('Shell', () => {
     TestBed.inject(HttpClient).get('/api/identity/users').subscribe((value) => (answer = value));
     harness.http.expectOne('/api/identity/users').flush({ type: 'identity-unavailable' }, { status: 503, statusText: 'Unavailable' });
     fixture.detectChanges();
+    flushUserTypes(harness);
+    fixture.detectChanges();
     const element = fixture.nativeElement as HTMLElement;
 
     expect(element.querySelector('[role="status"]')?.textContent).toContain('Sign-in service is unavailable.');
@@ -86,10 +118,10 @@ describe('Shell', () => {
     expect(navigationEntries(element)).toEqual(['Home', 'Tenants']);
   });
 
-  it('shows only Home to staff', async () => {
+  it('shows Home, Users and Roles to staff', async () => {
     const element = await render();
 
-    expect(navigationEntries(element)).toEqual(['Home']);
+    expect(navigationEntries(element)).toEqual(['Home', 'Users', 'Roles']);
   });
 
   it('marks the active entry', async () => {
@@ -102,6 +134,7 @@ describe('Shell', () => {
     const fixture = TestBed.createComponent(Shell);
     await router.navigateByUrl('/tenants');
     fixture.detectChanges();
+    flushUserTypes(harness);
     await fixture.whenStable();
     fixture.detectChanges();
 
@@ -118,6 +151,7 @@ describe('Shell', () => {
     await loadAs(harness, staffUser);
     const fixture = TestBed.createComponent(Shell);
     fixture.detectChanges();
+    flushUserTypes(harness);
     const element = fixture.nativeElement as HTMLElement;
 
     const sidenav = element.querySelector('mat-sidenav');

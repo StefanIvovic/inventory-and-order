@@ -1,5 +1,5 @@
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { Component, DestroyRef, computed, inject } from '@angular/core';
+import { Component, DestroyRef, computed, effect, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
@@ -9,12 +9,8 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { map } from 'rxjs';
+import { LookupValue, LookupsApi } from '../lookups/lookups-api';
 import { SessionService } from '../session/session.service';
-
-const roleLabels = {
-  staff: 'Staff',
-  platform: 'Platform administrator',
-} as const;
 
 interface NavigationEntry {
   label: string;
@@ -23,6 +19,9 @@ interface NavigationEntry {
 
 const homeEntry: NavigationEntry = { label: 'Home', path: '/' };
 const tenantsEntry: NavigationEntry = { label: 'Tenants', path: '/tenants' };
+const usersEntry: NavigationEntry = { label: 'Users', path: '/users' };
+const rolesEntry: NavigationEntry = { label: 'Roles', path: '/roles' };
+const userTypeList = 'user-type';
 
 @Component({
   selector: 'app-shell',
@@ -44,7 +43,9 @@ const tenantsEntry: NavigationEntry = { label: 'Tenants', path: '/tenants' };
       <span class="title">Backoffice</span>
       <span class="spacer"></span>
       @if (user(); as current) {
-        <span class="role">{{ role() }}</span>
+        @if (role(); as name) {
+          <span class="role">{{ name }}</span>
+        }
         <button mat-button type="button" aria-label="User menu" [matMenuTriggerFor]="menu">
           {{ current.email ?? current.userId }}
         </button>
@@ -135,16 +136,27 @@ export class Shell {
     return state.kind === 'signed-in' ? state.user : null;
   });
 
+  private readonly userTypes = signal<LookupValue[]>([]);
+
   protected readonly role = computed(() => {
     const user = this.user();
-    return user ? roleLabels[user.userType] : '';
+    return user ? (this.userTypes().find((type) => type.code === user.userType)?.name ?? '') : '';
   });
 
   protected readonly entries = computed(() =>
-    this.user()?.userType === 'platform' ? [homeEntry, tenantsEntry] : [homeEntry],
+    this.user()?.userType === 'platform' ? [homeEntry, tenantsEntry] : [homeEntry, usersEntry, rolesEntry],
   );
 
   constructor() {
+    const lookups = inject(LookupsApi);
+    let requested = false;
+    effect(() => {
+      if (this.user() && !requested) {
+        requested = true;
+        lookups.values(userTypeList).subscribe({ next: (types) => this.userTypes.set(types), error: () => this.userTypes.set([]) });
+      }
+    });
+
     const dialogs = inject(MatDialog);
     inject(DestroyRef).onDestroy(() => dialogs.closeAll());
   }

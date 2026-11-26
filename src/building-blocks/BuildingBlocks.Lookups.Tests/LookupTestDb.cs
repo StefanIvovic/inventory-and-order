@@ -18,12 +18,15 @@ public sealed class CommandCounter : DbCommandInterceptor
 
     public int Count => count;
 
+    public (string Text, IReadOnlyList<(string Name, object Value)> Parameters)? Last { get; private set; }
+
     public void Reset() => Interlocked.Exchange(ref count, 0);
 
     public override ValueTask<InterceptionResult<DbDataReader>> ReaderExecutingAsync(
         DbCommand command, CommandEventData eventData, InterceptionResult<DbDataReader> result, CancellationToken cancellationToken = default)
     {
         Interlocked.Increment(ref count);
+        Last = (command.CommandText, [.. command.Parameters.Cast<DbParameter>().Select(p => (p.ParameterName, p.Value ?? DBNull.Value))]);
         return base.ReaderExecutingAsync(command, eventData, result, cancellationToken);
     }
 }
