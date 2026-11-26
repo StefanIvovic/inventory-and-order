@@ -23,8 +23,12 @@ public sealed class RolesTests(ContainersFixture containers)
         var body = await response.Content.ReadFromJsonAsync<RolesResponse>(TestContext.Current.CancellationToken);
         Assert.NotNull(body);
         Assert.True(body.CanAssign);
-        var expected = IdentityRoles.Tenant.OrderBy(r => r.Key, StringComparer.Ordinal).Select(r => (r.Key, string.Join(',', r.Value.Order(StringComparer.Ordinal))));
-        Assert.Equal(expected, body.Roles.Select(r => (r.Name, string.Join(',', r.Permissions))));
+        Assert.Equal(
+            [
+                "identity.administrator|Administrator|identity.roles.assign:Assign roles,identity.users.manage:Manage users,identity.roles.view:View roles,identity.users.view:View users",
+                "identity.viewer|Viewer|identity.roles.view:View roles,identity.users.view:View users",
+            ],
+            body.Roles.Select(r => $"{r.Name}|{r.DisplayName}|{string.Join(',', r.Permissions.Select(p => $"{p.Name}:{p.DisplayName}"))}"));
     }
 
     [Fact]
