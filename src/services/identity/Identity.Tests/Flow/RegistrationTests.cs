@@ -172,5 +172,5 @@ public sealed class RegistrationTests(ContainersFixture containers)
     }
 
     private static Task<int> CustomersAsync(IdentityApp app) =>
-        CreateTenantTests.CountAsync(app, db => db.Users.CountAsync(u => u.UserType == UserTypes.Customer, TestContext.Current.CancellationToken));
+        CreateTenantTests.CountAsync(app, db => db.Users.CountAsync(u => u.UserTypeId == UserTypes.CustomerValue.Id, TestContext.Current.CancellationToken));
 }

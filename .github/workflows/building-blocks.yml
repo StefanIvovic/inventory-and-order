@@ -84,6 +84,10 @@ jobs:
         shell: pwsh
         run: ./scripts/check-consumer.ps1 -PackageId BuildingBlocks.Validation
 
+      - name: Consumer check Lookups
+        shell: pwsh
+        run: ./scripts/check-consumer.ps1 -PackageId BuildingBlocks.Lookups
+
       - name: Analyzer check
         shell: pwsh
         run: ./scripts/check-analyzers.ps1

@@ -4,10 +4,13 @@ namespace BuildingBlocks.Testing;
 
 public sealed record RouteCheckReport(IReadOnlyList<string> Checked, IReadOnlyList<string> Skipped, IReadOnlyList<string> Failures)
 {
+    public IReadOnlyList<string> SignedIn { get; init; } = [];
+
     public override string ToString()
     {
         var text = new StringBuilder();
         Append(text, "Checked", Checked);
+        Append(text, "Signed-in (401 without a token)", SignedIn);
         Append(text, "Skipped (allow-listed)", Skipped);
         Append(text, "Failures", Failures);
         return text.ToString();

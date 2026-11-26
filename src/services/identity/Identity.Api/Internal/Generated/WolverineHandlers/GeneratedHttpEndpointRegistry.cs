@@ -9,7 +9,7 @@ namespace Internal.Generated.WolverineHandlers
     {
         public override System.Type[] EndpointTypes()
         {
-            return new System.Type[] { typeof(Identity.Api.Features.AssignRole.RoleAssignmentEndpoints), typeof(Identity.Api.Features.CreateStaffUser.CreateStaffUserEndpoint), typeof(Identity.Api.Features.CreateTenant.CreateTenantEndpoint), typeof(Identity.Api.Features.DisableUser.DisableUserEndpoint), typeof(Identity.Api.Features.ListRoles.RolesEndpoint), typeof(Identity.Api.Features.ListTenants.ListTenantsEndpoint), typeof(Identity.Api.Features.ListUsers.ListUsersEndpoint) };
+            return new System.Type[] { typeof(Identity.Api.Features.AssignRole.RoleAssignmentEndpoints), typeof(Identity.Api.Features.CreateStaffUser.CreateStaffUserEndpoint), typeof(Identity.Api.Features.CreateTenant.CreateTenantEndpoint), typeof(Identity.Api.Features.DisableUser.DisableUserEndpoint), typeof(Identity.Api.Features.ListRoles.RolesEndpoint), typeof(Identity.Api.Features.ListTenants.ListTenantsEndpoint), typeof(Identity.Api.Features.ListUsers.ListUsersEndpoint), typeof(Identity.Api.Features.Lookups.ListLookupValuesEndpoint) };
         }
     }
 
@@ -24,6 +24,7 @@ namespace Internal.Generated.WolverineHandlers
         [global::System.Runtime.CompilerServices.ModuleInitializer]
         [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All, typeof(global::Internal.Generated.WolverineHandlers.GeneratedHttpEndpointRegistry))]
         [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All, typeof(global::Internal.Generated.WolverineHandlers.DELETE_users_id_roles_role))]
+        [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All, typeof(global::Internal.Generated.WolverineHandlers.GET_lookups_typeCode_values))]
         [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All, typeof(global::Internal.Generated.WolverineHandlers.GET_roles))]
         [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All, typeof(global::Internal.Generated.WolverineHandlers.GET_tenants))]
         [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All, typeof(global::Internal.Generated.WolverineHandlers.GET_users))]
@@ -38,6 +39,7 @@ namespace Internal.Generated.WolverineHandlers
         [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All, typeof(global::Identity.Api.Features.ListRoles.RolesEndpoint))]
         [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All, typeof(global::Identity.Api.Features.ListTenants.ListTenantsEndpoint))]
         [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All, typeof(global::Identity.Api.Features.ListUsers.ListUsersEndpoint))]
+        [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All, typeof(global::Identity.Api.Features.Lookups.ListLookupValuesEndpoint))]
         public static void Pin()
         {
             // Intentionally empty. The [DynamicDependency] attributes above are the payload: they root the generated types for Native AOT, and [ModuleInitializer] guarantees this method is itself an ILC root.

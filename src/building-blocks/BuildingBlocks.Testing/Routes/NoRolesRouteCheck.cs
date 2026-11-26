@@ -24,6 +24,7 @@ public static class NoRolesRouteCheck
 
         var checkedRoutes = new List<string>();
         var skipped = new List<string>();
+        var signedIn = new List<string>();
         var failures = new List<string>();
         var endpoints = services.GetRequiredService<EndpointDataSource>().Endpoints.OfType<RouteEndpoint>();
 
@@ -40,12 +41,23 @@ public static class NoRolesRouteCheck
                     continue;
                 }
 
-                using var request = new HttpRequestMessage(new HttpMethod(method), PathOf(endpoint.RoutePattern));
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", TokenFor(category, audience));
-                if (MethodsWithBody.Contains(method))
+                if (category == RouteCategory.SignedIn)
                 {
-                    request.Content = new StringContent("{}", Encoding.UTF8, "application/json");
+                    using var anonymous = Request(method, endpoint.RoutePattern, null);
+                    using var anonymousResponse = await client.SendAsync(anonymous, cancellationToken);
+                    if (anonymousResponse.StatusCode == HttpStatusCode.Unauthorized)
+                    {
+                        signedIn.Add(label);
+                    }
+                    else
+                    {
+                        failures.Add($"{label} (SignedIn) returned {(int)anonymousResponse.StatusCode} instead of 401 without a token");
+                    }
+
+                    continue;
                 }
+
+                using var request = Request(method, endpoint.RoutePattern, TokenFor(category, audience));
 
                 using var response = await client.SendAsync(request, cancellationToken);
                 if (response.StatusCode == HttpStatusCode.Forbidden)
@@ -59,7 +71,23 @@ public static class NoRolesRouteCheck
             }
         }
 
-        return new RouteCheckReport(checkedRoutes, skipped, failures);
+        return new RouteCheckReport(checkedRoutes, skipped, failures) { SignedIn = signedIn };
+    }
+
+    private static HttpRequestMessage Request(string method, RoutePattern pattern, string? token)
+    {
+        var request = new HttpRequestMessage(new HttpMethod(method), PathOf(pattern));
+        if (token is not null)
+        {
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        }
+
+        if (MethodsWithBody.Contains(method))
+        {
+            request.Content = new StringContent("{}", Encoding.UTF8, "application/json");
+        }
+
+        return request;
     }
 
     public static string PathOf(RoutePattern pattern)

@@ -9,7 +9,7 @@ namespace Internal.Generated.WolverineHandlers
     {
         public override System.Type[] HandlerTypes()
         {
-            return new System.Type[] { typeof(BuildingBlocks.Messaging.PermissionAssignmentsChangedHandler), typeof(Identity.Api.Features.AssignRole.AssignRoleHandler), typeof(Identity.Api.Features.AssignRole.UnassignRoleHandler), typeof(Identity.Api.Features.CreateStaffUser.CreateStaffUserHandler), typeof(Identity.Api.Features.CreateTenant.CreateTenantHandler), typeof(Identity.Api.Features.DisableUser.DisableUserHandler), typeof(Identity.Api.Features.ListRoles.GetRolesHandler), typeof(Identity.Api.Features.ListTenants.ListTenantsHandler), typeof(Identity.Api.Features.ListUsers.ListUsersHandler), typeof(Identity.Api.Features.RegisterCustomer.RegisterCustomerHandler) };
+            return new System.Type[] { typeof(BuildingBlocks.Messaging.PermissionAssignmentsChangedHandler), typeof(Identity.Api.Features.AssignRole.AssignRoleHandler), typeof(Identity.Api.Features.AssignRole.UnassignRoleHandler), typeof(Identity.Api.Features.CreateStaffUser.CreateStaffUserHandler), typeof(Identity.Api.Features.CreateTenant.CreateTenantHandler), typeof(Identity.Api.Features.DisableUser.DisableUserHandler), typeof(Identity.Api.Features.ListRoles.GetRolesHandler), typeof(Identity.Api.Features.ListTenants.ListTenantsHandler), typeof(Identity.Api.Features.ListUsers.ListUsersHandler), typeof(Identity.Api.Features.Lookups.ListLookupValuesHandler), typeof(Identity.Api.Features.RegisterCustomer.RegisterCustomerHandler) };
         }
 
         public override System.Type[] MessageTypes()
@@ -33,6 +33,7 @@ namespace Internal.Generated.WolverineHandlers
         [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All, typeof(global::Internal.Generated.WolverineHandlers.CreateTenantHandler493713107))]
         [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All, typeof(global::Internal.Generated.WolverineHandlers.DisableUserHandler1121474889))]
         [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All, typeof(global::Internal.Generated.WolverineHandlers.GetRolesHandler2085070051))]
+        [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All, typeof(global::Internal.Generated.WolverineHandlers.ListLookupValuesHandler1076829628))]
         [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All, typeof(global::Internal.Generated.WolverineHandlers.ListTenantsHandler2039965751))]
         [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All, typeof(global::Internal.Generated.WolverineHandlers.ListUsersHandler1234828937))]
         [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All, typeof(global::Internal.Generated.WolverineHandlers.PermissionAssignmentsChangedHandler1254324437))]
@@ -47,6 +48,7 @@ namespace Internal.Generated.WolverineHandlers
         [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All, typeof(global::Identity.Api.Features.ListRoles.GetRolesHandler))]
         [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All, typeof(global::Identity.Api.Features.ListTenants.ListTenantsHandler))]
         [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All, typeof(global::Identity.Api.Features.ListUsers.ListUsersHandler))]
+        [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All, typeof(global::Identity.Api.Features.Lookups.ListLookupValuesHandler))]
         [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All, typeof(global::Identity.Api.Features.RegisterCustomer.RegisterCustomerHandler))]
         [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All, typeof(global::BuildingBlocks.Messaging.PermissionAssignmentsChanged))]
         [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All, typeof(global::Identity.Api.Features.AssignRole.AssignRole))]
@@ -57,6 +59,7 @@ namespace Internal.Generated.WolverineHandlers
         [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All, typeof(global::Identity.Api.Features.ListRoles.GetRoles))]
         [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All, typeof(global::Identity.Api.Features.ListTenants.ListTenants))]
         [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All, typeof(global::Identity.Api.Features.ListUsers.ListUsers))]
+        [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All, typeof(global::Identity.Api.Features.Lookups.ListLookupValues))]
         [global::System.Diagnostics.CodeAnalysis.DynamicDependency(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All, typeof(global::Identity.Api.Features.RegisterCustomer.RegisterCustomer))]
         public static void Pin()
         {

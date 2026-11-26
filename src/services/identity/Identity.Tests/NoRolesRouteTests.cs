@@ -27,6 +27,7 @@ public sealed class NoRolesRouteTests(ContainersFixture containers)
                 "PUT /users/{id:guid}/roles/{role} (Tenant)",
             ],
             report.Checked.Order(StringComparer.Ordinal));
+        Assert.Equal(["GET /lookups/{typeCode}/values"], report.SignedIn);
         Assert.Contains("GET /health/live", report.Skipped);
         Assert.Contains("GET /health/ready", report.Skipped);
     }

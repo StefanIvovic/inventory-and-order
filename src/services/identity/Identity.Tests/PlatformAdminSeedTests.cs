@@ -104,7 +104,7 @@ public sealed class PlatformAdminSeedTests(ContainersFixture containers)
 
         await second.WithUsersAsync(async users =>
         {
-            Assert.Equal(1, await users.Users.CountAsync(u => u.UserType == UserTypes.Platform, TestContext.Current.CancellationToken));
+            Assert.Equal(1, await users.Users.CountAsync(u => u.UserTypeId == UserTypes.PlatformValue.Id, TestContext.Current.CancellationToken));
             Assert.Null(await users.FindByNameAsync("other@platform.test"));
         });
         Assert.Equal(stamp, await StampAsync(second));

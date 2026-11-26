@@ -54,10 +54,42 @@ public sealed class NoRolesRouteCheckTests
         Assert.Contains("Failures (1):", report.ToString(), StringComparison.Ordinal);
     }
 
+    [Fact]
+    public async Task SignedInRoutesAreCheckedWithoutAToken()
+    {
+        await using var app = await StartAsync(a =>
+        {
+            a.MapGet("/guarded", Guard);
+            a.MapGet("/reference/{code}", (string code) => code).RequireSignedIn();
+        });
+
+        var report = await NoRolesRouteCheck.RunAsync(app.Services, app.GetTestClient(), Audience, TestContext.Current.CancellationToken);
+
+        Assert.Empty(report.Failures);
+        Assert.Equal(["GET /reference/{code}"], report.SignedIn);
+        Assert.DoesNotContain(report.Checked, line => line.Contains("/reference", StringComparison.Ordinal));
+        Assert.Contains("Signed-in (401 without a token) (1):", report.ToString(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task SignedInRouteOpenToAnonymousCallersIsReported()
+    {
+        await using var app = await StartAsync(a => a.MapGet("/reference", () => "values").RequireSignedIn(), OpenSignedInPolicy);
+
+        var report = await NoRolesRouteCheck.RunAsync(app.Services, app.GetTestClient(), Audience, TestContext.Current.CancellationToken);
+
+        var failure = Assert.Single(report.Failures);
+        Assert.Equal("GET /reference (SignedIn) returned 200 instead of 401 without a token", failure);
+        Assert.Empty(report.SignedIn);
+    }
+
     private static IResult Guard(ICurrentUser user) =>
         user.TenantId is not null && user.UserType == UserType.Staff ? Results.StatusCode(403) : Results.StatusCode(500);
 
-    private static async Task<WebApplication> StartAsync(Action<WebApplication> routes)
+    private static void OpenSignedInPolicy(IServiceCollection services) =>
+        services.AddAuthorizationBuilder().AddPolicy(AuthorizationPolicies.SignedIn, policy => policy.RequireAssertion(_ => true));
+
+    private static async Task<WebApplication> StartAsync(Action<WebApplication> routes, Action<IServiceCollection>? services = null)
     {
         var builder = WebApplication.CreateBuilder();
         builder.WebHost.UseTestServer();
@@ -67,6 +99,7 @@ public sealed class NoRolesRouteCheckTests
         builder.Services.AddBuildingBlocks();
         builder.Services.AddBuildingBlocksAuthentication(builder.Configuration);
         builder.Services.AddTestTokenValidation(Audience);
+        services?.Invoke(builder.Services);
 
         var app = builder.Build();
         app.UseBuildingBlocksAuthentication();
