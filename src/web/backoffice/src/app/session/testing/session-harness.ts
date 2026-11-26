@@ -2,6 +2,7 @@ import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { loadingInterceptor } from '../../loading/loading.interceptor';
 import { apiInterceptor } from '../api.interceptor';
 import { BROWSER_LOCATION } from '../browser-location';
 import { SessionService, SessionUser } from '../session.service';
@@ -26,7 +27,7 @@ export function setUpSession(): SessionHarness {
   TestBed.configureTestingModule({
     providers: [
       provideRouter([]),
-      provideHttpClient(withInterceptors([apiInterceptor])),
+      provideHttpClient(withInterceptors([loadingInterceptor, apiInterceptor])),
       provideHttpClientTesting(),
       { provide: BROWSER_LOCATION, useValue: location },
     ],

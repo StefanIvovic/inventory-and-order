@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { MatDialogRef } from '@angular/material/dialog';
+import { LoadingService, loadingDelay } from '../loading/loading.service';
 import { SessionHarness, loadAs, setUpSession, staffUser } from '../session/testing/session-harness';
 import { AddStaffDialog } from './add-staff-dialog';
 import { UsersApi } from './users-api';
@@ -115,6 +116,26 @@ describe('AddStaffDialog', () => {
     await view.settle();
 
     expect(view.errorsUnder('email')).toContain('This email is already in use.');
+  });
+
+  it.each([
+    ['closes', { id: 'u-9' }, 201, ['clerk@demo.test']],
+    ['shows the error', { type: 'https://tools.ietf.org/html/rfc9110#section-15.5.10', code: 'email-taken' }, 409, []],
+  ])('shows the loading bar while saving until it %s', async (_, body, status, expected) => {
+    const loading = TestBed.inject(LoadingService);
+    const view = render();
+    view.fill({});
+    view.addButton().click();
+    await view.settle();
+    await new Promise((resolve) => setTimeout(resolve, loadingDelay));
+    expect(loading.visible()).toBe(true);
+
+    harness.http.expectOne(UsersApi.url).flush(body, { status, statusText: 'Answer' });
+    expect(loading.visible()).toBe(true);
+    await view.settle();
+
+    expect(closed).toEqual(expected);
+    expect(loading.visible()).toBe(false);
   });
 
   it('shows other failures at the top and keeps the values', async () => {

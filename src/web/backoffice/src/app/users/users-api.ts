@@ -1,6 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
+import { RequestOptions, contextFor } from '../loading/loading.interceptor';
 
 export interface StaffItem {
   id: string;
@@ -42,7 +43,7 @@ export class UsersApi {
 
   private readonly http = inject(HttpClient);
 
-  list(request: StaffListRequest): Observable<StaffList> {
+  list(request: StaffListRequest, options: RequestOptions = {}): Observable<StaffList> {
     let params = new HttpParams().set('size', request.size);
     const q = request.q.trim();
     if (q !== '') {
@@ -65,7 +66,7 @@ export class UsersApi {
       params = params.set('includeTotal', true);
     }
 
-    return this.http.get<StaffList>(UsersApi.url, { params });
+    return this.http.get<StaffList>(UsersApi.url, { params, context: contextFor(options) });
   }
 
   create(user: NewStaffUser): Observable<{ id: string }> {

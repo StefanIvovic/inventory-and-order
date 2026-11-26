@@ -321,7 +321,7 @@ export class LookupSelect implements FormValueControl<LookupSelectValue> {
     this.lastAfter = after;
     this.loading.set(true);
     this.failed.set(false);
-    this.api.page(this.typeCode(), { q: this.query, size: lookupPageSize, after }, this.service()).subscribe({
+    this.api.page(this.typeCode(), { q: this.query, size: lookupPageSize, after }, this.service(), { background: true }).subscribe({
       next: (page) => {
         if (generation !== this.generation) {
           return;
@@ -375,7 +375,7 @@ export class LookupSelect implements FormValueControl<LookupSelectValue> {
     const byId = this.valueBy() === 'id';
     forkJoin(
       chunks.map((chunk) =>
-        this.api.page(this.typeCode(), { size: chunk.length, ...(byId ? { ids: chunk } : { codes: chunk }) }, this.service()),
+        this.api.page(this.typeCode(), { size: chunk.length, ...(byId ? { ids: chunk } : { codes: chunk }) }, this.service(), { background: true }),
       ),
     ).subscribe({
       next: (pages) => {

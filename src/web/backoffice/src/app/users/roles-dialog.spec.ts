@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { LoadingService, loadingDelay } from '../loading/loading.service';
 import { tenantRoles } from '../roles/testing/tenant-roles';
 import { SessionHarness, loadAs, setUpSession, staffUser } from '../session/testing/session-harness';
 import { RolesDialog, RolesDialogData } from './roles-dialog';
@@ -96,6 +97,29 @@ describe('RolesDialog', () => {
     expect(view.isOn('identity.viewer')).toBe(true);
     view.close();
     expect(closed).toEqual([false]);
+  });
+
+  it.each([
+    ['answer', 204],
+    ['error answer', 409],
+  ])('shows the loading bar while a role switch saves, until its %s', (_, status) => {
+    vi.useFakeTimers();
+    try {
+      const loading = TestBed.inject(LoadingService);
+      const view = render();
+
+      view.flip('identity.administrator');
+      vi.advanceTimersByTime(loadingDelay);
+      expect(loading.visible()).toBe(true);
+
+      harness.http.expectOne(UsersApi.roleUrl('u-9', 'identity.administrator')).flush(null, { status, statusText: 'Answer' });
+      vi.advanceTimersByTime(0);
+      view.detect();
+
+      expect(loading.visible()).toBe(false);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('keeps the switch waiting while the sign-in service is unavailable, then re-sends on retry', () => {

@@ -1,6 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
+import { RequestOptions, contextFor } from '../loading/loading.interceptor';
 
 export interface LookupValue {
   id: string;
@@ -30,11 +31,11 @@ export class LookupsApi {
 
   private readonly http = inject(HttpClient);
 
-  values(typeCode: string): Observable<LookupValue[]> {
-    return this.page(typeCode, { size: LookupsApi.maxValues }).pipe(map((page) => page.items));
+  values(typeCode: string, options: RequestOptions = {}): Observable<LookupValue[]> {
+    return this.page(typeCode, { size: LookupsApi.maxValues }, identityService, options).pipe(map((page) => page.items));
   }
 
-  page(typeCode: string, request: LookupPageRequest, service = identityService): Observable<LookupValuePage> {
+  page(typeCode: string, request: LookupPageRequest, service = identityService, options: RequestOptions = {}): Observable<LookupValuePage> {
     let params = new HttpParams().set('size', request.size);
     const q = request.q?.trim();
     if (q) {
@@ -53,7 +54,7 @@ export class LookupsApi {
       params = params.set('after', request.after);
     }
 
-    return this.http.get<LookupValuePage>(LookupsApi.valuesUrl(typeCode, service), { params });
+    return this.http.get<LookupValuePage>(LookupsApi.valuesUrl(typeCode, service), { params, context: contextFor(options) });
   }
 
   static valuesUrl(typeCode: string, service = identityService): string {

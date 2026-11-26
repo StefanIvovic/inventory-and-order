@@ -1,3 +1,4 @@
+import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Component, DestroyRef, computed, effect, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -5,10 +6,12 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { map } from 'rxjs';
+import { LoadingService } from '../loading/loading.service';
 import { LookupValue, LookupsApi } from '../lookups/lookups-api';
 import { SessionService } from '../session/session.service';
 
@@ -29,6 +32,7 @@ const userTypeList = 'user-type';
     MatToolbarModule,
     MatButtonModule,
     MatMenuModule,
+    MatProgressBarModule,
     MatSidenavModule,
     MatListModule,
     RouterOutlet,
@@ -54,6 +58,11 @@ const userTypeList = 'user-type';
         <button mat-menu-item type="button" (click)="session.signOut()">Sign out</button>
       </mat-menu>
     </mat-toolbar>
+    <div class="loading">
+      @if (loading.visible()) {
+        <mat-progress-bar mode="indeterminate" aria-label="Loading" />
+      }
+    </div>
     @if (session.retryNeeded()) {
       <div class="banner" role="status">
         <span>Sign-in service is unavailable.</span>
@@ -99,6 +108,10 @@ const userTypeList = 'user-type';
       color: var(--mat-sys-on-secondary-container);
       margin-inline-end: 0.5rem;
     }
+    .loading {
+      height: 4px;
+      flex: none;
+    }
     .banner {
       display: flex;
       align-items: center;
@@ -123,6 +136,7 @@ const userTypeList = 'user-type';
 })
 export class Shell {
   protected readonly session = inject(SessionService);
+  protected readonly loading = inject(LoadingService);
 
   protected readonly handset = toSignal(
     inject(BreakpointObserver)
@@ -153,7 +167,14 @@ export class Shell {
     effect(() => {
       if (this.user() && !requested) {
         requested = true;
-        lookups.values(userTypeList).subscribe({ next: (types) => this.userTypes.set(types), error: () => this.userTypes.set([]) });
+        lookups.values(userTypeList, { background: true }).subscribe({ next: (types) => this.userTypes.set(types), error: () => this.userTypes.set([]) });
+      }
+    });
+
+    const announcer = inject(LiveAnnouncer);
+    effect(() => {
+      if (this.loading.visible()) {
+        void announcer.announce('Loading', 'polite');
       }
     });
 

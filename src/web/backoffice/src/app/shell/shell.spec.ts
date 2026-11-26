@@ -1,3 +1,4 @@
+import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout';
 import { HttpClient } from '@angular/common/http';
 import { of } from 'rxjs';
@@ -5,7 +6,9 @@ import { TestBed } from '@angular/core/testing';
 import { SessionHarness, loadAs, setUpSession, staffUser } from '../session/testing/session-harness';
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { LoadingService, loadingDelay } from '../loading/loading.service';
 import { LookupsApi } from '../lookups/lookups-api';
+import { BACKGROUND } from '../loading/loading.interceptor';
 import { Shell } from './shell';
 
 const userTypes = [
@@ -49,6 +52,15 @@ describe('Shell', () => {
 
     expect(element.textContent).toContain('admin@demo.local');
     expect(element.textContent).toContain('Staff');
+  });
+
+  it('loads the user type names in the background', async () => {
+    await loadAs(harness, staffUser);
+    TestBed.createComponent(Shell).detectChanges();
+
+    const request = harness.http.expectOne((candidate) => candidate.url === LookupsApi.valuesUrl('user-type'));
+    expect(request.request.context.get(BACKGROUND)).toBe(true);
+    request.flush({ items: userTypes, nextCursor: null });
   });
 
   it('takes the user type name from the user-type list and shows none when the list fails', async () => {
@@ -172,5 +184,69 @@ describe('Shell', () => {
 
     expect(element.querySelector('[aria-label="Menu"]')).toBeNull();
     expect(element.querySelector('mat-sidenav')?.classList.contains('mat-drawer-opened')).toBe(true);
+  });
+  describe('loading bar', () => {
+    afterEach(() => vi.useRealTimers());
+
+    async function renderWithFakeTimers() {
+      TestBed.resetTestingModule();
+      vi.useFakeTimers();
+      harness = setUpSession();
+      const announce = vi.spyOn(TestBed.inject(LiveAnnouncer), 'announce').mockResolvedValue();
+      await loadAs(harness, staffUser);
+      vi.advanceTimersByTime(0);
+      const fixture = TestBed.createComponent(Shell);
+      fixture.detectChanges();
+      flushUserTypes(harness);
+      vi.advanceTimersByTime(loadingDelay);
+      fixture.detectChanges();
+      return { fixture, element: fixture.nativeElement as HTMLElement, loading: TestBed.inject(LoadingService), announce };
+    }
+
+    it('keeps an empty slot directly under the toolbar while nothing runs', async () => {
+      const { element, announce } = await renderWithFakeTimers();
+
+      const slot = element.querySelector('.loading');
+      expect(slot).not.toBeNull();
+      expect(slot?.previousElementSibling?.tagName.toLowerCase()).toBe('mat-toolbar');
+      expect(slot?.querySelector('mat-progress-bar')).toBeNull();
+      expect(announce).not.toHaveBeenCalled();
+    });
+
+    it('shows one bar labelled Loading after the delay and announces it once', async () => {
+      const { fixture, element, loading, announce } = await renderWithFakeTimers();
+
+      const end = loading.begin();
+      vi.advanceTimersByTime(loadingDelay - 1);
+      fixture.detectChanges();
+      expect(element.querySelector('mat-progress-bar')).toBeNull();
+
+      vi.advanceTimersByTime(1);
+      fixture.detectChanges();
+      const bars = element.querySelectorAll('.loading mat-progress-bar');
+      expect(bars.length).toBe(1);
+      expect(bars[0].getAttribute('aria-label')).toBe('Loading');
+      expect(bars[0].getAttribute('mode')).toBe('indeterminate');
+      fixture.detectChanges();
+      expect(announce).toHaveBeenCalledTimes(1);
+      expect(announce).toHaveBeenCalledWith('Loading', 'polite');
+
+      end();
+      vi.advanceTimersByTime(0);
+      fixture.detectChanges();
+      expect(element.querySelector('mat-progress-bar')).toBeNull();
+      expect(announce).toHaveBeenCalledTimes(1);
+    });
+
+    it('sits above the retry banner', async () => {
+      const { fixture, element } = await renderWithFakeTimers();
+      TestBed.inject(HttpClient).get('/api/identity/users').subscribe();
+      harness.http.expectOne('/api/identity/users').flush({ type: 'identity-unavailable' }, { status: 503, statusText: 'Unavailable' });
+      fixture.detectChanges();
+
+      expect(element.querySelector('.loading')?.nextElementSibling?.classList.contains('banner')).toBe(true);
+      harness.session.retry();
+      harness.http.expectOne('/api/identity/users').flush([]);
+    });
   });
 });

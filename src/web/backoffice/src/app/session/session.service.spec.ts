@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { BROWSER_LOCATION } from './browser-location';
+import { BACKGROUND } from '../loading/loading.interceptor';
 import { SessionService, SessionUser } from './session.service';
 import { FakeBrowserLocation } from './testing/fake-browser-location';
 
@@ -42,6 +43,15 @@ describe('SessionService', () => {
     http.expectOne('/bff/backoffice/user').flush(staff);
     await loaded;
     expect(session.state()).toEqual({ kind: 'signed-in', user: staff });
+  });
+
+  it('checks the session in the background', async () => {
+    setUp();
+    const loaded = session.load();
+    const request = http.expectOne('/bff/backoffice/user');
+    expect(request.request.context.get(BACKGROUND)).toBe(true);
+    request.flush(staff);
+    await loaded;
   });
 
   it('is signed out when the user endpoint answers 401', async () => {

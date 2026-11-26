@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { MatDialogRef } from '@angular/material/dialog';
+import { LoadingService, loadingDelay } from '../loading/loading.service';
 import { SessionHarness, loadAs, setUpSession, staffUser } from '../session/testing/session-harness';
 import { CreateTenantDialog } from './create-tenant-dialog';
 import { TenantsApi } from './tenants-api';
@@ -119,6 +120,26 @@ describe('CreateTenantDialog', () => {
     await view.settle();
 
     expect(view.errorsUnder(field)).toContain(message);
+  });
+
+  it.each([
+    ['closes', { id: 't', slug: 'acme', adminUserId: 'u' }, 201, ['acme']],
+    ['shows the error', { type: 'https://tools.ietf.org/html/rfc9110#section-15.5.10', code: 'tenant-slug-taken' }, 409, []],
+  ])('shows the loading bar while saving until it %s', async (_, body, status, expected) => {
+    const loading = TestBed.inject(LoadingService);
+    const view = render();
+    view.fill({});
+    view.createButton().click();
+    await view.settle();
+    await new Promise((resolve) => setTimeout(resolve, loadingDelay));
+    expect(loading.visible()).toBe(true);
+
+    harness.http.expectOne(TenantsApi.url).flush(body, { status, statusText: 'Answer' });
+    expect(loading.visible()).toBe(true);
+    await view.settle();
+
+    expect(closed).toEqual(expected);
+    expect(loading.visible()).toBe(false);
   });
 
   it('shows other failures at the top and keeps the values', async () => {

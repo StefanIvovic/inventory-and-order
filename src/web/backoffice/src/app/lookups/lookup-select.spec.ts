@@ -7,6 +7,7 @@ import { MatAutocompleteTrigger } from '@angular/material/autocomplete';
 import { SessionHarness, loadAs, setUpSession, staffUser } from '../session/testing/session-harness';
 import { LookupSelect, LookupSelectValue } from './lookup-select';
 import { LookupValue, LookupsApi } from './lookups-api';
+import { BACKGROUND } from '../loading/loading.interceptor';
 
 const statuses: LookupValue[] = [
   { id: 'id-active', code: 'active', name: 'Active' },
@@ -124,6 +125,21 @@ describe('LookupSelect', () => {
       expect(view.options()).toEqual(['All', 'Active', 'Disabled']);
       await view.open();
       expect(pages()).toEqual([]);
+    });
+
+    it('loads names and option pages in the background', async () => {
+      const view = await render((host) => host.value.set('active'));
+      const names = page();
+      expect(params(names)).toEqual({ size: '1', codes: 'active' });
+      expect(names.request.context.get(BACKGROUND)).toBe(true);
+      names.flush({ items: [statuses[0]], nextCursor: null });
+      await view.settle();
+
+      await view.open();
+      const options = page();
+      expect(options.request.context.get(BACKGROUND)).toBe(true);
+      options.flush({ items: statuses, nextCursor: null });
+      await view.settle();
     });
 
     it('sends nothing while typing and searches on Enter or the search button', async () => {
