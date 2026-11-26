@@ -22,7 +22,7 @@ public static class LookupReader
 
         var typeCode = query.TypeCode;
         var values = db.Set<LookupValue>().AsNoTracking()
-            .Where(v => db.Set<LookupType>().Any(t => t.Id == v.LookupTypeId && t.Code == typeCode));
+            .Where(v => v.LookupTypeId == db.Set<LookupType>().Where(t => t.Code == typeCode).Select(t => t.Id).FirstOrDefault());
 
         if (!string.IsNullOrWhiteSpace(query.Q))
         {
@@ -44,7 +44,7 @@ public static class LookupReader
         {
             var name = after.Name;
             var id = after.Id;
-            values = values.Where(v => string.Compare(v.Name, name) > 0 || (v.Name == name && v.Id.CompareTo(id) > 0));
+            values = values.Where(v => string.Compare(v.Name, name) >= 0 && (string.Compare(v.Name, name) > 0 || v.Id.CompareTo(id) > 0));
         }
 
         var rows = await values

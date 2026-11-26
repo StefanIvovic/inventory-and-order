@@ -156,6 +156,8 @@ description: "Task list for feature 019 Backoffice Staff"
 - [X] T015 In `NODE_IMAGE` with `CI=true`: lint, unit tests and build. The initial bundle must not grow (the pages are lazy). Review the new files for comments. Run the image pin check
 - [X] T016 [P] Record findings in `specs/019-backoffice-staff/research.md` (R8). Update `README.md` (Users and Roles)
 
+- [ ] T017 BuildingBlocks 0.4.1: `LookupReader` keyset condition as an index range (`name >= n AND (name > n OR id > i)`), per research.md R8. Test first in `BuildingBlocks.Lookups.Tests`: with 20,000 values, a deep page is one command, has no sequential scan, and costs no more than twice the first page. Pack, consumer and analyzer checks; tag `building-blocks/v0.4.1`; pin it in Identity; Identity suite green
+
 ---
 
 ## Dependencies
