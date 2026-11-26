@@ -151,10 +151,10 @@ description: "Task list for feature 019 Backoffice Staff"
 
 ## Phase 7: Browser check, end-to-end, polish
 
-- [ ] T013 Rebuild the Identity and backoffice images with `dev.ps1 up -Profile infra,apps` (never reset); the new migration applies to the existing dev data. Check quickstart.md section 2 in a real browser through the gateway, including a new user with no roles seeing the no-access texts. Capture one real answer per refusal code and compare it with the fixtures
-- [ ] T014 `tests/e2e/specs/backoffice-staff.spec.ts` per research.md R7. `scripts/e2e.ps1` passes all four specs; the cleanup check is clean; the dev stack is still running
-- [ ] T015 In `NODE_IMAGE` with `CI=true`: lint, unit tests and build. The initial bundle must not grow (the pages are lazy). Review the new files for comments. Run the image pin check
-- [ ] T016 [P] Record findings in `specs/019-backoffice-staff/research.md` (R8). Update `README.md` (Users and Roles)
+- [X] T013 Rebuild the Identity and backoffice images with `dev.ps1 up -Profile infra,apps` (never reset); the new migration applies to the existing dev data. Check quickstart.md section 2 in a real browser through the gateway, including a new user with no roles seeing the no-access texts. Capture one real answer per refusal code and compare it with the fixtures
+- [X] T014 `tests/e2e/specs/backoffice-staff.spec.ts` per research.md R7. `scripts/e2e.ps1` passes all four specs; the cleanup check is clean; the dev stack is still running
+- [X] T015 In `NODE_IMAGE` with `CI=true`: lint, unit tests and build. The initial bundle must not grow (the pages are lazy). Review the new files for comments. Run the image pin check
+- [X] T016 [P] Record findings in `specs/019-backoffice-staff/research.md` (R8). Update `README.md` (Users and Roles)
 
 ---
 

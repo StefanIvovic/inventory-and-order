@@ -86,7 +86,7 @@ flowchart LR
 ```
 
 - **Gateway**: the only public address. It signs users in with Identity as a confidential OpenID Connect client and keeps tokens on the server, and forwards the access token to each API. The browser holds only an encrypted, HttpOnly cookie.
-- **Identity**: issues short-lived access tokens that carry the user, tenant and user type only. It manages tenants, staff users and its own roles.
+- **Identity**: issues short-lived access tokens that carry the user, tenant and user type only. It manages tenants, staff users and its own roles. Its value lists (user types, staff statuses) are lookups read from `/api/identity/lookups/{type}/values`; the UIs hold no lists of their own.
 - **Each service**: validates the token itself, checks permissions from its own database, and keeps a local copy of the users it needs from Identity's events.
 - **Messaging**: every change and its events are saved in one transaction, and events are sent only after commit (transactional outbox).
 
@@ -113,7 +113,7 @@ The first command builds the shared packages Identity depends on into the local 
 
 | What | Where |
 |---|---|
-| Backoffice | http://localhost:8080/backoffice/ (the platform admin manages tenants under Tenants) |
+| Backoffice | http://localhost:8080/backoffice/ (the platform admin manages tenants under Tenants; tenant staff manage staff users under Users and see each role's permissions under Roles) |
 | Storefront of the demo shop | http://localhost:8080/shop/demo/ |
 | Backoffice sign-in (through the gateway) | http://localhost:8080/bff/backoffice/login |
 | Storefront sign-in for the demo shop | http://localhost:8080/bff/shop/demo/login |

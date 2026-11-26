@@ -74,6 +74,19 @@ The same Signal Forms pattern as 018's tenant dialog:
 4. Sign out and sign in as the admin, then disable the clerk.
 5. Sign out and try to sign in as the clerk: Identity's generic error, and the browser stays on the login page.
 
+## R8. Findings during implementation (2026-11-26)
+
+- **Users are not tenant-filtered by EF.** `AppUser` is not `ITenantOwned`, because the platform admin has no tenant. The handler filters `TenantId` itself, as 013 did. `role_assignments` keeps the global filter.
+- **The keyset condition must be an index range.** `email > x OR (email = x AND id > y)` made Postgres scan 82,000 rows for a deep page. `email >= x AND (email > x OR id > y)` gives the index a start point. Measured with `EXPLAIN (ANALYZE, BUFFERS)` on 100,000 staff in two tenants.
+- **Partial index needs a literal.** The staff type id is inlined with `EF.Constant`. As a parameter, Postgres cannot match the partial index predicate.
+- **Collation.** `NormalizedEmail` uses collation `C` on the column (EF `UseCollation`), so ordering, prefix search and the index agree; the migration builder handles it, no raw SQL.
+- **Index-only page.** The page selects only columns in the staff index (`Email`, `DisabledAt`, `CreatedAt` included), and the type code is the constant `staff`.
+- **The plan test asserts cost, not an index name.** With two equal email indexes the planner may pick either. The test asserts one command, no sequential scan, at most 1,200 blocks, and a deep page no dearer than twice the first. Filters that match one row in ten cost about 600–900 blocks, as expected.
+- **Role display names come from `/roles`.** `IdentityRoles.DisplayNames` and `IdentityPermissions.DisplayNames` sit next to the definitions; a test checks every role and permission has one.
+- **Shell user-type name from the lookup.** The shell's hard-coded "Staff" and "Platform administrator" were removed; the name comes from the `user-type` lookup and is hidden if it cannot be loaded.
+- **Bundle.** Initial raw size grew from 623.3 kB to 646.0 kB, but the transfer size only from 143.65 kB to 143.80 kB: the bundler merged a shared chunk into `main`. The new pages are lazy.
+- **Open item for BuildingBlocks.** `LookupReader` (020) uses the same OR keyset condition, so deep lookup pages scan. Lookup lists are short today; the fix is the same rewrite, in a BuildingBlocks 0.4.1.
+
 ## R9. Staff list paging and filters (Identity)
 
 Owner requirement: standard pagination, extremely fast at any size, filtering by two or three fields. Options weighed with the owner:

@@ -46,6 +46,6 @@ test('the platform admin creates a tenant whose first admin can then sign in', a
   await signIn(page, adminEmail, adminPassword);
 
   await expect(page.locator('mat-toolbar')).toContainText('Staff');
-  await expect(page.locator('mat-nav-list')).toHaveText('Home');
+  await expect(page.locator('mat-nav-list a')).toHaveText(['Home', 'Users', 'Roles']);
   await expect(page.getByRole('link', { name: 'Tenants', exact: true })).toHaveCount(0);
 });
