@@ -86,7 +86,7 @@ type OptionToken = { kind: 'value'; item: LookupValue } | { kind: 'empty' } | { 
           </mat-option>
         }
         @if (loading() || !loaded()) {
-          <mat-option disabled class="state"><mat-progress-bar mode="indeterminate" aria-label="Loading options" /></mat-option>
+          <mat-option disabled class="state" aria-label="Loading options"><mat-progress-bar mode="indeterminate" aria-hidden="true" /></mat-option>
         } @else if (failed()) {
           <mat-option disabled class="state">Options could not be loaded.</mat-option>
           <mat-option [value]="retryToken">Try again</mat-option>

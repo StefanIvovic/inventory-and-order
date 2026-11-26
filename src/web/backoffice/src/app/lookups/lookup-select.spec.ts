@@ -148,6 +148,16 @@ describe('LookupSelect', () => {
       expect(params(page())).toEqual({ size: '50' });
     });
 
+    it('names the loading row for screen readers until the first page arrives', async () => {
+      const view = await render();
+      await view.open();
+
+      expect(view.panel()?.querySelector('mat-option.state')?.getAttribute('aria-label')).toBe('Loading options');
+      page().flush({ items: statuses, nextCursor: null });
+      await view.settle();
+      expect(view.panel()?.querySelector('mat-option.state')).toBeNull();
+    });
+
     it('says when nothing matches', async () => {
       const view = await render();
       await view.open();
