@@ -16,6 +16,7 @@ public sealed class IdentityDbContext(DbContextOptions<IdentityDbContext> option
 {
     public const string StaffEmailIndex = "ux_identity_users_staff_email";
     public const string TenantSlugIndex = "ux_tenants_slug";
+    public const string TenantNameIndex = "ix_tenants_normalized_name";
     public const string UserNameIndex = "IX_identity_users_NormalizedUserName";
     public const string CustomerEmailIndex = "ux_identity_users_customer_email";
     public const string StaffListIndex = "ix_identity_users_staff_list";
@@ -64,9 +65,11 @@ public sealed class IdentityDbContext(DbContextOptions<IdentityDbContext> option
             entity.ToTable("tenants", table => table.HasCheckConstraint("ck_tenants_slug", $"\"Slug\" ~ '{Tenant.SlugPattern}'"));
             entity.HasKey(t => t.Id);
             entity.Property(t => t.Id).HasMaxLength(Tenant.IdLength);
-            entity.Property(t => t.Slug).IsRequired().HasMaxLength(Tenant.SlugMaxLength);
+            entity.Property(t => t.Slug).IsRequired().HasMaxLength(Tenant.SlugMaxLength).UseCollation(ByteOrderCollation);
             entity.HasIndex(t => t.Slug).IsUnique().HasDatabaseName(TenantSlugIndex);
             entity.Property(t => t.Name).IsRequired().HasMaxLength(Tenant.NameMaxLength);
+            entity.Property(t => t.NormalizedName).IsRequired().HasMaxLength(Tenant.NameMaxLength).UseCollation(ByteOrderCollation);
+            entity.HasIndex(t => t.NormalizedName).HasDatabaseName(TenantNameIndex);
             entity.Property(t => t.CreatedAt).IsRequired();
         });
 
