@@ -26,9 +26,27 @@ namespace Internal.Generated.WolverineHandlers
             var messageContext = new Wolverine.Runtime.MessageContext(_wolverineRuntime);
             Wolverine.Http.HttpHandler.RequestActivity(httpContext)?.SetTag("handler.type", "Identity.Api.Features.ListTenants.ListTenantsEndpoint").SetTag("http.route", "/tenants").SetTag("http.request.method", "GET");
             Wolverine.Http.Runtime.RequestIdMiddleware.Apply(httpContext, messageContext);
+            var q = httpContext.Request.Query["q"];
+            string size_rawValue = httpContext.Request.Query["size"];
+            int size = 25;
+
+            if (size_rawValue != null && int.TryParse(size_rawValue, System.Globalization.CultureInfo.InvariantCulture, out var size_parsed))
+            {
+                size = size_parsed;
+            }
+
+            var after = httpContext.Request.Query["after"];
+            string includeTotal_rawValue = httpContext.Request.Query["includeTotal"];
+            bool includeTotal = false;
+
+            if (bool.TryParse(includeTotal_rawValue, out var includeTotal_parsed))
+            {
+                includeTotal = includeTotal_parsed;
+            }
+
             
             // The actual HTTP request handler execution
-            var tenantList_response = await Identity.Api.Features.ListTenants.ListTenantsEndpoint.Get(messageContext, httpContext.RequestAborted).ConfigureAwait(false);
+            var tenantList_response = await Identity.Api.Features.ListTenants.ListTenantsEndpoint.Get(messageContext, httpContext.RequestAborted, q, size, after, includeTotal).ConfigureAwait(false);
 
             // Writing the response body to JSON because this was the first 'return variable' in the method signature
             await WriteJsonAsync(httpContext, tenantList_response, 404);

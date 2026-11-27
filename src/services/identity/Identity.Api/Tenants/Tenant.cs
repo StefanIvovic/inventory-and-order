@@ -19,6 +19,8 @@ public sealed partial class Tenant
 
     public string Name { get; private set; } = string.Empty;
 
+    public string NormalizedName { get; private set; } = string.Empty;
+
     public DateTimeOffset CreatedAt { get; private set; }
 
     public static bool IsValidSlug(string? slug) => slug is not null && SlugRegex().IsMatch(slug);
@@ -36,7 +38,7 @@ public sealed partial class Tenant
             throw new ArgumentException("The name is not valid.", nameof(name));
         }
 
-        return new Tenant { Id = Guid.NewGuid().ToString("N"), Slug = slug, Name = trimmed, CreatedAt = createdAt };
+        return new Tenant { Id = Guid.NewGuid().ToString("N"), Slug = slug, Name = trimmed, NormalizedName = trimmed.ToUpperInvariant(), CreatedAt = createdAt };
     }
 
     [GeneratedRegex(SlugPattern, RegexOptions.CultureInvariant)]

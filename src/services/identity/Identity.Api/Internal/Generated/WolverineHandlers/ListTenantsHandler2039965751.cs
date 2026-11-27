@@ -23,6 +23,9 @@ namespace Internal.Generated.WolverineHandlers
 
         public override async System.Threading.Tasks.Task HandleAsync(Wolverine.Runtime.MessageContext context, System.Threading.CancellationToken cancellation)
         {
+            var listTenantsValidator = new Identity.Api.Features.ListTenants.ListTenantsValidator();
+            System.Collections.Generic.IEnumerable<BuildingBlocks.Validation.CommandValidator<Identity.Api.Features.ListTenants.ListTenants>> commandValidatorOfListTenantsIEnumerable = new BuildingBlocks.Validation.CommandValidator<Identity.Api.Features.ListTenants.ListTenants>[]{listTenantsValidator};
+            var commandValidationOfListTenants = new BuildingBlocks.Validation.CommandValidation<Identity.Api.Features.ListTenants.ListTenants>(commandValidatorOfListTenantsIEnumerable);
             await using var serviceScope = _serviceScopeFactory.CreateAsyncScope();
             Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<Wolverine.Runtime.ScopedMessageContextHolder>(serviceScope.ServiceProvider).Context = context;
             // This service has been marked as requiring service location independent of Wolverine's ability to use constructor injection of everything else
@@ -49,7 +52,7 @@ namespace Internal.Generated.WolverineHandlers
                 BuildingBlocks.Messaging.TenantContextMiddleware.Before(context.Envelope, tenantContext, _httpContextAccessor);
                 Wolverine.Runtime.WolverineTracing.MessageActivity(context.Envelope)?.SetTag("message.handler", "Identity.Api.Features.ListTenants.ListTenantsHandler");
                 Wolverine.Runtime.WolverineTracing.MessageActivity(context.Envelope)?.SetTag("handler.type", "Identity.Api.Features.ListTenants.ListTenantsHandler");
-                var listTenantsHandler = new Identity.Api.Features.ListTenants.ListTenantsHandler(requestContext, identityDbContext);
+                var listTenantsHandler = new Identity.Api.Features.ListTenants.ListTenantsHandler(requestContext, identityDbContext, commandValidationOfListTenants);
                 
                 // The actual message execution
                 var outgoing1 = await listTenantsHandler.Handle(listTenants, cancellation).ConfigureAwait(false);

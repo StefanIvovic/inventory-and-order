@@ -145,12 +145,22 @@ namespace Identity.Api.Persistence.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
+                    b.Property<string>("NormalizedName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .UseCollation("C");
+
                     b.Property<string>("Slug")
                         .IsRequired()
                         .HasMaxLength(63)
-                        .HasColumnType("character varying(63)");
+                        .HasColumnType("character varying(63)")
+                        .UseCollation("C");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("NormalizedName")
+                        .HasDatabaseName("ix_tenants_normalized_name");
 
                     b.HasIndex("Slug")
                         .IsUnique()
