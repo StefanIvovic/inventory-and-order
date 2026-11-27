@@ -117,7 +117,7 @@
 **Independent Test**: spec.md US3.
 
 - [X] T009 [US3] Tests first in `tenants-page.spec.ts`: after the create dialog returns a slug, the confirmation shows and the list restarts at the first page with the total, keeping the search and size; cancelling sends nothing. See them fail, then implement in `tenants-page.ts`
-- [ ] T010 [US3] Update `tests/e2e/specs/backoffice-tenants.spec.ts` per research.md R7: after creating, search for the slug and expect the first row to contain it
+- [X] T010 [US3] Update `tests/e2e/specs/backoffice-tenants.spec.ts` per research.md R7: after creating, search for the slug and expect the first row to contain it
 
 ---
 
