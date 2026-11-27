@@ -41,7 +41,11 @@ test('the platform admin creates a tenant whose first admin can then sign in', a
 
   await expect(dialog).toHaveCount(0);
   await expect(page.locator('mat-snack-bar-container')).toContainText(`Tenant ${slug} created.`);
+  await page.getByRole('searchbox', { name: 'Search tenants' }).fill(slug);
+  await page.getByRole('searchbox', { name: 'Search tenants' }).press('Enter');
+  await expect(page.locator('tr[mat-row]')).toHaveCount(1);
   await expect(page.locator('tr[mat-row]').first()).toContainText(slug);
+  await expect(page.locator('.range')).toHaveText('1–1 of 1 tenants');
 
   await signOut(page);
   await signIn(page, adminEmail, adminPassword);
