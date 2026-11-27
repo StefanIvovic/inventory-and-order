@@ -1,0 +1,53 @@
+services:
+  product-db:
+    image: ${POSTGRES_IMAGE}
+    profiles:
+      - infra
+    environment:
+      POSTGRES_DB: product
+      POSTGRES_USER: ${PRODUCT_DB_USER}
+      POSTGRES_PASSWORD: ${PRODUCT_DB_PASSWORD}
+    ports:
+      - "127.0.0.1:${PRODUCT_DB_PORT}:5432"
+    volumes:
+      - product-db-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+  product-api:
+    build:
+      context: .
+      additional_contexts:
+        packages: ../../../artifacts/packages
+      args:
+        DOTNET_SDK_IMAGE: ${DOTNET_SDK_IMAGE}
+        DOTNET_ASPNET_IMAGE: ${DOTNET_ASPNET_IMAGE}
+    profiles:
+      - apps
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__Product: "Host=product-db;Port=5432;Database=product;Username=${PRODUCT_DB_USER};Password=${PRODUCT_DB_PASSWORD};GSS Encryption Mode=Disable"
+      RabbitMq__Uri: "amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672"
+      Authentication__Authority: "${IDENTITY_ISSUER}"
+      Authentication__Audience: product
+      Authentication__RequireHttpsMetadata: "${IDENTITY_REQUIRE_HTTPS}"
+      Authentication__InternalAddress: "http://identity-api:8080"
+    depends_on:
+      product-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    restart: on-failure
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/health/ready > /dev/null || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 24
+      start_period: 15s
+
+volumes:
+  product-db-data:

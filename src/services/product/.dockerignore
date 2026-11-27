@@ -1,0 +1,6 @@
+**/bin
+**/obj
+Product.Tests
+compose.yaml
+Dockerfile
+.dockerignore
