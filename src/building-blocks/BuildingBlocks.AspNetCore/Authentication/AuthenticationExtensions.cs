@@ -19,6 +19,9 @@ public static class AuthenticationExtensions
             .Bind(configuration.GetSection(AuthenticationSettings.SectionName))
             .Validate(settings => !string.IsNullOrWhiteSpace(settings.Authority), "Authentication:Authority is required.")
             .Validate(settings => !string.IsNullOrWhiteSpace(settings.Audience), "Authentication:Audience is required.")
+            .Validate(
+                settings => settings.InternalAddress is null || AuthenticationSettings.IsOrigin(settings.InternalAddress),
+                "Authentication:InternalAddress must be an absolute http or https address with no path.")
             .ValidateOnStart();
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
@@ -35,6 +38,13 @@ public static class AuthenticationExtensions
                 options.TokenValidationParameters.ValidateLifetime = true;
                 options.TokenValidationParameters.ValidateIssuerSigningKey = true;
                 options.TokenValidationParameters.NameClaimType = AppClaimTypes.Subject;
+                if (settings.Value.InternalAddress is { } internalAddress && AuthenticationSettings.IsOrigin(internalAddress))
+                {
+                    options.BackchannelHttpHandler = new IssuerBackchannelHandler(new Uri(settings.Value.Authority), new Uri(internalAddress))
+                    {
+                        InnerHandler = new SocketsHttpHandler(),
+                    };
+                }
             });
 
         return services.AddBuildingBlocksRouteAuthorization(JwtBearerDefaults.AuthenticationScheme);
