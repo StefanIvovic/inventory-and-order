@@ -15,6 +15,7 @@ services:
       Gateway__Clients__storefront-bff__Secret: "${STOREFRONT_BFF_SECRET}"
       Gateway__Keys__Path: /keys
       ReverseProxy__Clusters__identity__Destinations__main__Address: "http://identity-api:8080"
+      ReverseProxy__Clusters__product__Destinations__main__Address: "http://product-api:8080"
       ReverseProxy__Clusters__backoffice-spa__Destinations__main__Address: "http://backoffice-spa:8080"
       ReverseProxy__Clusters__storefront-spa__Destinations__main__Address: "http://storefront-spa:8080"
     ports:

@@ -16,8 +16,9 @@ public sealed class GatewayApp : WebApplicationFactory<Program>
 
     private readonly Dictionary<string, string?> settings;
 
-    private GatewayApp(Uri origin, FakeIdentity identity, SpaStub backoffice, SpaStub storefront, Dictionary<string, string?> settings)
+    private GatewayApp(Uri origin, FakeIdentity identity, SpaStub backoffice, SpaStub storefront, SpaStub product, Dictionary<string, string?> settings)
     {
+        ProductApi = product;
         Origin = origin;
         Identity = identity;
         BackofficeSpa = backoffice;
@@ -33,6 +34,8 @@ public sealed class GatewayApp : WebApplicationFactory<Program>
 
     public SpaStub StorefrontSpa { get; }
 
+    public SpaStub ProductApi { get; }
+
     public FakeTimeProvider Clock { get; } = new(DateTimeOffset.UtcNow);
 
     public static async Task<GatewayApp> StartAsync(string origin = HttpsOrigin, IReadOnlyDictionary<string, string?>? overrides = null)
@@ -47,9 +50,11 @@ public sealed class GatewayApp : WebApplicationFactory<Program>
         var identity = new FakeIdentity(issuer, clients);
         var backoffice = new SpaStub();
         var storefront = new SpaStub();
+        var product = new SpaStub();
         await identity.StartAsync();
         await backoffice.StartAsync();
         await storefront.StartAsync();
+        await product.StartAsync();
 
         var values = new Dictionary<string, string?>(StringComparer.Ordinal)
         {
@@ -60,13 +65,14 @@ public sealed class GatewayApp : WebApplicationFactory<Program>
             ["ReverseProxy:Clusters:identity:Destinations:main:Address"] = identity.Address.ToString(),
             ["ReverseProxy:Clusters:backoffice-spa:Destinations:main:Address"] = backoffice.Address.ToString(),
             ["ReverseProxy:Clusters:storefront-spa:Destinations:main:Address"] = storefront.Address.ToString(),
+            ["ReverseProxy:Clusters:product:Destinations:main:Address"] = product.Address.ToString(),
         };
         foreach (var (key, value) in overrides ?? new Dictionary<string, string?>())
         {
             values[key] = value;
         }
 
-        var app = new GatewayApp(publicOrigin, identity, backoffice, storefront, values);
+        var app = new GatewayApp(publicOrigin, identity, backoffice, storefront, product, values);
         _ = app.Server;
         return app;
     }
@@ -96,6 +102,7 @@ public sealed class GatewayApp : WebApplicationFactory<Program>
         await Identity.DisposeAsync();
         await BackofficeSpa.DisposeAsync();
         await StorefrontSpa.DisposeAsync();
+        await ProductApi.DisposeAsync();
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
