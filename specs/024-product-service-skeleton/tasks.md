@@ -57,7 +57,7 @@
   - the `Initial` migration via `dotnet ef migrations add`
 
   T004 green
-- [ ] T006 [US1] Docker and compose, per contracts/configuration.md:
+- [X] T006 [US1] Docker and compose, per contracts/configuration.md:
   - `Dockerfile`, copied from Identity's, without `/keys`
   - `compose.yaml`: `product-db` in infra (loopback `PRODUCT_DB_PORT`, named volume, healthcheck) and `product-api` in apps (settings, waits for healthy db and rabbitmq, healthcheck, no ports)
   - add `PRODUCT_DB_USER` and `PRODUCT_DB_PASSWORD` to `deploy/dev.env`
