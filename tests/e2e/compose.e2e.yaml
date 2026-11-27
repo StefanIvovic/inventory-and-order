@@ -5,6 +5,12 @@ services:
     tmpfs:
       - /var/lib/postgresql
 
+  product-db:
+    ports: !reset []
+    volumes: !reset []
+    tmpfs:
+      - /var/lib/postgresql
+
   rabbitmq:
     ports: !reset []
     volumes: !reset []

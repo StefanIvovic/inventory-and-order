@@ -7,6 +7,7 @@ on:
       - 'deploy/**'
       - 'src/gateway/**'
       - 'src/services/identity/**'
+      - 'src/services/product/**'
       - 'scripts/smoke-signin.ps1'
       - 'scripts/dev.ps1'
       - 'scripts/check-test-cleanup.ps1'
@@ -19,6 +20,7 @@ on:
       - 'deploy/**'
       - 'src/gateway/**'
       - 'src/services/identity/**'
+      - 'src/services/product/**'
       - 'scripts/smoke-signin.ps1'
       - 'scripts/dev.ps1'
       - 'scripts/check-test-cleanup.ps1'
@@ -62,6 +64,10 @@ jobs:
       - name: Restore package feed from tag
         shell: pwsh
         run: ./scripts/restore-feed.ps1 -Service identity
+
+      - name: Restore Product package feed from tag
+        shell: pwsh
+        run: ./scripts/restore-feed.ps1 -Service product
 
       - name: Dev stack up
         shell: pwsh
