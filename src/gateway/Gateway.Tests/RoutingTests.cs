@@ -44,6 +44,7 @@ public sealed class RoutingTests
         }
 
         Assert.Contains(routes, route => route.RouteId == "api-identity");
+        Assert.Contains(routes, route => route.RouteId == "api-product" && route.Match.Path == "/api/product/{**rest}" && route.ClusterId == "product");
     }
 
     [Theory]

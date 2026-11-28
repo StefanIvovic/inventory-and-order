@@ -16,10 +16,12 @@ $compose = @(
     '--env-file', (Join-Path $deploy 'versions.env')
 )
 
-& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'restore-feed.ps1') -Service identity
-if ($LASTEXITCODE -ne 0) {
-    Write-Error 'Restoring the package feed failed.' -ErrorAction Continue
-    exit 1
+foreach ($service in 'identity', 'product') {
+    & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'restore-feed.ps1') -Service $service
+    if ($LASTEXITCODE -ne 0) {
+        Write-Error "Restoring the package feed for $service failed." -ErrorAction Continue
+        exit 1
+    }
 }
 
 $previous = $env:COMPOSE_PROFILES

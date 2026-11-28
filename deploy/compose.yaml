@@ -9,6 +9,10 @@ include:
     env_file:
       - versions.env
       - dev.env
+  - path: ../src/services/product/compose.yaml
+    env_file:
+      - versions.env
+      - dev.env
   - path: ../src/gateway/compose.yaml
     env_file:
       - versions.env

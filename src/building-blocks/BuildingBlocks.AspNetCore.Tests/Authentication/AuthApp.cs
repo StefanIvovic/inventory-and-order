@@ -27,7 +27,8 @@ public sealed class AuthApp : IAsyncDisposable
         string authority = TestTokens.Issuer,
         bool trustTestKey = true,
         Action<IServiceCollection>? services = null,
-        Action<WebApplication>? routes = null)
+        Action<WebApplication>? routes = null,
+        string? internalAddress = null)
     {
         var builder = WebApplication.CreateBuilder();
         builder.WebHost.UseTestServer();
@@ -35,6 +36,10 @@ public sealed class AuthApp : IAsyncDisposable
         builder.Configuration["Authentication:Authority"] = authority;
         builder.Configuration["Authentication:Audience"] = Audience;
         builder.Configuration["Authentication:RequireHttpsMetadata"] = "false";
+        if (internalAddress is not null)
+        {
+            builder.Configuration["Authentication:InternalAddress"] = internalAddress;
+        }
 
         builder.Services.AddBuildingBlocks();
         builder.Services.AddBuildingBlocksAuthentication(builder.Configuration);

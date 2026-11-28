@@ -172,4 +172,33 @@ public sealed class ApiForwardingTests
         Assert.Equal(HttpStatusCode.BadGateway, response.Status);
         Assert.Contains("upstream-unavailable", response.Body, StringComparison.Ordinal);
     }
+
+    [Fact]
+    public async Task ProductCallsReachTheProductServiceWithTheBearerTokenAndWithoutThePrefix()
+    {
+        await using var app = await GatewayApp.StartAsync();
+        using var browser = await app.SignedInBackofficeAsync();
+
+        var response = await browser.GetAsync("/api/product/roles?x=1", request => request.Headers.Add("X-Bff-App", "backoffice"));
+
+        Assert.Equal(HttpStatusCode.OK, response.Status);
+        var echo = JsonSerializer.Deserialize<EchoBody>(response.Body, JsonSerializerOptions.Web)!;
+        Assert.Equal("/roles", echo.Path);
+        Assert.Equal("?x=1", echo.Query);
+        Assert.Equal("Bearer " + app.Identity.IssuedAccessTokens.Single(), echo.Headers["Authorization"]);
+        Assert.False(echo.Headers.ContainsKey("Cookie"));
+        Assert.Single(app.ProductApi.RequestsTo("/roles"));
+    }
+
+    [Fact]
+    public async Task ProductCallsWithoutASessionAre401AndNotForwarded()
+    {
+        await using var app = await GatewayApp.StartAsync();
+        using var browser = app.CreateBrowser();
+
+        var response = await browser.GetAsync("/api/product/roles", request => request.Headers.Add("X-Bff-App", "backoffice"));
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.Status);
+        Assert.Empty(app.ProductApi.RequestsTo("/roles"));
+    }
 }

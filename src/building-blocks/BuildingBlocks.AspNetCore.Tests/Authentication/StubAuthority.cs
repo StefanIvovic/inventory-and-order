@@ -16,6 +16,7 @@ public sealed class StubAuthority : IAsyncDisposable
     private readonly WebApplication app;
     private readonly List<RsaSecurityKey> keys = [];
     private readonly Lock gate = new();
+    private readonly List<(string? Proto, string? Host)> forwarded = [];
 
     private StubAuthority(WebApplication app, string address)
     {
@@ -25,6 +26,17 @@ public sealed class StubAuthority : IAsyncDisposable
 
     public string Address { get; }
 
+    public IReadOnlyList<(string? Proto, string? Host)> Forwarded
+    {
+        get
+        {
+            lock (gate)
+            {
+                return [.. forwarded];
+            }
+        }
+    }
+
     public static async Task<StubAuthority> StartAsync()
     {
         var builder = WebApplication.CreateBuilder();
@@ -33,12 +45,22 @@ public sealed class StubAuthority : IAsyncDisposable
         var app = builder.Build();
         StubAuthority? stub = null;
 
-        app.MapGet("/.well-known/openid-configuration", (HttpContext context) => Results.Json(new Dictionary<string, object>
+        app.MapGet("/.well-known/openid-configuration", (HttpContext context) =>
         {
-            ["issuer"] = TestTokens.Issuer,
-            ["jwks_uri"] = $"{context.Request.Scheme}://{context.Request.Host}/jwks",
-        }));
-        app.MapGet("/jwks", () => Results.Json(new Dictionary<string, object> { ["keys"] = stub!.Jwks() }));
+            stub!.Record(context);
+            var proto = context.Request.Headers["X-Forwarded-Proto"].FirstOrDefault() ?? context.Request.Scheme;
+            var host = context.Request.Headers["X-Forwarded-Host"].FirstOrDefault() ?? context.Request.Host.Value;
+            return Results.Json(new Dictionary<string, object>
+            {
+                ["issuer"] = TestTokens.Issuer,
+                ["jwks_uri"] = $"{proto}://{host}/jwks",
+            });
+        });
+        app.MapGet("/jwks", (HttpContext context) =>
+        {
+            stub!.Record(context);
+            return Results.Json(new Dictionary<string, object> { ["keys"] = stub.Jwks() });
+        });
 
         await app.StartAsync();
         var address = app.Services.GetRequiredService<IServer>().Features.Get<IServerAddressesFeature>()!.Addresses.First();
@@ -55,6 +77,14 @@ public sealed class StubAuthority : IAsyncDisposable
     }
 
     public async ValueTask DisposeAsync() => await app.DisposeAsync();
+
+    private void Record(HttpContext context)
+    {
+        lock (gate)
+        {
+            forwarded.Add((context.Request.Headers["X-Forwarded-Proto"].FirstOrDefault(), context.Request.Headers["X-Forwarded-Host"].FirstOrDefault()));
+        }
+    }
 
     private List<Dictionary<string, string>> Jwks()
     {
